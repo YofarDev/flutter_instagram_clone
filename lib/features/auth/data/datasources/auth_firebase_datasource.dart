@@ -7,6 +7,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../../core/models/app_user.dart';
 
+class UsernameTakenException implements Exception {}
+
 abstract interface class IAuthDataSource {
   Stream<AppUser?> get authStateChanges;
   Future<AppUser> signUp({required String email, required String password});
@@ -17,6 +19,7 @@ abstract interface class IAuthDataSource {
   Future<void> saveProfileDoc({
     required String uid,
     required Map<String, dynamic> data,
+    String? previousUsername,
   });
   Future<String> uploadAvatar({required String uid, required String filePath});
 }
@@ -100,8 +103,27 @@ class AuthFirebaseDataSource implements IAuthDataSource {
   Future<void> saveProfileDoc({
     required String uid,
     required Map<String, dynamic> data,
+    String? previousUsername,
   }) {
-    return _db.collection('users').doc(uid).set(data, SetOptions(merge: true));
+    final String? newUsername = data['username'] as String?;
+    return _db.runTransaction((Transaction tx) async {
+      if (newUsername != null && newUsername != previousUsername) {
+        final DocumentSnapshot<Object?> lock =
+            await tx.get(_db.collection('usernames').doc(newUsername));
+        if (lock.exists &&
+            (lock.data() as Map<String, dynamic>?)?['uid'] != uid) {
+          throw UsernameTakenException();
+        }
+        tx.set(
+          _db.collection('usernames').doc(newUsername),
+          <String, dynamic>{'uid': uid},
+        );
+        if (previousUsername != null && previousUsername != newUsername) {
+          tx.delete(_db.collection('usernames').doc(previousUsername));
+        }
+      }
+      tx.set(_db.collection('users').doc(uid), data, SetOptions(merge: true));
+    });
   }
 
   @override

@@ -16,6 +16,11 @@ void main() {
   late AuthRepositoryImpl repo;
 
   const AppUser user = AppUser(uid: 'u1', email: 'a@b.c');
+  const AppUser profileWithUsername = AppUser(
+    uid: 'u1',
+    email: 'a@b.c',
+    username: 'newname',
+  );
 
   setUp(() {
     ds = MockAuthDataSource();
@@ -124,6 +129,42 @@ void main() {
           avatarUrl: 'http://x',
         ),
       );
+    });
+  });
+
+  group('saveProfile username uniqueness', () {
+    test('UsernameTakenException maps to friendly failure', () async {
+      when(() => ds.fetchProfileDoc('u1'))
+          .thenAnswer((_) async => <String, dynamic>{'email': 'a@b.c'});
+      when(() => ds.saveProfileDoc(
+            uid: 'u1',
+            data: any(named: 'data'),
+            previousUsername: any(named: 'previousUsername'),
+          )).thenThrow(UsernameTakenException());
+
+      final Either<Failure, void> result =
+          await repo.saveProfile(user: profileWithUsername);
+
+      expect(result.getLeft().toNullable()?.message, 'Username is taken');
+    });
+
+    test('passes previousUsername from current doc', () async {
+      when(() => ds.fetchProfileDoc('u1')).thenAnswer(
+        (_) async => <String, dynamic>{'email': 'a@b.c', 'username': 'old'},
+      );
+      when(() => ds.saveProfileDoc(
+            uid: 'u1',
+            data: any(named: 'data'),
+            previousUsername: 'old',
+          )).thenAnswer((_) async {});
+
+      await repo.saveProfile(user: profileWithUsername);
+
+      verify(() => ds.saveProfileDoc(
+            uid: 'u1',
+            data: any(named: 'data'),
+            previousUsername: 'old',
+          )).called(1);
     });
   });
 }

@@ -88,6 +88,7 @@ class AuthRepositoryImpl implements IAuthRepository {
   @override
   Future<Either<Failure, void>> saveProfile({required AppUser user}) async {
     try {
+      final Map<String, dynamic>? current = await _ds.fetchProfileDoc(user.uid);
       return Right<Failure, void>(
         await _ds.saveProfileDoc(
           uid: user.uid,
@@ -97,6 +98,7 @@ class AuthRepositoryImpl implements IAuthRepository {
             bio: user.bio,
             avatarUrl: user.avatarUrl,
           ).toMap(),
+          previousUsername: current?['username'] as String?,
         ),
       );
     } catch (e) {
@@ -119,6 +121,9 @@ class AuthRepositoryImpl implements IAuthRepository {
   }
 
   Failure _mapError(Object e) {
+    if (e is UsernameTakenException) {
+      return const Failure.serverError(message: 'Username is taken');
+    }
     if (e is GoogleSignInException) {
       if (e.code == GoogleSignInExceptionCode.canceled) {
         // ponytail: typed cancel sentinel, cubit ignores it
