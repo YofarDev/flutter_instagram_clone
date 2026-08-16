@@ -11,6 +11,8 @@ sealed class UserDto with _$UserDto {
     String? avatarUrl,
   }) = _UserDto;
 
+  const UserDto._();
+
   factory UserDto.fromMap(Map<String, dynamic> map) => UserDto(
         email: map['email'] as String,
         username: map['username'] as String?,

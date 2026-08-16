@@ -202,8 +202,8 @@ return $default(_that.email,_that.username,_that.bio,_that.avatarUrl);case _:
 /// @nodoc
 
 
-class _UserDto implements UserDto {
-  const _UserDto({required this.email, this.username, this.bio, this.avatarUrl});
+class _UserDto extends UserDto {
+  const _UserDto({required this.email, this.username, this.bio, this.avatarUrl}): super._();
   
 
 @override final  String email;
