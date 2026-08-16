@@ -61,5 +61,8 @@
   "usernameTaken": "Ce nom d'utilisateur est déjà pris",
   "followersTitle": "Abonnés",
   "followingTitle": "Abonnements",
-  "editProfileChangePhoto": "Changer la photo"
+  "editProfileChangePhoto": "Changer la photo",
+  "storiesYourStory": "Ton histoire",
+  "storiesAddToStory": "Ajouter à l'histoire",
+  "createStoryTitle": "Nouvelle histoire"
 }

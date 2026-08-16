@@ -7,6 +7,13 @@ import '../../domain/models/story_tray.dart';
 import '../../domain/repositories/stories_repository.dart';
 import 'story_viewer_state.dart';
 
+class StoryViewerArgs {
+  const StoryViewerArgs({required this.trays, required this.initialTrayIndex});
+
+  final List<StoryTray> trays;
+  final int initialTrayIndex;
+}
+
 class StoryViewerCubit extends Cubit<StoryViewerState> {
   StoryViewerCubit(
     this._repository, {

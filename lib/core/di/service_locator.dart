@@ -18,6 +18,12 @@ import '../../features/profile/domain/repositories/profile_repository.dart';
 import '../../features/profile/presentation/bloc/edit_profile_cubit.dart';
 import '../../features/profile/presentation/bloc/follow_list_cubit.dart';
 import '../../features/profile/presentation/bloc/profile_cubit.dart';
+import '../../features/stories/data/datasources/stories_firebase_datasource.dart';
+import '../../features/stories/data/repositories/stories_repository_impl.dart';
+import '../../features/stories/domain/repositories/stories_repository.dart';
+import '../../features/stories/presentation/bloc/create_story_cubit.dart';
+import '../../features/stories/presentation/bloc/stories_cubit.dart';
+import '../../features/stories/presentation/bloc/story_viewer_cubit.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -74,5 +80,29 @@ Future<void> setupServiceLocator() async {
   );
   getIt.registerFactory<FollowListCubit>(
     () => FollowListCubit(getIt<IProfileRepository>()),
+  );
+
+  // --- Stories feature ---
+  getIt.registerLazySingleton<IStoriesDataSource>(
+    () => StoriesFirebaseDataSource(),
+  );
+  getIt.registerLazySingleton<IStoriesRepository>(
+    () => StoriesRepositoryImpl(getIt<IStoriesDataSource>()),
+  );
+  getIt.registerFactoryParam<StoriesCubit, String, void>(
+    (String uid, _) => StoriesCubit(
+      getIt<IStoriesRepository>(),
+      myUid: uid,
+    ),
+  );
+  getIt.registerFactory<CreateStoryCubit>(
+    () => CreateStoryCubit(getIt<IStoriesRepository>()),
+  );
+  getIt.registerFactoryParam<StoryViewerCubit, StoryViewerArgs, void>(
+    (StoryViewerArgs args, _) => StoryViewerCubit(
+      getIt<IStoriesRepository>(),
+      trays: args.trays,
+      initialTrayIndex: args.initialTrayIndex,
+    ),
   );
 }

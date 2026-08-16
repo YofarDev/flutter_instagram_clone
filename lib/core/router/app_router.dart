@@ -22,6 +22,9 @@ import '../../features/profile/presentation/bloc/profile_cubit.dart';
 import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/user_list_screen.dart';
+import '../../features/stories/presentation/bloc/create_story_cubit.dart';
+import '../../features/stories/presentation/bloc/stories_cubit.dart';
+import '../../features/stories/presentation/bloc/story_viewer_cubit.dart';
 import '../di/service_locator.dart';
 import 'go_router_refresh.dart';
 import 'route_constants.dart';
@@ -96,14 +99,21 @@ class AppRouter {
                 path: Routes.feed,
                 name: 'Feed',
                 builder: (BuildContext context, GoRouterState state) =>
+                    MultiBlocProvider(
+                  providers: <BlocProvider<dynamic>>[
+                    BlocProvider<AuthCubit>.value(value: getIt<AuthCubit>()),
                     BlocProvider<FeedCubit>(
-                  create: (_) => getIt<FeedCubit>(
-                    param1: getIt<AuthCubit>().state.user!.uid,
-                  ),
-                  child: BlocProvider<AuthCubit>.value(
-                    value: getIt<AuthCubit>(),
-                    child: const FeedScreen(),
-                  ),
+                      create: (_) => getIt<FeedCubit>(
+                        param1: getIt<AuthCubit>().state.user!.uid,
+                      ),
+                    ),
+                    BlocProvider<StoriesCubit>(
+                      create: (_) => getIt<StoriesCubit>(
+                        param1: getIt<AuthCubit>().state.user!.uid,
+                      ),
+                    ),
+                  ],
+                  child: const FeedScreen(),
                 ),
               ),
             ],
@@ -208,6 +218,37 @@ class AppRouter {
           return BlocProvider<EditProfileCubit>(
             create: (_) => getIt<EditProfileCubit>(param1: extra),
             child: const EditProfileScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: Routes.createStory,
+        name: 'CreateStory',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (BuildContext context, GoRouterState state) =>
+            BlocProvider<CreateStoryCubit>(
+          create: (_) => getIt<CreateStoryCubit>(),
+          child: const Scaffold(
+            body: Center(child: Text('Create story placeholder')),
+          ), // TODO(phase4-task-5): replace with CreateStoryScreen
+        ),
+      ),
+      GoRoute(
+        path: Routes.storyViewer,
+        name: 'StoryViewer',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (BuildContext context, GoRouterState state) {
+          final Object? extra = state.extra;
+          if (extra is! StoryViewerArgs) {
+            return const Scaffold(
+              body: Center(child: Text('Stories not found')),
+            );
+          }
+          return BlocProvider<StoryViewerCubit>(
+            create: (_) => getIt<StoryViewerCubit>(param1: extra),
+            child: const Scaffold(
+              body: Center(child: Text('Viewer placeholder')),
+            ), // TODO(phase4-task-5): replace with StoryViewerScreen
           );
         },
       ),

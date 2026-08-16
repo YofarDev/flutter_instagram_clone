@@ -11,6 +11,8 @@ abstract final class Routes {
   static const String user = '/user/:uid';
   static const String userFollowers = '/user/:uid/followers';
   static const String userFollowing = '/user/:uid/following';
+  static const String createStory = '/create-story';
+  static const String storyViewer = '/story-viewer';
 
   static String userPath(String uid) => user.replaceFirst(':uid', uid);
   static String userFollowersPath(String uid) =>

@@ -130,5 +130,8 @@
   "usernameTaken": "This username is already taken",
   "followersTitle": "Followers",
   "followingTitle": "Following",
-  "editProfileChangePhoto": "Change photo"
+  "editProfileChangePhoto": "Change photo",
+  "storiesYourStory": "Your story",
+  "storiesAddToStory": "Add to story",
+  "createStoryTitle": "New story"
 }
