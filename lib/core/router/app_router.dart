@@ -4,7 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/bloc/auth_cubit.dart';
 import '../../features/auth/presentation/bloc/auth_state.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/onboarding_screen.dart';
+import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
+import '../../features/feed/presentation/screens/feed_screen.dart';
 import '../di/service_locator.dart';
 import 'go_router_refresh.dart';
 import 'route_constants.dart';
@@ -34,7 +38,10 @@ class AppRouter {
         path: Routes.feed,
         name: 'Feed',
         builder: (BuildContext context, GoRouterState state) =>
-            const Scaffold(body: Center(child: Text('Feed placeholder'))),
+            BlocProvider<AuthCubit>.value(
+          value: getIt<AuthCubit>(),
+          child: const FeedScreen(),
+        ),
       ),
       GoRoute(
         path: Routes.splash,
@@ -48,9 +55,7 @@ class AppRouter {
         builder: (BuildContext context, GoRouterState state) =>
             BlocProvider<AuthCubit>.value(
           value: getIt<AuthCubit>(),
-          child: const Scaffold(
-            body: Center(child: Text('Login placeholder')),
-          ), // TODO(phase1-tasks-10-13): replace with LoginScreen
+          child: const LoginScreen(),
         ),
       ),
       GoRoute(
@@ -59,9 +64,7 @@ class AppRouter {
         builder: (BuildContext context, GoRouterState state) =>
             BlocProvider<AuthCubit>.value(
           value: getIt<AuthCubit>(),
-          child: const Scaffold(
-            body: Center(child: Text('Signup placeholder')),
-          ), // TODO(phase1-tasks-10-13): replace with SignupScreen
+          child: const SignupScreen(),
         ),
       ),
       GoRoute(
@@ -70,9 +73,7 @@ class AppRouter {
         builder: (BuildContext context, GoRouterState state) =>
             BlocProvider<AuthCubit>.value(
           value: getIt<AuthCubit>(),
-          child: const Scaffold(
-            body: Center(child: Text('Onboarding placeholder')),
-          ), // TODO(phase1-tasks-10-13): replace with OnboardingScreen
+          child: const OnboardingScreen(),
         ),
       ),
     ],
