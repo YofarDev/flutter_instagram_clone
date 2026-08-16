@@ -76,9 +76,11 @@ class FeedScreen extends StatelessWidget {
                     isLiked: state.likedIds.contains(post.id),
                     onLikeTap: () =>
                         context.read<FeedCubit>().toggleLike(post),
-                    onCommentTap: () => context.push('/post/${post.id}',
+                    onCommentTap: () => context.push(
+                        Routes.postDetailPath(post.id),
                         extra: post),
-                    onUsernameTap: () => context.push('/user/${post.authorId}'),
+                    onUsernameTap: () =>
+                        context.push(Routes.userPath(post.authorId)),
                   );
                 }
                 return Padding(

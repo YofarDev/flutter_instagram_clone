@@ -6,24 +6,21 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // users/{uid} + counts. Update allowed by the owner OR by followers
-    // (follow batches increment followerCount/followingCount on both docs).
-    // ponytail: follower-update hole is broader than counts — field-scoped
-    // rules or cloud functions when it matters.
     match /users/{uid} {
       allow read: if signedIn();
-      allow create, update: if signedIn() &&
-          (request.auth.uid == uid ||
-           exists(/databases/$(database)/documents/users/$(request.auth.uid)/following/$(uid)));
+      allow create: if signedIn() && request.auth.uid == uid;
+      // owner edits anything; strangers may ONLY touch the count fields
+      // (follow batches increment counts on both user docs)
+      allow update: if request.auth.uid == uid ||
+          (signedIn() && request.resource.data.diff(resource.data)
+              .affectedKeys().hasOnly(['followerCount', 'followingCount']));
       allow delete: if false;
 
-      // follower edge: written BY the follower (edge doc id = follower uid)
       match /followers/{followerUid} {
         allow read: if signedIn();
         allow create, delete: if signedIn() && request.auth.uid == followerUid;
       }
 
-      // following edge: written by the user who owns the list
       match /following/{targetUid} {
         allow read: if signedIn();
         allow create, delete: if signedIn() && request.auth.uid == uid;
@@ -33,15 +30,16 @@ service cloud.firestore {
     match /usernames/{username} {
       allow read: if signedIn();
       allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
-      // update only re-claims by the same owner (rename deletes old + creates new)
       allow update, delete: if signedIn() && resource.data.uid == request.auth.uid;
     }
 
     match /posts/{postId} {
       allow read: if signedIn();
       allow create: if signedIn() && request.resource.data.authorId == request.auth.uid;
-      // like/comment transactions update likeCount/commentCount from any signed-in user
-      allow update: if signedIn();
+      // strangers may only flip like/comment counts (transactions)
+      allow update: if request.auth.uid == resource.data.authorId ||
+          (signedIn() && request.resource.data.diff(resource.data)
+              .affectedKeys().hasOnly(['likeCount', 'commentCount']));
       allow delete: if signedIn() && resource.data.authorId == request.auth.uid;
 
       match /likes/{uid} {

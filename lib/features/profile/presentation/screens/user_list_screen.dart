@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/models/app_user.dart';
+import '../../../../core/router/route_constants.dart';
 import '../bloc/follow_list_cubit.dart';
 import '../bloc/follow_list_state.dart';
 
@@ -57,7 +58,7 @@ class UserListScreen extends StatelessWidget {
                         : null,
                   ),
                   title: Text(username),
-                  onTap: () => context.push('/user/${user.uid}'),
+                  onTap: () => context.push(Routes.userPath(user.uid)),
                 );
               },
             );

@@ -11,4 +11,11 @@ abstract final class Routes {
   static const String user = '/user/:uid';
   static const String userFollowers = '/user/:uid/followers';
   static const String userFollowing = '/user/:uid/following';
+
+  static String userPath(String uid) => user.replaceFirst(':uid', uid);
+  static String userFollowersPath(String uid) =>
+      userFollowers.replaceFirst(':uid', uid);
+  static String userFollowingPath(String uid) =>
+      userFollowing.replaceFirst(':uid', uid);
+  static String postDetailPath(String id) => postDetail.replaceFirst(':id', id);
 }

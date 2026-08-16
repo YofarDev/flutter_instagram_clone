@@ -48,8 +48,10 @@ class ProfileCubit extends Cubit<ProfileState> {
     final int gen = ++_gen;
     _sub = _repository.watchUserPosts(uid: _uid, limit: _limit).listen(
           (List<Post> posts) => _onPosts(posts, gen),
-          onError: (Object e) =>
-              emit(state.copyWith(error: 'Failed to load posts')),
+          onError: (Object e) {
+            if (isClosed) return;
+            emit(state.copyWith(error: 'Failed to load posts'));
+          },
         );
   }
 

@@ -74,7 +74,8 @@ class ProfileScreen extends StatelessWidget {
                                     ),
                                     InkWell(
                                       onTap: () => context.push(
-                                          '/user/${profile.uid}/followers'),
+                                          Routes.userFollowersPath(
+                                              profile.uid)),
                                       child: _CountColumn(
                                         count: profile.followerCount,
                                         label: l10n.profileFollowers,
@@ -82,7 +83,8 @@ class ProfileScreen extends StatelessWidget {
                                     ),
                                     InkWell(
                                       onTap: () => context.push(
-                                          '/user/${profile.uid}/following'),
+                                          Routes.userFollowingPath(
+                                              profile.uid)),
                                       child: _CountColumn(
                                         count: profile.followingCount,
                                         label: l10n.profileFollowing,
@@ -161,7 +163,8 @@ class ProfileScreen extends StatelessWidget {
                             itemBuilder: (BuildContext context, int index) {
                               final Post post = state.posts[index];
                               return InkWell(
-                                onTap: () => context.push('/post/${post.id}',
+                                onTap: () => context.push(
+                                    Routes.postDetailPath(post.id),
                                     extra: post),
                                 child: Image.network(
                                   post.imageUrl,

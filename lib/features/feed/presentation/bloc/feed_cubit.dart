@@ -47,8 +47,10 @@ class FeedCubit extends Cubit<FeedState> {
     final int gen = ++_gen;
     _sub = _repository.watchFeed(limit: _limit).listen(
           (List<Post> posts) => _onPosts(posts, gen),
-          onError: (Object e) =>
-              emit(state.copyWith(error: 'Failed to load feed')),
+          onError: (Object e) {
+            if (isClosed) return;
+            emit(state.copyWith(error: 'Failed to load feed'));
+          },
         );
   }
 
