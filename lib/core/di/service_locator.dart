@@ -6,6 +6,7 @@ import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/presentation/bloc/auth_cubit.dart';
 import '../../features/feed/data/datasources/feed_firebase_datasource.dart';
 import '../../features/feed/data/repositories/feed_repository_impl.dart';
+import '../models/app_user.dart';
 import '../models/post.dart';
 import '../../features/feed/domain/repositories/feed_repository.dart';
 import '../../features/feed/presentation/bloc/create_post_cubit.dart';
@@ -14,6 +15,9 @@ import '../../features/feed/presentation/bloc/post_detail_cubit.dart';
 import '../../features/profile/data/datasources/profile_firebase_datasource.dart';
 import '../../features/profile/data/repositories/profile_repository_impl.dart';
 import '../../features/profile/domain/repositories/profile_repository.dart';
+import '../../features/profile/presentation/bloc/edit_profile_cubit.dart';
+import '../../features/profile/presentation/bloc/follow_list_cubit.dart';
+import '../../features/profile/presentation/bloc/profile_cubit.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -56,5 +60,19 @@ Future<void> setupServiceLocator() async {
   );
   getIt.registerLazySingleton<IProfileRepository>(
     () => ProfileRepositoryImpl(getIt<IProfileDataSource>()),
+  );
+  getIt.registerFactoryParam<ProfileCubit, ProfileArgs, void>(
+    (ProfileArgs args, _) => ProfileCubit(
+      getIt<IProfileRepository>(),
+      uid: args.uid,
+      isMe: args.isMe,
+    ),
+  );
+  getIt.registerFactoryParam<EditProfileCubit, AppUser, void>(
+    (AppUser user, _) =>
+        EditProfileCubit(getIt<IAuthRepository>(), user: user),
+  );
+  getIt.registerFactory<FollowListCubit>(
+    () => FollowListCubit(getIt<IProfileRepository>()),
   );
 }

@@ -49,5 +49,17 @@
   "postDetailTitle": "Publication",
   "feedEmpty": "Aucun post pour l'instant — sois le premier !",
   "errorGeneric": "Une erreur est survenue",
-  "feedLoadMore": "Charger plus"
+  "feedLoadMore": "Charger plus",
+  "profileFollowers": "Abonnés",
+  "profileFollowing": "Abonnements",
+  "profilePosts": "Publications",
+  "profileFollow": "Suivre",
+  "profileUnfollow": "Ne plus suivre",
+  "profileEdit": "Modifier le profil",
+  "editProfileTitle": "Modifier le profil",
+  "profileSave": "Enregistrer",
+  "usernameTaken": "Ce nom d'utilisateur est déjà pris",
+  "followersTitle": "Abonnés",
+  "followingTitle": "Abonnements",
+  "editProfileChangePhoto": "Changer la photo"
 }

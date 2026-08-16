@@ -9,6 +9,13 @@ import '../../domain/models/user_profile.dart';
 import '../../domain/repositories/profile_repository.dart';
 import 'profile_state.dart';
 
+class ProfileArgs {
+  const ProfileArgs({required this.uid, required this.isMe});
+
+  final String uid;
+  final bool isMe;
+}
+
 class ProfileCubit extends Cubit<ProfileState> {
   ProfileCubit(
     this._repository, {

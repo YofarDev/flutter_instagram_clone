@@ -118,5 +118,17 @@
   "postDetailTitle": "Post",
   "feedEmpty": "No posts yet — be the first!",
   "errorGeneric": "Something went wrong",
-  "feedLoadMore": "Load more"
+  "feedLoadMore": "Load more",
+  "profileFollowers": "Followers",
+  "profileFollowing": "Following",
+  "profilePosts": "Posts",
+  "profileFollow": "Follow",
+  "profileUnfollow": "Unfollow",
+  "profileEdit": "Edit profile",
+  "editProfileTitle": "Edit profile",
+  "profileSave": "Save",
+  "usernameTaken": "This username is already taken",
+  "followersTitle": "Followers",
+  "followingTitle": "Following",
+  "editProfileChangePhoto": "Change photo"
 }
