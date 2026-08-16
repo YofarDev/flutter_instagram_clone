@@ -14,6 +14,7 @@ sealed class ProfileState with _$ProfileState {
     UserProfile? profile,
     @Default(<Post>[]) List<Post> posts,
     @Default(false) bool isFollowing,
+    @Default(false) bool isMe,
     @Default(true) bool hasMore,
     String? error,
   }) = _ProfileState;

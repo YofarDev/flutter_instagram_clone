@@ -196,11 +196,13 @@ void main() {
         status: ProfileStatus.ready,
         posts: manyPosts,
         hasMore: true,
+        isMe: true,
       ),
       ProfileState(
         status: ProfileStatus.ready,
         posts: manyPosts,
         hasMore: false,
+        isMe: true,
       ),
     ],
   );
@@ -220,7 +222,7 @@ void main() {
       return ProfileCubit(repo, uid: 'u2', isMe: true);
     },
     expect: () => <ProfileState>[
-      ProfileState(error: 'Failed to load posts'),
+      ProfileState(error: 'Failed to load posts', isMe: true),
     ],
   );
 }

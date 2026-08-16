@@ -9,6 +9,7 @@ class PostCard extends StatelessWidget {
     required this.isLiked,
     required this.onLikeTap,
     this.onCommentTap,
+    this.onUsernameTap,
     super.key,
   });
 
@@ -16,6 +17,7 @@ class PostCard extends StatelessWidget {
   final bool isLiked;
   final VoidCallback onLikeTap;
   final VoidCallback? onCommentTap;
+  final VoidCallback? onUsernameTap;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +25,7 @@ class PostCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         ListTile(
+          onTap: onUsernameTap,
           leading: CircleAvatar(
             backgroundImage: post.authorAvatarUrl != null
                 ? NetworkImage(post.authorAvatarUrl!)

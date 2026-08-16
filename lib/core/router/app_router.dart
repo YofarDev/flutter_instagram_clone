@@ -19,6 +19,9 @@ import '../../features/feed/presentation/screens/post_detail_screen.dart';
 import '../../features/profile/presentation/bloc/edit_profile_cubit.dart';
 import '../../features/profile/presentation/bloc/follow_list_cubit.dart';
 import '../../features/profile/presentation/bloc/profile_cubit.dart';
+import '../../features/profile/presentation/screens/edit_profile_screen.dart';
+import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/profile/presentation/screens/user_list_screen.dart';
 import '../di/service_locator.dart';
 import 'go_router_refresh.dart';
 import 'route_constants.dart';
@@ -131,9 +134,7 @@ class AppRouter {
                     create: (_) => getIt<ProfileCubit>(
                       param1: ProfileArgs(uid: uid, isMe: true),
                     ),
-                    child: const Scaffold(
-                      body: Center(child: Text('My profile placeholder')),
-                    ), // TODO(phase3-task-7): replace with ProfileScreen
+                    child: const ProfileScreen(),
                   );
                 },
               ),
@@ -167,9 +168,7 @@ class AppRouter {
           return BlocProvider<ProfileCubit>(
             create: (_) =>
                 getIt<ProfileCubit>(param1: ProfileArgs(uid: uid, isMe: isMe)),
-            child: const Scaffold(
-              body: Center(child: Text('User profile placeholder')),
-            ), // TODO(phase3-task-7): replace with ProfileScreen
+            child: const ProfileScreen(),
           );
         },
       ),
@@ -181,9 +180,7 @@ class AppRouter {
             BlocProvider<FollowListCubit>(
           create: (_) => getIt<FollowListCubit>()
             ..load(uid: state.pathParameters['uid']!, followersMode: true),
-          child: const Scaffold(
-            body: Center(child: Text('Followers placeholder')),
-          ), // TODO(phase3-task-7): replace with FollowListScreen
+          child: const UserListScreen(followersMode: true),
         ),
       ),
       GoRoute(
@@ -194,9 +191,7 @@ class AppRouter {
             BlocProvider<FollowListCubit>(
           create: (_) => getIt<FollowListCubit>()
             ..load(uid: state.pathParameters['uid']!, followersMode: false),
-          child: const Scaffold(
-            body: Center(child: Text('Following placeholder')),
-          ), // TODO(phase3-task-7): replace with FollowListScreen
+          child: const UserListScreen(followersMode: false),
         ),
       ),
       GoRoute(
@@ -212,9 +207,7 @@ class AppRouter {
           }
           return BlocProvider<EditProfileCubit>(
             create: (_) => getIt<EditProfileCubit>(param1: extra),
-            child: const Scaffold(
-              body: Center(child: Text('Edit profile placeholder')),
-            ), // TODO(phase3-task-7): replace with EditProfileScreen
+            child: const EditProfileScreen(),
           );
         },
       ),

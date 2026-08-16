@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../bloc/post_detail_cubit.dart';
@@ -61,6 +62,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       isLiked: state.isLiked,
                       onLikeTap: () =>
                           context.read<PostDetailCubit>().toggleLike(),
+                      onUsernameTap: () =>
+                          context.push('/user/${state.post.authorId}'),
                     ),
                   ),
                 ),

@@ -21,9 +21,9 @@ class ProfileCubit extends Cubit<ProfileState> {
     this._repository, {
     required String uid,
     required bool isMe,
-  })  : _uid = uid, // ignore: prefer_initializing_formals
+  }  )  : _uid = uid, // ignore: prefer_initializing_formals
         _isMe = isMe, // ignore: prefer_initializing_formals
-        super(const ProfileState()) {
+        super(ProfileState(isMe: isMe)) {
     _subscribe();
     if (!_isMe) {
       _subFollow = _repository
