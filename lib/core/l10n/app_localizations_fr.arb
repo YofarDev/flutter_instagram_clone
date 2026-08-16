@@ -40,5 +40,18 @@
   "onboardingAddPhoto": "Ajouter une photo",
   "onboardingDone": "Terminer",
   "feedPlaceholder": "Le fil arrive en Phase 2",
-  "authPasswordsDontMatch": "Les mots de passe ne correspondent pas"
+  "authPasswordsDontMatch": "Les mots de passe ne correspondent pas",
+  "feedNewPost": "Nouveau post",
+  "createPostTitle": "Nouvelle publication",
+  "postCaptionHint": "Écris une légende…",
+  "postShare": "Partager",
+  "postAddPhoto": "Choisir une photo",
+  "postTakePhoto": "Prendre une photo",
+  "postComments": "Commentaires",
+  "postAddComment": "Ajouter un commentaire…",
+  "postSend": "Envoyer",
+  "postDetailTitle": "Publication",
+  "feedEmpty": "Aucun post pour l'instant — sois le premier !",
+  "errorGeneric": "Une erreur est survenue",
+  "postRetry": "Réessayer"
 }
