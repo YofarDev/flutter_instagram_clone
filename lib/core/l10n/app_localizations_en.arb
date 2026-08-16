@@ -122,5 +122,6 @@
   "postDetailTitle": "Post",
   "feedEmpty": "No posts yet — be the first!",
   "errorGeneric": "Something went wrong",
-  "postRetry": "Try again"
+  "postRetry": "Try again",
+  "feedLoadMore": "Load more"
 }

@@ -12,7 +12,9 @@ import '../../features/feed/domain/models/post.dart';
 import '../../features/feed/presentation/bloc/create_post_cubit.dart';
 import '../../features/feed/presentation/bloc/feed_cubit.dart';
 import '../../features/feed/presentation/bloc/post_detail_cubit.dart';
+import '../../features/feed/presentation/screens/create_post_screen.dart';
 import '../../features/feed/presentation/screens/feed_screen.dart';
+import '../../features/feed/presentation/screens/post_detail_screen.dart';
 import '../di/service_locator.dart';
 import 'go_router_refresh.dart';
 import 'route_constants.dart';
@@ -56,9 +58,7 @@ class AppRouter {
         builder: (BuildContext context, GoRouterState state) =>
             BlocProvider<CreatePostCubit>(
           create: (_) => getIt<CreatePostCubit>(),
-          child: const Scaffold(
-            body: Center(child: Text('Create placeholder')),
-          ), // TODO(phase2-tasks-8-9): replace with CreatePostScreen
+          child: const CreatePostScreen(),
         ),
       ),
       GoRoute(
@@ -68,9 +68,7 @@ class AppRouter {
           final Post post = state.extra! as Post;
           return BlocProvider<PostDetailCubit>(
             create: (_) => getIt<PostDetailCubit>(param1: post),
-            child: const Scaffold(
-              body: Center(child: Text('Detail placeholder')),
-            ), // TODO(phase2-tasks-8-9): replace with PostDetailScreen
+            child: const PostDetailScreen(),
           );
         },
       ),

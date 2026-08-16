@@ -53,5 +53,6 @@
   "postDetailTitle": "Publication",
   "feedEmpty": "Aucun post pour l'instant — sois le premier !",
   "errorGeneric": "Une erreur est survenue",
-  "postRetry": "Réessayer"
+  "postRetry": "Réessayer",
+  "feedLoadMore": "Charger plus"
 }
