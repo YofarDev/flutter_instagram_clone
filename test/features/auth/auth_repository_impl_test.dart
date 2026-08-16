@@ -88,7 +88,7 @@ void main() {
       final Either<Failure, AppUser?> result =
           await repo.findProfile(uid: 'u1', email: 'a@b.c');
 
-      expect(result.getRight().toNullable(), isNull);
+      expect(result, const Right<Failure, AppUser?>(null));
     });
 
     test('doc maps to full AppUser', () async {
