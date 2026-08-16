@@ -87,6 +87,14 @@ class FeedFirebaseDataSource implements IFeedDataSource {
       unawaited(ref.delete().catchError((_) => ref));
       rethrow;
     }
+    try {
+      await _db
+          .collection('users')
+          .doc(_uid)
+          .update(<String, dynamic>{'postCount': FieldValue.increment(1)});
+    } catch (_) {
+      // ponytail: count drift acceptable; profile grid is source of truth
+    }
   }
 
   @override
