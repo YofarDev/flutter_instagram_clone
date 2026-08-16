@@ -19,6 +19,7 @@ final Post p1 = Post(
   imageUrl: 'http://img/p1',
   createdAt: DateTime(2026, 1, 1),
   likeCount: 5,
+  commentCount: 2,
 );
 final Comment c1 = Comment(
   id: 'c1',
@@ -162,7 +163,7 @@ void main() {
     },
     expect: () => <PostDetailState>[
       PostDetailState(post: p1, sending: true),
-      PostDetailState(post: p1),
+      PostDetailState(post: p1.copyWith(commentCount: 3)),
     ],
   );
 

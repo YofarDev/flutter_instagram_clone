@@ -31,6 +31,7 @@ class CreatePostCubit extends Cubit<CreatePostState> {
       caption: state.caption.trim(),
       filePath: state.pickedPath!,
     );
+    if (isClosed) return;
     either.fold(
       (Failure f) => emit(state.copyWith(submitting: false, error: f.message)),
       (_) => emit(state.copyWith(submitting: false, success: true)),

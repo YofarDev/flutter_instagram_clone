@@ -45,7 +45,7 @@ class FeedScreen extends StatelessWidget {
         },
         child: BlocBuilder<FeedCubit, FeedState>(
           buildWhen: (FeedState p, FeedState c) =>
-              p.status != c.status || p.posts.length != c.posts.length,
+              p.status != c.status || p.posts != c.posts || p.likedIds != c.likedIds,
           builder: (BuildContext context, FeedState state) {
             if (state.status == FeedStatus.loading) {
               return const Center(child: CircularProgressIndicator());

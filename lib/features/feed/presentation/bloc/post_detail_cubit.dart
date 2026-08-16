@@ -22,10 +22,12 @@ class PostDetailCubit extends Cubit<PostDetailState> {
 
   final IFeedRepository _repository;
   late final StreamSubscription<List<Comment>> _commentsSub;
+  bool _toggled = false;
 
   Future<void> _hydrateLike() async {
     final Either<Failure, Set<String>> either =
         await _repository.fetchLikedPostIds(postIds: <String>[state.post.id]);
+    if (isClosed || _toggled) return;
     either.fold(
       (_) {}, // ponytail: default unliked on hydration failure
       (Set<String> ids) =>
@@ -38,6 +40,7 @@ class PostDetailCubit extends Cubit<PostDetailState> {
 
   Future<void> toggleLike() async {
     final bool wasLiked = state.isLiked;
+    _toggled = true;
     emit(state.copyWith(
       isLiked: !wasLiked,
       post: state.post
@@ -47,6 +50,7 @@ class PostDetailCubit extends Cubit<PostDetailState> {
       post: state.post,
       currentlyLiked: wasLiked,
     );
+    if (isClosed) return;
     either.fold(
       (Failure f) => emit(state.copyWith(
         error: f.message,
@@ -65,9 +69,13 @@ class PostDetailCubit extends Cubit<PostDetailState> {
     emit(state.copyWith(sending: true, error: null));
     final Either<Failure, void> either =
         await _repository.addComment(postId: state.post.id, text: trimmed);
+    if (isClosed) return;
     either.fold(
       (Failure f) => emit(state.copyWith(sending: false, error: f.message)),
-      (_) => emit(state.copyWith(sending: false)),
+      (_) => emit(state.copyWith(
+        sending: false,
+        post: state.post.copyWith(commentCount: state.post.commentCount + 1),
+      )),
     );
   }
 

@@ -65,7 +65,11 @@ class AppRouter {
         path: Routes.postDetail,
         name: 'PostDetail',
         builder: (BuildContext context, GoRouterState state) {
-          final Post post = state.extra! as Post;
+          final Object? extra = state.extra;
+          if (extra is! Post) {
+            return const Scaffold(body: Center(child: Text('Post not found')));
+          }
+          final Post post = extra;
           return BlocProvider<PostDetailCubit>(
             create: (_) => getIt<PostDetailCubit>(param1: post),
             child: const PostDetailScreen(),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -72,14 +73,20 @@ class FeedFirebaseDataSource implements IFeedDataSource {
     await ref.putFile(File(filePath));
     final String imageUrl = await ref.getDownloadURL();
     // ponytail: client timestamp + denormalized author fields
-    await _db.collection('posts').add(PostDto(
-          authorId: _uid,
-          authorUsername: profile.username,
-          authorAvatarUrl: profile.avatarUrl,
-          imageUrl: imageUrl,
-          caption: caption,
-          createdAtMillis: millis,
-        ).toMap());
+    try {
+      await _db.collection('posts').add(PostDto(
+            authorId: _uid,
+            authorUsername: profile.username,
+            authorAvatarUrl: profile.avatarUrl,
+            imageUrl: imageUrl,
+            caption: caption,
+            createdAtMillis: millis,
+          ).toMap());
+    } catch (e) {
+      // ponytail: best-effort cleanup, orphan possible if delete fails too
+      unawaited(ref.delete().catchError((_) => ref));
+      rethrow;
+    }
   }
 
   @override
