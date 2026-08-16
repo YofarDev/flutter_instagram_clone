@@ -18,7 +18,7 @@ A fully vibe-coded clone of the Instagram mobile app, built as a proof of concep
 
 Built incrementally, one phase at a time:
 
-- [ ] **Phase 1 — Foundation**: Firebase wiring, auth (email + Google), signup/login/onboarding, user profile creation
+- [x] **Phase 1 — Foundation**: Firebase wiring, auth (email + Google), signup/login/onboarding, user profile creation
 - [ ] **Phase 2 — Posts & Feed**: image posts (gallery/camera), home feed, like, comment
 - [ ] **Phase 3 — Social Graph**: follow/unfollow, profile grid, followers/following lists
 - [ ] **Phase 4 — Stories**: 24h stories, story creation, story viewer
