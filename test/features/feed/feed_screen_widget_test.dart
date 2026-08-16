@@ -9,10 +9,10 @@ import 'package:nested/nested.dart';
 
 import 'package:flutter_instagram_clone/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_instagram_clone/core/models/failure.dart';
-import 'package:flutter_instagram_clone/features/auth/domain/models/app_user.dart';
+import 'package:flutter_instagram_clone/core/models/app_user.dart';
 import 'package:flutter_instagram_clone/features/auth/domain/repositories/auth_repository.dart';
 import 'package:flutter_instagram_clone/features/auth/presentation/bloc/auth_cubit.dart';
-import 'package:flutter_instagram_clone/features/feed/domain/models/post.dart';
+import 'package:flutter_instagram_clone/core/models/post.dart';
 import 'package:flutter_instagram_clone/features/feed/domain/repositories/feed_repository.dart';
 import 'package:flutter_instagram_clone/features/feed/presentation/bloc/feed_cubit.dart';
 import 'package:flutter_instagram_clone/features/feed/presentation/screens/feed_screen.dart';

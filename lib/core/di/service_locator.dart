@@ -6,7 +6,7 @@ import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/presentation/bloc/auth_cubit.dart';
 import '../../features/feed/data/datasources/feed_firebase_datasource.dart';
 import '../../features/feed/data/repositories/feed_repository_impl.dart';
-import '../../features/feed/domain/models/post.dart';
+import '../models/post.dart';
 import '../../features/feed/domain/repositories/feed_repository.dart';
 import '../../features/feed/presentation/bloc/create_post_cubit.dart';
 import '../../features/feed/presentation/bloc/feed_cubit.dart';

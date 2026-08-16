@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../domain/models/comment.dart';
-import '../../domain/models/post.dart';
+import '../../../../core/models/post.dart';
 
 part 'post_detail_state.freezed.dart';
 

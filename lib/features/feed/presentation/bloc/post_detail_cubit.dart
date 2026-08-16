@@ -5,7 +5,7 @@ import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/models/failure.dart';
 import '../../domain/models/comment.dart';
-import '../../domain/models/post.dart';
+import '../../../../core/models/post.dart';
 import '../../domain/repositories/feed_repository.dart';
 import 'post_detail_state.dart';
 

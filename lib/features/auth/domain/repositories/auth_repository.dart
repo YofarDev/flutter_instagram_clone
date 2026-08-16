@@ -1,7 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/models/failure.dart';
-import '../models/app_user.dart';
+import '../../../../core/models/app_user.dart';
 
 abstract interface class IAuthRepository {
   /// Emits a bare AppUser (uid + email only) or null on logout.

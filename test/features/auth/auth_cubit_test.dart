@@ -4,7 +4,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:flutter_instagram_clone/core/models/failure.dart';
-import 'package:flutter_instagram_clone/features/auth/domain/models/app_user.dart';
+import 'package:flutter_instagram_clone/core/models/app_user.dart';
 import 'package:flutter_instagram_clone/features/auth/domain/repositories/auth_repository.dart';
 import 'package:flutter_instagram_clone/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:flutter_instagram_clone/features/auth/presentation/bloc/auth_state.dart';

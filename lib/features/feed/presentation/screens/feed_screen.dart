@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/router/route_constants.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
-import '../../domain/models/post.dart';
+import '../../../../core/models/post.dart';
 import '../bloc/feed_cubit.dart';
 import '../bloc/feed_state.dart';
 import '../widgets/post_card.dart';

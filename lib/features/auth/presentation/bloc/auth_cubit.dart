@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/models/failure.dart';
-import '../../domain/models/app_user.dart';
+import '../../../../core/models/app_user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import 'auth_state.dart';
 

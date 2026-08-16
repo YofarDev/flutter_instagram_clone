@@ -3,7 +3,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../../core/models/failure.dart';
-import '../../domain/models/app_user.dart';
+import '../../../../core/models/app_user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_firebase_datasource.dart';
 import '../models/user_dto.dart';

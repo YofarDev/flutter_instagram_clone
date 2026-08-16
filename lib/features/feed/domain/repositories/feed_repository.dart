@@ -2,7 +2,7 @@ import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/models/failure.dart';
 import '../models/comment.dart';
-import '../models/post.dart';
+import '../../../../core/models/post.dart';
 
 abstract interface class IFeedRepository {
   /// Live feed, newest first. Raw stream — errors surface via onError.

@@ -1,4 +1,4 @@
-import '../../domain/models/post.dart';
+import './post.dart';
 
 class PostDto {
   const PostDto({

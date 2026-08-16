@@ -6,9 +6,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 import '../../domain/models/comment.dart';
-import '../../domain/models/post.dart';
+import '../../../../core/models/post.dart';
 import '../models/comment_dto.dart';
-import '../models/post_dto.dart';
+import '../../../../core/models/post_dto.dart';
 
 abstract interface class IFeedDataSource {
   Stream<List<Post>> watchFeed({required int limit});

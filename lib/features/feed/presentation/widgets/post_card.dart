@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../domain/models/post.dart';
+import '../../../../core/models/post.dart';
 import 'time_ago.dart';
 
 class PostCard extends StatelessWidget {

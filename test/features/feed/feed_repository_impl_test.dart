@@ -6,7 +6,7 @@ import 'package:flutter_instagram_clone/core/models/failure.dart';
 import 'package:flutter_instagram_clone/features/feed/data/datasources/feed_firebase_datasource.dart';
 import 'package:flutter_instagram_clone/features/feed/data/repositories/feed_repository_impl.dart';
 import 'package:flutter_instagram_clone/features/feed/domain/models/comment.dart';
-import 'package:flutter_instagram_clone/features/feed/domain/models/post.dart';
+import 'package:flutter_instagram_clone/core/models/post.dart';
 
 class MockFeedDataSource extends Mock implements IFeedDataSource {}
 

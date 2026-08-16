@@ -7,7 +7,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:flutter_instagram_clone/core/models/failure.dart';
 import 'package:flutter_instagram_clone/features/auth/data/datasources/auth_firebase_datasource.dart';
 import 'package:flutter_instagram_clone/features/auth/data/repositories/auth_repository_impl.dart';
-import 'package:flutter_instagram_clone/features/auth/domain/models/app_user.dart';
+import 'package:flutter_instagram_clone/core/models/app_user.dart';
 
 class MockAuthDataSource extends Mock implements IAuthDataSource {}
 
