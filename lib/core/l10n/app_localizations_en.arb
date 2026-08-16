@@ -109,5 +109,5 @@
   "onboardingAddPhoto": "Add a photo",
   "onboardingDone": "Done",
   "feedPlaceholder": "Feed coming in Phase 2",
-  "actionLogout": "Log out"
+  "authPasswordsDontMatch": "Passwords do not match"
 }

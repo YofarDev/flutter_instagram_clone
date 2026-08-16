@@ -35,6 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: BlocListener<AuthCubit, AuthState>(
+              listenWhen: (AuthState p, AuthState c) => p.error != c.error,
               listener: (BuildContext context, AuthState state) {
                 if (state.error != null) {
                   ScaffoldMessenger.of(context)

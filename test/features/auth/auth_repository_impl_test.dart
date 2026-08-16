@@ -13,13 +13,13 @@ class MockAuthDataSource extends Mock implements IAuthDataSource {}
 
 void main() {
   late MockAuthDataSource ds;
-  late AuthRepository repo;
+  late AuthRepositoryImpl repo;
 
   const AppUser user = AppUser(uid: 'u1', email: 'a@b.c');
 
   setUp(() {
     ds = MockAuthDataSource();
-    repo = AuthRepository(ds);
+    repo = AuthRepositoryImpl(ds);
   });
 
   group('signUp', () {
@@ -67,7 +67,7 @@ void main() {
   });
 
   group('signInWithGoogle', () {
-    test('user cancel produces empty-message failure', () async {
+    test('user cancel produces typed cancelled failure', () async {
       when(() => ds.signInWithGoogle()).thenThrow(
         GoogleSignInException(
           code: GoogleSignInExceptionCode.canceled,
@@ -78,6 +78,17 @@ void main() {
       final Either<Failure, AppUser> result = await repo.signInWithGoogle();
 
       expect(result.getLeft().toNullable()?.message, '');
+      expect(
+        result.getLeft().toNullable(),
+        isA<Failure>().having(
+          (Failure f) => f.maybeWhen(
+            cancelled: () => true,
+            orElse: () => false,
+          ),
+          'is cancelled',
+          isTrue,
+        ),
+      );
     });
   });
 

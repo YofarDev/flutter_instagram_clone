@@ -30,10 +30,11 @@ class _SignupScreenState extends State<SignupScreen> {
 
   void _submit() {
     if (_password.text != _confirm.text) {
+      final AppLocalizations l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(content: Text('Passwords do not match')),
+          SnackBar(content: Text(l10n.authPasswordsDontMatch)),
         );
       return;
     }
@@ -53,6 +54,7 @@ class _SignupScreenState extends State<SignupScreen> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: BlocListener<AuthCubit, AuthState>(
+              listenWhen: (AuthState p, AuthState c) => p.error != c.error,
               listener: (BuildContext context, AuthState state) {
                 if (state.error != null) {
                   ScaffoldMessenger.of(context)

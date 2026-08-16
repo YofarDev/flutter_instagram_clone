@@ -8,8 +8,8 @@ import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_firebase_datasource.dart';
 import '../models/user_dto.dart';
 
-class AuthRepository implements IAuthRepository {
-  const AuthRepository(this._ds);
+class AuthRepositoryImpl implements IAuthRepository {
+  const AuthRepositoryImpl(this._ds);
 
   final IAuthDataSource _ds;
 
@@ -121,8 +121,8 @@ class AuthRepository implements IAuthRepository {
   Failure _mapError(Object e) {
     if (e is GoogleSignInException) {
       if (e.code == GoogleSignInExceptionCode.canceled) {
-        // ponytail: empty message = silent cancel sentinel, cubit ignores it
-        return const Failure.serverError(message: '');
+        // ponytail: typed cancel sentinel, cubit ignores it
+        return const Failure.cancelled();
       }
       return Failure.serverError(message: e.description ?? 'Google sign-in failed');
     }

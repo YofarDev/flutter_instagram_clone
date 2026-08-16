@@ -13,7 +13,7 @@ Future<void> setupServiceLocator() async {
 
   // --- Repositories ---
   getIt.registerLazySingleton<IAuthRepository>(
-    () => AuthRepository(getIt<IAuthDataSource>()),
+    () => AuthRepositoryImpl(getIt<IAuthDataSource>()),
   );
 
   // --- Cubits (app-scoped) ---

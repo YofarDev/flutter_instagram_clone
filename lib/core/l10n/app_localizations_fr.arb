@@ -40,5 +40,5 @@
   "onboardingAddPhoto": "Ajouter une photo",
   "onboardingDone": "Terminer",
   "feedPlaceholder": "Le fil arrive en Phase 2",
-  "actionLogout": "Se déconnecter"
+  "authPasswordsDontMatch": "Les mots de passe ne correspondent pas"
 }

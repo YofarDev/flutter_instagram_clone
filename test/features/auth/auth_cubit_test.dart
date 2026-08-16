@@ -98,13 +98,12 @@ void main() {
   );
 
   blocTest<AuthCubit, AuthState>(
-    'google cancel (empty message) → no error shown',
+    'google cancel (typed failure) → no error shown',
     build: () {
       when(() => repo.authStateChanges)
           .thenAnswer((_) => const Stream<AppUser?>.empty());
       when(() => repo.signInWithGoogle()).thenAnswer(
-        (_) async =>
-            const Left<Failure, AppUser>(Failure.serverError(message: '')),
+        (_) async => const Left<Failure, AppUser>(Failure.cancelled()),
       );
       return AuthCubit(repo);
     },
@@ -158,6 +157,37 @@ void main() {
           bio: 'hi',
           avatarUrl: 'http://avatar',
         ),
+      ),
+    ],
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'avatar upload failure → error, saveProfile never called',
+    build: () {
+      when(() => repo.authStateChanges)
+          .thenAnswer((_) => const Stream<AppUser?>.empty());
+      when(() => repo.uploadAvatar(uid: 'u1', filePath: '/tmp/p.jpg'))
+          .thenAnswer(
+        (_) async =>
+            const Left<Failure, String>(Failure.serverError(message: 'upload failed')),
+      );
+      return AuthCubit(repo);
+    },
+    seed: () => const AuthState(status: AuthStatus.needsProfile, user: user),
+    act: (AuthCubit cubit) => cubit.completeProfile(
+      username: 'yo',
+      bio: 'hi',
+      avatarPath: '/tmp/p.jpg',
+    ),
+    verify: (AuthCubit cubit) {
+      verifyNever(() => repo.saveProfile(user: any(named: 'user')));
+    },
+    expect: () => const <AuthState>[
+      AuthState(status: AuthStatus.needsProfile, user: user, submitting: true),
+      AuthState(
+        status: AuthStatus.needsProfile,
+        user: user,
+        error: 'upload failed',
       ),
     ],
   );

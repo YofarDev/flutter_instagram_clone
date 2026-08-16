@@ -9,6 +9,7 @@ sealed class Failure with _$Failure {
   const factory Failure.serverError({required String message}) = _ServerError;
   const factory Failure.networkError() = _NetworkError;
   const factory Failure.unauthorized() = _Unauthorized;
+  const factory Failure.cancelled() = _Cancelled;
 
   const Failure._();
 
@@ -16,5 +17,6 @@ sealed class Failure with _$Failure {
     serverError: (String message) => message,
     networkError: () => 'Network error occurred',
     unauthorized: () => 'Unauthorized access',
+    cancelled: () => '',
   );
 }

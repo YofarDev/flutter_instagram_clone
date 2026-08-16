@@ -55,13 +55,14 @@ extension FailurePatterns on Failure {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _ServerError value)?  serverError,TResult Function( _NetworkError value)?  networkError,TResult Function( _Unauthorized value)?  unauthorized,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _ServerError value)?  serverError,TResult Function( _NetworkError value)?  networkError,TResult Function( _Unauthorized value)?  unauthorized,TResult Function( _Cancelled value)?  cancelled,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _ServerError() when serverError != null:
 return serverError(_that);case _NetworkError() when networkError != null:
 return networkError(_that);case _Unauthorized() when unauthorized != null:
-return unauthorized(_that);case _:
+return unauthorized(_that);case _Cancelled() when cancelled != null:
+return cancelled(_that);case _:
   return orElse();
 
 }
@@ -79,13 +80,14 @@ return unauthorized(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _ServerError value)  serverError,required TResult Function( _NetworkError value)  networkError,required TResult Function( _Unauthorized value)  unauthorized,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _ServerError value)  serverError,required TResult Function( _NetworkError value)  networkError,required TResult Function( _Unauthorized value)  unauthorized,required TResult Function( _Cancelled value)  cancelled,}){
 final _that = this;
 switch (_that) {
 case _ServerError():
 return serverError(_that);case _NetworkError():
 return networkError(_that);case _Unauthorized():
-return unauthorized(_that);}
+return unauthorized(_that);case _Cancelled():
+return cancelled(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -99,13 +101,14 @@ return unauthorized(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _ServerError value)?  serverError,TResult? Function( _NetworkError value)?  networkError,TResult? Function( _Unauthorized value)?  unauthorized,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _ServerError value)?  serverError,TResult? Function( _NetworkError value)?  networkError,TResult? Function( _Unauthorized value)?  unauthorized,TResult? Function( _Cancelled value)?  cancelled,}){
 final _that = this;
 switch (_that) {
 case _ServerError() when serverError != null:
 return serverError(_that);case _NetworkError() when networkError != null:
 return networkError(_that);case _Unauthorized() when unauthorized != null:
-return unauthorized(_that);case _:
+return unauthorized(_that);case _Cancelled() when cancelled != null:
+return cancelled(_that);case _:
   return null;
 
 }
@@ -122,12 +125,13 @@ return unauthorized(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String message)?  serverError,TResult Function()?  networkError,TResult Function()?  unauthorized,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String message)?  serverError,TResult Function()?  networkError,TResult Function()?  unauthorized,TResult Function()?  cancelled,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ServerError() when serverError != null:
 return serverError(_that.message);case _NetworkError() when networkError != null:
 return networkError();case _Unauthorized() when unauthorized != null:
-return unauthorized();case _:
+return unauthorized();case _Cancelled() when cancelled != null:
+return cancelled();case _:
   return orElse();
 
 }
@@ -145,12 +149,13 @@ return unauthorized();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String message)  serverError,required TResult Function()  networkError,required TResult Function()  unauthorized,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String message)  serverError,required TResult Function()  networkError,required TResult Function()  unauthorized,required TResult Function()  cancelled,}) {final _that = this;
 switch (_that) {
 case _ServerError():
 return serverError(_that.message);case _NetworkError():
 return networkError();case _Unauthorized():
-return unauthorized();}
+return unauthorized();case _Cancelled():
+return cancelled();}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -164,12 +169,13 @@ return unauthorized();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String message)?  serverError,TResult? Function()?  networkError,TResult? Function()?  unauthorized,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String message)?  serverError,TResult? Function()?  networkError,TResult? Function()?  unauthorized,TResult? Function()?  cancelled,}) {final _that = this;
 switch (_that) {
 case _ServerError() when serverError != null:
 return serverError(_that.message);case _NetworkError() when networkError != null:
 return networkError();case _Unauthorized() when unauthorized != null:
-return unauthorized();case _:
+return unauthorized();case _Cancelled() when cancelled != null:
+return cancelled();case _:
   return null;
 
 }
@@ -299,6 +305,38 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
   return 'Failure.unauthorized()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _Cancelled extends Failure {
+  const _Cancelled(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Cancelled);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'Failure.cancelled()';
 }
 
 

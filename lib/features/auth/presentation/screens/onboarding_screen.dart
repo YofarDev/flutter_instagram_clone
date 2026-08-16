@@ -33,9 +33,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       maxWidth: 512,
       imageQuality: 70,
     );
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() => _avatarPath = picked.path);
     }
+  }
+
+  void _submit() {
+    if (_username.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('Username is required')));
+      return;
+    }
+    context.read<AuthCubit>().completeProfile(
+          username: _username.text.trim(),
+          bio: _bio.text.trim().isEmpty ? null : _bio.text.trim(),
+          avatarPath: _avatarPath,
+        );
   }
 
   @override
@@ -48,6 +62,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: BlocListener<AuthCubit, AuthState>(
+              listenWhen: (AuthState p, AuthState c) => p.error != c.error,
               listener: (BuildContext context, AuthState state) {
                 if (state.error != null) {
                   ScaffoldMessenger.of(context)
@@ -98,16 +113,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       const SizedBox(height: 24),
                       FilledButton(
                         onPressed:
-                            state.submitting || _username.text.trim().isEmpty
-                                ? null
-                                : () =>
-                                    context.read<AuthCubit>().completeProfile(
-                                          username: _username.text.trim(),
-                                          bio: _bio.text.trim().isEmpty
-                                              ? null
-                                              : _bio.text.trim(),
-                                          avatarPath: _avatarPath,
-                                        ),
+                            state.submitting ? null : _submit,
                         child: Text(l10n.onboardingDone),
                       ),
                     ],

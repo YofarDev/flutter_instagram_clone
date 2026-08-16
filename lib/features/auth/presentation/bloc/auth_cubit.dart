@@ -93,7 +93,13 @@ class AuthCubit extends Cubit<AuthState> {
     );
   }
 
-  Future<void> signOut() => _repository.signOut();
+  Future<void> signOut() async {
+    final Either<Failure, void> result = await _repository.signOut();
+    result.fold(
+      (Failure f) => emit(state.copyWith(error: f.message)),
+      (_) {},
+    );
+  }
 
   Future<void> _runAction(
     Future<Either<Failure, Object?>> Function() action,
@@ -103,8 +109,11 @@ class AuthCubit extends Cubit<AuthState> {
     result.fold(
       (Failure f) => emit(state.copyWith(
         submitting: false,
-        // ponytail: empty message = google cancel sentinel, stay quiet
-        error: f.message.isEmpty ? null : f.message,
+        // ponytail: typed cancel, stay quiet
+        error: f.maybeWhen(
+          cancelled: () => null,
+          orElse: () => f.message,
+        ),
       )),
       (_) => emit(state.copyWith(submitting: false)),
     );
