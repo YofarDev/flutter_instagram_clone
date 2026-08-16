@@ -25,6 +25,8 @@ import '../../features/profile/presentation/screens/user_list_screen.dart';
 import '../../features/stories/presentation/bloc/create_story_cubit.dart';
 import '../../features/stories/presentation/bloc/stories_cubit.dart';
 import '../../features/stories/presentation/bloc/story_viewer_cubit.dart';
+import '../../features/stories/presentation/screens/create_story_screen.dart';
+import '../../features/stories/presentation/screens/story_viewer_screen.dart';
 import '../di/service_locator.dart';
 import 'go_router_refresh.dart';
 import 'route_constants.dart';
@@ -47,7 +49,8 @@ class AppRouter {
     redirect: (BuildContext context, GoRouterState state) {
       final AuthStatus status = getIt<AuthCubit>().state.status;
       final String loc = state.matchedLocation;
-      final bool onAuthPage = loc == Routes.splash ||
+      final bool onAuthPage =
+          loc == Routes.splash ||
           loc == Routes.login ||
           loc == Routes.signup ||
           loc == Routes.onboarding;
@@ -61,36 +64,40 @@ class AppRouter {
     },
     routes: <RouteBase>[
       StatefulShellRoute.indexedStack(
-        builder: (BuildContext context, GoRouterState state,
-            StatefulNavigationShell navigationShell) {
-          return Scaffold(
-            body: navigationShell,
-            bottomNavigationBar: NavigationBar(
-              selectedIndex: navigationShell.currentIndex,
-              onDestinationSelected: (int i) => navigationShell.goBranch(
-                i,
-                initialLocation: i == navigationShell.currentIndex,
-              ),
-              destinations: const <NavigationDestination>[
-                NavigationDestination(
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home),
-                  label: 'Feed',
+        builder:
+            (
+              BuildContext context,
+              GoRouterState state,
+              StatefulNavigationShell navigationShell,
+            ) {
+              return Scaffold(
+                body: navigationShell,
+                bottomNavigationBar: NavigationBar(
+                  selectedIndex: navigationShell.currentIndex,
+                  onDestinationSelected: (int i) => navigationShell.goBranch(
+                    i,
+                    initialLocation: i == navigationShell.currentIndex,
+                  ),
+                  destinations: const <NavigationDestination>[
+                    NavigationDestination(
+                      icon: Icon(Icons.home_outlined),
+                      selectedIcon: Icon(Icons.home),
+                      label: 'Feed',
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.add_box_outlined),
+                      selectedIcon: Icon(Icons.add_box),
+                      label: 'Create',
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.person_outline),
+                      selectedIcon: Icon(Icons.person),
+                      label: 'Profile',
+                    ),
+                  ],
                 ),
-                NavigationDestination(
-                  icon: Icon(Icons.add_box_outlined),
-                  selectedIcon: Icon(Icons.add_box),
-                  label: 'Create',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.person_outline),
-                  selectedIcon: Icon(Icons.person),
-                  label: 'Profile',
-                ),
-              ],
-            ),
-          );
-        },
+              );
+            },
         branches: <StatefulShellBranch>[
           StatefulShellBranch(
             navigatorKey: _feedNavigatorKey,
@@ -100,21 +107,23 @@ class AppRouter {
                 name: 'Feed',
                 builder: (BuildContext context, GoRouterState state) =>
                     MultiBlocProvider(
-                  providers: <BlocProvider<dynamic>>[
-                    BlocProvider<AuthCubit>.value(value: getIt<AuthCubit>()),
-                    BlocProvider<FeedCubit>(
-                      create: (_) => getIt<FeedCubit>(
-                        param1: getIt<AuthCubit>().state.user!.uid,
-                      ),
+                      providers: <BlocProvider<dynamic>>[
+                        BlocProvider<AuthCubit>.value(
+                          value: getIt<AuthCubit>(),
+                        ),
+                        BlocProvider<FeedCubit>(
+                          create: (_) => getIt<FeedCubit>(
+                            param1: getIt<AuthCubit>().state.user!.uid,
+                          ),
+                        ),
+                        BlocProvider<StoriesCubit>(
+                          create: (_) => getIt<StoriesCubit>(
+                            param1: getIt<AuthCubit>().state.user!.uid,
+                          ),
+                        ),
+                      ],
+                      child: const FeedScreen(),
                     ),
-                    BlocProvider<StoriesCubit>(
-                      create: (_) => getIt<StoriesCubit>(
-                        param1: getIt<AuthCubit>().state.user!.uid,
-                      ),
-                    ),
-                  ],
-                  child: const FeedScreen(),
-                ),
               ),
             ],
           ),
@@ -126,9 +135,9 @@ class AppRouter {
                 name: 'CreatePost',
                 builder: (BuildContext context, GoRouterState state) =>
                     BlocProvider<CreatePostCubit>(
-                  create: (_) => getIt<CreatePostCubit>(),
-                  child: const CreatePostScreen(),
-                ),
+                      create: (_) => getIt<CreatePostCubit>(),
+                      child: const CreatePostScreen(),
+                    ),
               ),
             ],
           ),
@@ -176,8 +185,9 @@ class AppRouter {
           final String uid = state.pathParameters['uid']!;
           final bool isMe = uid == getIt<AuthCubit>().state.user!.uid;
           return BlocProvider<ProfileCubit>(
-            create: (_) =>
-                getIt<ProfileCubit>(param1: ProfileArgs(uid: uid, isMe: isMe)),
+            create: (_) => getIt<ProfileCubit>(
+              param1: ProfileArgs(uid: uid, isMe: isMe),
+            ),
             child: const ProfileScreen(),
           );
         },
@@ -188,10 +198,10 @@ class AppRouter {
         parentNavigatorKey: rootNavigatorKey,
         builder: (BuildContext context, GoRouterState state) =>
             BlocProvider<FollowListCubit>(
-          create: (_) => getIt<FollowListCubit>()
-            ..load(uid: state.pathParameters['uid']!, followersMode: true),
-          child: const UserListScreen(followersMode: true),
-        ),
+              create: (_) => getIt<FollowListCubit>()
+                ..load(uid: state.pathParameters['uid']!, followersMode: true),
+              child: const UserListScreen(followersMode: true),
+            ),
       ),
       GoRoute(
         path: Routes.userFollowing,
@@ -199,10 +209,10 @@ class AppRouter {
         parentNavigatorKey: rootNavigatorKey,
         builder: (BuildContext context, GoRouterState state) =>
             BlocProvider<FollowListCubit>(
-          create: (_) => getIt<FollowListCubit>()
-            ..load(uid: state.pathParameters['uid']!, followersMode: false),
-          child: const UserListScreen(followersMode: false),
-        ),
+              create: (_) => getIt<FollowListCubit>()
+                ..load(uid: state.pathParameters['uid']!, followersMode: false),
+              child: const UserListScreen(followersMode: false),
+            ),
       ),
       GoRoute(
         path: Routes.profileEdit,
@@ -211,9 +221,7 @@ class AppRouter {
         builder: (BuildContext context, GoRouterState state) {
           final Object? extra = state.extra;
           if (extra is! AppUser) {
-            return const Scaffold(
-              body: Center(child: Text('User not found')),
-            );
+            return const Scaffold(body: Center(child: Text('User not found')));
           }
           return BlocProvider<EditProfileCubit>(
             create: (_) => getIt<EditProfileCubit>(param1: extra),
@@ -227,11 +235,9 @@ class AppRouter {
         parentNavigatorKey: rootNavigatorKey,
         builder: (BuildContext context, GoRouterState state) =>
             BlocProvider<CreateStoryCubit>(
-          create: (_) => getIt<CreateStoryCubit>(),
-          child: const Scaffold(
-            body: Center(child: Text('Create story placeholder')),
-          ), // TODO(phase4-task-5): replace with CreateStoryScreen
-        ),
+              create: (_) => getIt<CreateStoryCubit>(),
+              child: const CreateStoryScreen(),
+            ),
       ),
       GoRoute(
         path: Routes.storyViewer,
@@ -246,9 +252,7 @@ class AppRouter {
           }
           return BlocProvider<StoryViewerCubit>(
             create: (_) => getIt<StoryViewerCubit>(param1: extra),
-            child: const Scaffold(
-              body: Center(child: Text('Viewer placeholder')),
-            ), // TODO(phase4-task-5): replace with StoryViewerScreen
+            child: const StoryViewerScreen(),
           );
         },
       ),
@@ -263,27 +267,27 @@ class AppRouter {
         name: 'Login',
         builder: (BuildContext context, GoRouterState state) =>
             BlocProvider<AuthCubit>.value(
-          value: getIt<AuthCubit>(),
-          child: const LoginScreen(),
-        ),
+              value: getIt<AuthCubit>(),
+              child: const LoginScreen(),
+            ),
       ),
       GoRoute(
         path: Routes.signup,
         name: 'Signup',
         builder: (BuildContext context, GoRouterState state) =>
             BlocProvider<AuthCubit>.value(
-          value: getIt<AuthCubit>(),
-          child: const SignupScreen(),
-        ),
+              value: getIt<AuthCubit>(),
+              child: const SignupScreen(),
+            ),
       ),
       GoRoute(
         path: Routes.onboarding,
         name: 'Onboarding',
         builder: (BuildContext context, GoRouterState state) =>
             BlocProvider<AuthCubit>.value(
-          value: getIt<AuthCubit>(),
-          child: const OnboardingScreen(),
-        ),
+              value: getIt<AuthCubit>(),
+              child: const OnboardingScreen(),
+            ),
       ),
     ],
   );

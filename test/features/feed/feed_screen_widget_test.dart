@@ -17,12 +17,17 @@ import 'package:flutter_instagram_clone/features/feed/domain/repositories/feed_r
 import 'package:flutter_instagram_clone/features/feed/presentation/bloc/feed_cubit.dart';
 import 'package:flutter_instagram_clone/features/feed/presentation/screens/feed_screen.dart';
 import 'package:flutter_instagram_clone/features/profile/domain/repositories/profile_repository.dart';
+import 'package:flutter_instagram_clone/features/stories/domain/models/story.dart';
+import 'package:flutter_instagram_clone/features/stories/domain/repositories/stories_repository.dart';
+import 'package:flutter_instagram_clone/features/stories/presentation/bloc/stories_cubit.dart';
 
 class MockFeedRepository extends Mock implements IFeedRepository {}
 
 class MockProfileRepository extends Mock implements IProfileRepository {}
 
 class MockAuthRepository extends Mock implements IAuthRepository {}
+
+class MockStoriesRepository extends Mock implements IStoriesRepository {}
 
 Post _post() => Post(
       id: 'p1',
@@ -39,6 +44,7 @@ void main() {
 
   late MockFeedRepository repo;
   late MockProfileRepository profileRepo;
+  late MockStoriesRepository storiesRepo;
   late Completer<Either<Failure, void>> toggleGate;
 
   setUpAll(() => registerFallbackValue(_post()));
@@ -46,6 +52,7 @@ void main() {
   setUp(() {
     repo = MockFeedRepository();
     profileRepo = MockProfileRepository();
+    storiesRepo = MockStoriesRepository();
     toggleGate = Completer<Either<Failure, void>>();
     when(() => repo.watchFeed(limit: any(named: 'limit')))
         .thenAnswer((_) => Stream<List<Post>>.value(<Post>[_post()]));
@@ -58,6 +65,12 @@ void main() {
           post: any(named: 'post'),
           currentlyLiked: any(named: 'currentlyLiked'),
         )).thenAnswer((_) => toggleGate.future);
+    when(() => storiesRepo.watchStories())
+        .thenAnswer((_) => const Stream<List<Story>>.empty());
+    when(() => storiesRepo.fetchViewedStoryIds(
+          storyIds: any(named: 'storyIds'),
+        )).thenAnswer(
+        (_) async => const Right<Failure, Set<String>>(<String>{}));
   });
 
   Widget subject() {
@@ -72,6 +85,8 @@ void main() {
           BlocProvider<AuthCubit>(create: (_) => AuthCubit(authRepo)),
           BlocProvider<FeedCubit>(
               create: (_) => FeedCubit(repo, profileRepo, myUid: 'u1')),
+          BlocProvider<StoriesCubit>(
+              create: (_) => StoriesCubit(storiesRepo, myUid: 'u1')),
         ],
         child: const FeedScreen(),
       ),
