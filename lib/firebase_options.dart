@@ -63,6 +63,9 @@ class DefaultFirebaseOptions {
     messagingSenderId: '442906012491',
     projectId: 'flutter-insta-clone-yofardev',
     storageBucket: 'flutter-insta-clone-yofardev.firebasestorage.app',
+    androidClientId: '442906012491-hnufchr6clfvi5uojvk9aj5i34po32v8.apps.googleusercontent.com',
+    iosClientId: '442906012491-u81qcj1bq0tffc65qei7ad1j8gfb6pvp.apps.googleusercontent.com',
     iosBundleId: 'fr.yofardev.flutterInstagramClone',
   );
+
 }
