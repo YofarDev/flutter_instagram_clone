@@ -39,6 +39,10 @@
 	<string>442906012491-u81qcj1bq0tffc65qei7ad1j8gfb6pvp.apps.googleusercontent.com</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Take photos for your posts</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Choose photos for your posts</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
