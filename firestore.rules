@@ -33,6 +33,17 @@ service cloud.firestore {
       allow update, delete: if signedIn() && resource.data.uid == request.auth.uid;
     }
 
+    match /stories/{storyId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+
+      match /viewers/{uid} {
+        allow read: if signedIn();
+        allow create: if signedIn() && request.auth.uid == uid;
+      }
+    }
+
     match /posts/{postId} {
       allow read: if signedIn();
       allow create: if signedIn() && request.resource.data.authorId == request.auth.uid;
