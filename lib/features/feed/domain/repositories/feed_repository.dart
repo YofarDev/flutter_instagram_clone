@@ -1,0 +1,31 @@
+import 'package:fpdart/fpdart.dart';
+
+import '../../../../core/models/failure.dart';
+import '../models/comment.dart';
+import '../models/post.dart';
+
+abstract interface class IFeedRepository {
+  /// Live feed, newest first. Raw stream — errors surface via onError.
+  Stream<List<Post>> watchFeed({required int limit});
+
+  Future<Either<Failure, void>> createPost({
+    required String caption,
+    required String filePath,
+  });
+
+  Future<Either<Failure, Set<String>>> fetchLikedPostIds({
+    required List<String> postIds,
+  });
+
+  Future<Either<Failure, void>> toggleLike({
+    required Post post,
+    required bool currentlyLiked,
+  });
+
+  Stream<List<Comment>> watchComments({required String postId});
+
+  Future<Either<Failure, void>> addComment({
+    required String postId,
+    required String text,
+  });
+}
