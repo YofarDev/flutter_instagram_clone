@@ -6,19 +6,41 @@ import 'package:fpdart/fpdart.dart';
 import '../../../../core/models/failure.dart';
 import '../../../../core/models/post.dart';
 import '../../domain/repositories/feed_repository.dart';
+import '../../../profile/domain/repositories/profile_repository.dart';
 import 'feed_state.dart';
 
 class FeedCubit extends Cubit<FeedState> {
-  FeedCubit(this._repository) : super(const FeedState()) {
+  FeedCubit(this._repository, this._profileRepository, {required String myUid})
+      : _myUid = myUid,
+        super(const FeedState()) {
     _subscribe();
+    _followingSub = _profileRepository
+        .watchFollowingIds(uid: myUid)
+        .listen((List<String> ids) {
+      _followingIds = ids.toSet();
+      // re-filter raw posts on follow changes; skip before first posts emission
+      if (_allPosts != null) _emitFiltered(_gen);
+    });
   }
 
   static const int _pageSize = 10;
 
   final IFeedRepository _repository;
+  final IProfileRepository _profileRepository;
+  final String _myUid;
   StreamSubscription<List<Post>>? _sub;
+  StreamSubscription<List<String>>? _followingSub;
+  Set<String> _followingIds = <String>{};
+  List<Post>? _allPosts;
   int _limit = _pageSize;
   int _gen = 0;
+
+  // ponytail: client-side follow filter; Firestore 'in' caps at 10 —
+  // server-side whereIn when the graph outgrows it
+  List<Post> get _visiblePosts => _allPosts!
+      .where((Post p) =>
+          p.authorId == _myUid || _followingIds.contains(p.authorId))
+      .toList();
 
   void _subscribe() {
     _sub?.cancel();
@@ -32,20 +54,28 @@ class FeedCubit extends Cubit<FeedState> {
 
   Future<void> _onPosts(List<Post> posts, int gen) async {
     if (isClosed || gen != _gen) return;
+    _allPosts = posts;
+    await _emitFiltered(gen);
+  }
+
+  Future<void> _emitFiltered(int gen) async {
+    if (isClosed || gen != _gen) return;
+    final List<Post> visible = _visiblePosts;
     final Either<Failure, Set<String>> either = await _repository
-        .fetchLikedPostIds(postIds: posts.map((Post p) => p.id).toList());
+        .fetchLikedPostIds(
+            postIds: visible.map((Post p) => p.id).toList());
     if (isClosed || gen != _gen) return;
     either.fold(
       (_) => emit(state.copyWith(
         status: FeedStatus.ready,
-        posts: posts,
-        hasMore: posts.length >= _limit,
+        posts: visible,
+        hasMore: _allPosts!.length >= _limit,
       )), // ponytail: keep stale likedIds on hydration failure
       (Set<String> ids) => emit(state.copyWith(
         status: FeedStatus.ready,
-        posts: posts,
+        posts: visible,
         likedIds: ids,
-        hasMore: posts.length >= _limit,
+        hasMore: _allPosts!.length >= _limit,
       )),
     );
   }
@@ -93,6 +123,7 @@ class FeedCubit extends Cubit<FeedState> {
   @override
   Future<void> close() {
     _sub?.cancel();
+    _followingSub?.cancel();
     return super.close();
   }
 }

@@ -45,7 +45,9 @@ class AppRouter {
         name: 'Feed',
         builder: (BuildContext context, GoRouterState state) =>
             BlocProvider<FeedCubit>(
-          create: (_) => getIt<FeedCubit>(),
+          create: (_) => getIt<FeedCubit>(
+            param1: getIt<AuthCubit>().state.user!.uid,
+          ),
           child: BlocProvider<AuthCubit>.value(
             value: getIt<AuthCubit>(),
             child: const FeedScreen(),

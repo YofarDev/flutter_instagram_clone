@@ -10,8 +10,11 @@ import 'package:flutter_instagram_clone/core/models/post.dart';
 import 'package:flutter_instagram_clone/features/feed/domain/repositories/feed_repository.dart';
 import 'package:flutter_instagram_clone/features/feed/presentation/bloc/feed_cubit.dart';
 import 'package:flutter_instagram_clone/features/feed/presentation/bloc/feed_state.dart';
+import 'package:flutter_instagram_clone/features/profile/domain/repositories/profile_repository.dart';
 
 class MockIFeedRepository extends Mock implements IFeedRepository {}
+
+class MockIProfileRepository extends Mock implements IProfileRepository {}
 
 final Post p1 = Post(
   id: 'p1',
@@ -38,14 +41,42 @@ final List<Post> manyPosts = List<Post>.generate(
     createdAt: DateTime(2026, 1, 1),
   ),
 );
+final Post mine = Post(
+  id: 'pm',
+  authorId: 'me',
+  authorUsername: 'me',
+  imageUrl: 'http://img/pm',
+  createdAt: DateTime(2026, 1, 1),
+);
+final Post followedPost = Post(
+  id: 'pf',
+  authorId: 'u2',
+  authorUsername: 'followed',
+  imageUrl: 'http://img/pf',
+  createdAt: DateTime(2026, 1, 1),
+);
+final Post stranger = Post(
+  id: 'ps',
+  authorId: 'u9',
+  authorUsername: 'stranger',
+  imageUrl: 'http://img/ps',
+  createdAt: DateTime(2026, 1, 1),
+);
 
 void main() {
   late MockIFeedRepository repo;
+  late MockIProfileRepository profileRepo;
+  late StreamController<List<Post>> postsController;
+  late StreamController<List<String>> followingController;
 
   setUp(() {
     repo = MockIFeedRepository();
+    profileRepo = MockIProfileRepository();
     registerFallbackValue(p1);
     registerFallbackValue(<String>[]);
+    // existing fixtures are authored by 'u1' — keep them visible via myUid
+    when(() => profileRepo.watchFollowingIds(uid: any(named: 'uid')))
+        .thenAnswer((_) => const Stream<List<String>>.empty());
   });
 
   blocTest<FeedCubit, FeedState>(
@@ -55,7 +86,7 @@ void main() {
           .thenAnswer((_) => Stream<List<Post>>.value(<Post>[p1, p2]));
       when(() => repo.fetchLikedPostIds(postIds: any(named: 'postIds')))
           .thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{'p1'}));
-      return FeedCubit(repo);
+      return FeedCubit(repo, profileRepo, myUid: 'u1');
     },
     expect: () => <FeedState>[
       FeedState(
@@ -85,7 +116,7 @@ void main() {
       controller
         ..add(<Post>[p1, p2])
         ..add(<Post>[p1]);
-      return FeedCubit(repo);
+      return FeedCubit(repo, profileRepo, myUid: 'u1');
     },
     expect: () => <FeedState>[
       FeedState(
@@ -112,7 +143,7 @@ void main() {
       when(() => repo.watchFeed(limit: any(named: 'limit')))
           .thenAnswer((_) => controller.stream);
       controller.addError(Exception('db down'));
-      return FeedCubit(repo);
+      return FeedCubit(repo, profileRepo, myUid: 'u1');
     },
     expect: () => <FeedState>[
       FeedState(error: 'Failed to load feed'),
@@ -130,7 +161,7 @@ void main() {
           currentlyLiked: any(named: 'currentlyLiked'),
         ),
       ).thenAnswer((_) async => const Right<Failure, void>(null));
-      return FeedCubit(repo);
+      return FeedCubit(repo, profileRepo, myUid: 'u1');
     },
     seed: () => FeedState(status: FeedStatus.ready, posts: <Post>[p1], hasMore: true),
     act: (FeedCubit cubit) => cubit.toggleLike(p1),
@@ -161,7 +192,7 @@ void main() {
         (_) async =>
             const Left<Failure, void>(Failure.serverError(message: 'boom')),
       );
-      return FeedCubit(repo);
+      return FeedCubit(repo, profileRepo, myUid: 'u1');
     },
     seed: () => FeedState(status: FeedStatus.ready, posts: <Post>[p1], hasMore: true),
     act: (FeedCubit cubit) => cubit.toggleLike(p1),
@@ -188,7 +219,7 @@ void main() {
           .thenAnswer((_) => Stream<List<Post>>.value(manyPosts));
       when(() => repo.fetchLikedPostIds(postIds: any(named: 'postIds')))
           .thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
-      return FeedCubit(repo);
+      return FeedCubit(repo, profileRepo, myUid: 'u1');
     },
     act: (FeedCubit cubit) async {
       await Future<void>.delayed(Duration.zero);
@@ -211,7 +242,7 @@ void main() {
     build: () {
       when(() => repo.watchFeed(limit: any(named: 'limit')))
           .thenAnswer((_) => const Stream<List<Post>>.empty());
-      return FeedCubit(repo);
+      return FeedCubit(repo, profileRepo, myUid: 'u1');
     },
     seed: () => FeedState(status: FeedStatus.ready, hasMore: false),
     act: (FeedCubit cubit) => cubit.loadMore(),
@@ -219,5 +250,74 @@ void main() {
       verify(() => repo.watchFeed(limit: any(named: 'limit'))).called(1);
     },
     expect: () => const <FeedState>[],
+  );
+
+  blocTest<FeedCubit, FeedState>(
+    'feed filters to self + followed',
+    build: () {
+      when(() => repo.watchFeed(limit: any(named: 'limit')))
+          .thenAnswer((_) => Stream<List<Post>>.value(
+                <Post>[mine, followedPost, stranger],
+              ));
+      when(() => repo.fetchLikedPostIds(postIds: any(named: 'postIds')))
+          .thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
+      when(() => profileRepo.watchFollowingIds(uid: any(named: 'uid')))
+          .thenAnswer((_) => Stream<List<String>>.value(<String>['u2']));
+      return FeedCubit(repo, profileRepo, myUid: 'me');
+    },
+    expect: () => <FeedState>[
+      // stream race: posts may land before following ids arrive — starts
+      // narrow, widens; stranger ('u9') never appears in either state
+      FeedState(
+        status: FeedStatus.ready,
+        posts: <Post>[mine],
+        likedIds: const <String>{},
+        hasMore: false,
+      ),
+      FeedState(
+        status: FeedStatus.ready,
+        posts: <Post>[mine, followedPost],
+        likedIds: const <String>{},
+        hasMore: false,
+      ),
+    ],
+  );
+
+  blocTest<FeedCubit, FeedState>(
+    'follow change re-filters live',
+    build: () {
+      postsController = StreamController<List<Post>>();
+      addTearDown(postsController.close);
+      followingController = StreamController<List<String>>();
+      addTearDown(followingController.close);
+      when(() => repo.watchFeed(limit: any(named: 'limit')))
+          .thenAnswer((_) => postsController.stream);
+      when(() => repo.fetchLikedPostIds(postIds: any(named: 'postIds')))
+          .thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
+      when(() => profileRepo.watchFollowingIds(uid: any(named: 'uid')))
+          .thenAnswer((_) => followingController.stream);
+      return FeedCubit(repo, profileRepo, myUid: 'me');
+    },
+    act: (FeedCubit cubit) async {
+      await Future<void>.delayed(Duration.zero);
+      postsController.add(<Post>[mine, followedPost]); // following empty -> only mine
+      await Future<void>.delayed(Duration.zero);
+      followingController.add(<String>['u2']); // widen -> mine + followed
+      await Future<void>.delayed(Duration.zero);
+    },
+    expect: () => <FeedState>[
+      FeedState(
+        status: FeedStatus.ready,
+        posts: <Post>[mine],
+        likedIds: const <String>{},
+        hasMore: false,
+      ),
+      FeedState(
+        status: FeedStatus.ready,
+        posts: <Post>[mine, followedPost],
+        likedIds: const <String>{},
+        hasMore: false,
+      ),
+    ],
   );
 }

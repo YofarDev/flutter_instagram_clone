@@ -16,8 +16,11 @@ import 'package:flutter_instagram_clone/core/models/post.dart';
 import 'package:flutter_instagram_clone/features/feed/domain/repositories/feed_repository.dart';
 import 'package:flutter_instagram_clone/features/feed/presentation/bloc/feed_cubit.dart';
 import 'package:flutter_instagram_clone/features/feed/presentation/screens/feed_screen.dart';
+import 'package:flutter_instagram_clone/features/profile/domain/repositories/profile_repository.dart';
 
 class MockFeedRepository extends Mock implements IFeedRepository {}
+
+class MockProfileRepository extends Mock implements IProfileRepository {}
 
 class MockAuthRepository extends Mock implements IAuthRepository {}
 
@@ -35,15 +38,19 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late MockFeedRepository repo;
+  late MockProfileRepository profileRepo;
   late Completer<Either<Failure, void>> toggleGate;
 
   setUpAll(() => registerFallbackValue(_post()));
 
   setUp(() {
     repo = MockFeedRepository();
+    profileRepo = MockProfileRepository();
     toggleGate = Completer<Either<Failure, void>>();
     when(() => repo.watchFeed(limit: any(named: 'limit')))
         .thenAnswer((_) => Stream<List<Post>>.value(<Post>[_post()]));
+    when(() => profileRepo.watchFollowingIds(uid: any(named: 'uid')))
+        .thenAnswer((_) => const Stream<List<String>>.empty());
     when(() => repo.fetchLikedPostIds(postIds: any(named: 'postIds')))
         .thenAnswer(
             (_) async => const Right<Failure, Set<String>>(<String>{}));
@@ -63,7 +70,8 @@ void main() {
       home: MultiBlocProvider(
         providers: <SingleChildWidget>[
           BlocProvider<AuthCubit>(create: (_) => AuthCubit(authRepo)),
-          BlocProvider<FeedCubit>(create: (_) => FeedCubit(repo)),
+          BlocProvider<FeedCubit>(
+              create: (_) => FeedCubit(repo, profileRepo, myUid: 'u1')),
         ],
         child: const FeedScreen(),
       ),
