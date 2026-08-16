@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter analyze:*)",
+      "Bash(dart format .:*)",
+      "Bash(flutter pub get:*)",
+      "Bash(flutter test:*)",
+      "Bash(flutter clean:*)",
+      "Bash(flutter pub add:*)",
+      "Bash(/Users/yofardev/development/Projects/Flutter/_utils/new-project/IMPROVEMENTS.md:*)",
+      "Bash(dart run build_runner build:*)"
+    ]
+  }
+}
