@@ -91,5 +91,23 @@
   "count": "Count",
   "@count": {
     "description": "Label for the counter value"
-  }
+  },
+  "authLoginTitle": "Log in",
+  "authSignupTitle": "Create account",
+  "authEmail": "Email address",
+  "authPassword": "Password",
+  "authConfirmPassword": "Confirm password",
+  "authLogin": "Log in",
+  "authSignup": "Sign up",
+  "authGoogleButton": "Continue with Google",
+  "authNoAccount": "No account?",
+  "authHasAccount": "Already have an account?",
+  "authOr": "or",
+  "onboardingTitle": "Create your profile",
+  "onboardingUsername": "Username",
+  "onboardingBio": "Bio",
+  "onboardingAddPhoto": "Add a photo",
+  "onboardingDone": "Done",
+  "feedPlaceholder": "Feed coming in Phase 2",
+  "actionLogout": "Log out"
 }
