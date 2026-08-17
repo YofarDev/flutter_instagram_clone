@@ -24,7 +24,7 @@ Built incrementally, one phase at a time:
 - [x] **Phase 4 — Stories**: 24h stories, story creation, story viewer
 - [x] **Phase 5 — Explore & Search**: explore grid, user & hashtag search
 - [x] **Phase 6 — Notifications**: likes, comments, follows
-- [ ] **Phase 7 — Reels**: short video posts, vertical feed
+- [x] **Phase 7 — Reels**: short video posts, vertical feed
 - [ ] **Phase 8 — Direct Messages**: 1:1 chat, real-time
 
 ## Firebase Setup
