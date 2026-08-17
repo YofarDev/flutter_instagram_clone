@@ -14,5 +14,6 @@ sealed class Post with _$Post {
     required DateTime createdAt,
     @Default(0) int likeCount,
     @Default(0) int commentCount,
+    @Default(<String>[]) List<String> tags,
   }) = _Post;
 }

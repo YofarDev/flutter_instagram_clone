@@ -122,7 +122,16 @@ class AuthFirebaseDataSource implements IAuthDataSource {
           tx.delete(_db.collection('usernames').doc(previousUsername));
         }
       }
-      tx.set(_db.collection('users').doc(uid), data, SetOptions(merge: true));
+      final Map<String, dynamic> userData = <String, dynamic>{
+        ...data,
+        if (data['username'] != null)
+          'usernameLower': (data['username'] as String).toLowerCase(),
+      };
+      tx.set(
+        _db.collection('users').doc(uid),
+        userData,
+        SetOptions(merge: true),
+      );
     });
   }
 

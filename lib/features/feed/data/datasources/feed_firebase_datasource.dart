@@ -10,6 +10,16 @@ import '../../../../core/models/post.dart';
 import '../models/comment_dto.dart';
 import '../../../../core/models/post_dto.dart';
 
+/// #hashtag extraction: lowercase, strip #, [a-z0-9_], deduped.
+List<String> extractTags(String caption) {
+  final RegExp re = RegExp(r'#([a-zA-Z0-9_]+)');
+  return re
+      .allMatches(caption)
+      .map((RegExpMatch m) => m.group(1)!.toLowerCase())
+      .toSet()
+      .toList();
+}
+
 abstract interface class IFeedDataSource {
   Stream<List<Post>> watchFeed({required int limit});
   Future<void> createPost({
@@ -81,6 +91,7 @@ class FeedFirebaseDataSource implements IFeedDataSource {
             imageUrl: imageUrl,
             caption: caption,
             createdAtMillis: millis,
+            tags: extractTags(caption),
           ).toMap());
     } catch (e) {
       // ponytail: best-effort cleanup, orphan possible if delete fails too

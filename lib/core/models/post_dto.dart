@@ -10,6 +10,7 @@ class PostDto {
     required this.createdAtMillis,
     this.likeCount = 0,
     this.commentCount = 0,
+    this.tags = const <String>[],
   });
 
   factory PostDto.fromMap(String id, Map<String, dynamic> map) => PostDto(
@@ -21,6 +22,9 @@ class PostDto {
         createdAtMillis: map['createdAt'] as int,
         likeCount: map['likeCount'] as int? ?? 0,
         commentCount: map['commentCount'] as int? ?? 0,
+        tags: ((map['tags'] as List<dynamic>?) ?? <dynamic>[])
+            .map((dynamic e) => e as String)
+            .toList(),
       );
 
   final String authorId;
@@ -31,6 +35,7 @@ class PostDto {
   final int createdAtMillis;
   final int likeCount;
   final int commentCount;
+  final List<String> tags;
 
   Map<String, dynamic> toMap() => <String, dynamic>{
         'authorId': authorId,
@@ -41,6 +46,7 @@ class PostDto {
         'createdAt': createdAtMillis,
         'likeCount': likeCount,
         'commentCount': commentCount,
+        'tags': tags,
       };
 
   Post toDomain(String id) => Post(
@@ -53,5 +59,6 @@ class PostDto {
         createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMillis),
         likeCount: likeCount,
         commentCount: commentCount,
+        tags: tags,
       );
 }
