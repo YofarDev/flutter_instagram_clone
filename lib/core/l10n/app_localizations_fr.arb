@@ -64,5 +64,8 @@
   "newDmTitle": "Nouveau message",
   "dmEmpty": "Aucune conversation",
   "chatEmpty": "Démarre la conversation",
-  "dmYouPrefix": "Vous : "
+  "dmYouPrefix": "Vous : ",
+  "navActivity": "Activité",
+  "navConversations": "Messages",
+  "navLogout": "Déconnexion"
 }

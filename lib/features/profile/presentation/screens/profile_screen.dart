@@ -6,6 +6,9 @@ import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/models/app_user.dart';
 import '../../../../core/models/post.dart';
 import '../../../../core/router/route_constants.dart';
+import '../../../../core/widgets/ig_icon.dart';
+import '../../../../core/widgets/ig_icons.dart';
+import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../domain/models/user_profile.dart';
 import '../bloc/profile_cubit.dart';
 import '../bloc/profile_state.dart';
@@ -40,7 +43,21 @@ class ProfileScreen extends StatelessWidget {
           }
           final UserProfile? profile = state.profile;
           return Scaffold(
-            appBar: AppBar(title: Text(profile?.username ?? '')),
+            appBar: AppBar(
+              title: Text(profile?.username ?? ''),
+              actions: <Widget>[
+                // Own profile only — placeholder until the P4 more-menu sheet.
+                if (state.isMe)
+                  IconButton(
+                    tooltip: l10n.navLogout,
+                    icon: IgIcon(
+                      IgIcons.moreDots,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    onPressed: () => context.read<AuthCubit>().signOut(),
+                  ),
+              ],
+            ),
             body: profile == null
                 ? const SizedBox.shrink()
                 : SingleChildScrollView(

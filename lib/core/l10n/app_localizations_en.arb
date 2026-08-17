@@ -94,5 +94,8 @@
   "newDmTitle": "New message",
   "dmEmpty": "No conversations",
   "chatEmpty": "Start the conversation",
-  "dmYouPrefix": "You: "
+  "dmYouPrefix": "You: ",
+  "navActivity": "Activity",
+  "navConversations": "Messages",
+  "navLogout": "Log out"
 }

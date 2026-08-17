@@ -293,10 +293,17 @@ class AppRouter {
         builder: (BuildContext context, GoRouterState state) {
           final String uid = state.pathParameters['uid']!;
           final bool isMe = uid == getIt<AuthCubit>().state.user!.uid;
-          return BlocProvider<ProfileCubit>(
-            create: (_) => getIt<ProfileCubit>(
-              param1: ProfileArgs(uid: uid, isMe: isMe),
-            ),
+          // Top-level route sits outside the shell providers, but the
+          // own-profile path (isMe) reads AuthCubit for sign-out.
+          return MultiBlocProvider(
+            providers: <BlocProvider<dynamic>>[
+              BlocProvider<AuthCubit>.value(value: getIt<AuthCubit>()),
+              BlocProvider<ProfileCubit>(
+                create: (_) => getIt<ProfileCubit>(
+                  param1: ProfileArgs(uid: uid, isMe: isMe),
+                ),
+              ),
+            ],
             child: const ProfileScreen(),
           );
         },

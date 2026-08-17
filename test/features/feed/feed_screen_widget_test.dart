@@ -16,6 +16,8 @@ import 'package:flutter_instagram_clone/core/models/post.dart';
 import 'package:flutter_instagram_clone/features/feed/domain/repositories/feed_repository.dart';
 import 'package:flutter_instagram_clone/features/feed/presentation/bloc/feed_cubit.dart';
 import 'package:flutter_instagram_clone/features/feed/presentation/screens/feed_screen.dart';
+import 'package:flutter_instagram_clone/features/notifications/domain/repositories/notifications_repository.dart';
+import 'package:flutter_instagram_clone/features/notifications/presentation/bloc/notifications_cubit.dart';
 import 'package:flutter_instagram_clone/features/profile/domain/repositories/profile_repository.dart';
 import 'package:flutter_instagram_clone/features/stories/domain/models/story.dart';
 import 'package:flutter_instagram_clone/features/stories/domain/repositories/stories_repository.dart';
@@ -28,6 +30,9 @@ class MockProfileRepository extends Mock implements IProfileRepository {}
 class MockAuthRepository extends Mock implements IAuthRepository {}
 
 class MockStoriesRepository extends Mock implements IStoriesRepository {}
+
+class MockNotificationsRepository extends Mock
+    implements INotificationsRepository {}
 
 Post _post() => Post(
   id: 'p1',
@@ -45,6 +50,7 @@ void main() {
   late MockFeedRepository repo;
   late MockProfileRepository profileRepo;
   late MockStoriesRepository storiesRepo;
+  late MockNotificationsRepository notificationsRepo;
   late Completer<Either<Failure, void>> toggleGate;
 
   setUpAll(() => registerFallbackValue(_post()));
@@ -53,6 +59,7 @@ void main() {
     repo = MockFeedRepository();
     profileRepo = MockProfileRepository();
     storiesRepo = MockStoriesRepository();
+    notificationsRepo = MockNotificationsRepository();
     toggleGate = Completer<Either<Failure, void>>();
     when(
       () => repo.watchFeed(limit: any(named: 'limit')),
@@ -94,6 +101,10 @@ void main() {
           BlocProvider<StoriesCubit>(
             create: (_) => StoriesCubit(storiesRepo, myUid: 'u1'),
           ),
+          // shell provides the cubit above the feed branch — mirror that here
+          BlocProvider<NotificationsCubit>(
+            create: (_) => NotificationsCubit(notificationsRepo),
+          ),
         ],
         child: const FeedScreen(),
       ),
@@ -129,5 +140,17 @@ void main() {
     verify(
       () => repo.toggleLike(post: any(named: 'post'), currentlyLiked: false),
     ).called(1);
+  });
+
+  testWidgets('appbar shows heart and plane, no logout, no FAB', (
+    WidgetTester tester,
+  ) async {
+    await pumpSubject(tester);
+
+    expect(find.byTooltip('Activity'), findsOneWidget);
+    // navConversations l10n value is "Messages" in both locales
+    expect(find.byTooltip('Messages'), findsOneWidget);
+    expect(find.byIcon(Icons.logout), findsNothing);
+    expect(find.byType(FloatingActionButton), findsNothing);
   });
 }
