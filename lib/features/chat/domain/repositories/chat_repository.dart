@@ -1,0 +1,20 @@
+import 'package:fpdart/fpdart.dart';
+
+import '../../../../core/models/failure.dart';
+import '../models/chat_message.dart';
+import '../models/conversation.dart';
+
+abstract interface class IChatRepository {
+  Stream<List<Conversation>> watchConversations({required String myUid});
+  Stream<List<ChatMessage>> watchMessages({required String conversationId});
+  Future<Either<Failure, Conversation>> getOrCreateConversation({
+    required String myUid,
+    required String otherUid,
+  });
+  Future<Either<Failure, void>> sendMessage({
+    required String conversationId,
+    required String myUid,
+    required String otherUid,
+    required String text,
+  });
+}
