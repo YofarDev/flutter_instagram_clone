@@ -64,5 +64,12 @@ service cloud.firestore {
         allow update, delete: if signedIn() && resource.data.authorId == request.auth.uid;
       }
     }
+
+    match /notifications/{id} {
+      allow read: if signedIn() && resource.data.ownerUid == request.auth.uid;
+      // ponytail: client-writable create is spoofable; server-side writes later
+      allow create: if signedIn();
+      allow update, delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
+    }
   }
 }
