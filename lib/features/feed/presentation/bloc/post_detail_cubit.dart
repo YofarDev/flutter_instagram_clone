@@ -30,7 +30,8 @@ class PostDetailCubit extends Cubit<PostDetailState> {
         await _repository.getPostById(postId: postId);
     if (isClosed) return;
     either.fold(
-      (Failure f) => emit(state.copyWith(error: f.message)),
+      (Failure f) =>
+          emit(state.copyWith(status: PostDetailStatus.failed, error: f.message)),
       (Post post) {
         emit(state.copyWith(post: post, status: PostDetailStatus.ready));
         _onPostReady(post);

@@ -103,15 +103,7 @@ class _NotificationRow extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text.rich(
-                      TextSpan(
-                        text: item.actorUsername,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                        children: <InlineSpan>[
-                          TextSpan(text: ' $message'),
-                        ],
-                      ),
-                    ),
+                    Text(message),
                     const SizedBox(height: 2),
                     Text(
                       timeAgo(item.createdAt),
@@ -120,11 +112,11 @@ class _NotificationRow extends StatelessWidget {
                   ],
                 ),
               ),
-              if (item.postImageUrl != null) ...<Widget>[
+              if (item.postImageUrl != null && item.postId != null) ...<Widget>[
                 const SizedBox(width: 12),
                 GestureDetector(
                   onTap: () => context.push(
-                    Routes.postDetailPath(item.postId ?? ''),
+                    Routes.postDetailPath(item.postId!),
                     extra: item.postId,
                   ),
                   child: SizedBox(

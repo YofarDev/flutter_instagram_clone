@@ -38,6 +38,7 @@ class NotificationsFirebaseDataSource implements INotificationsDataSource {
                       .toDomain(doc.id))
               .toList());
 
+  // ponytail: unread capped at 50 per pass; badge drift above that
   @override
   Future<void> markAllRead({required String uid}) async {
     final QuerySnapshot<Object?> snap = await _db

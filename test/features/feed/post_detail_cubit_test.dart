@@ -251,7 +251,10 @@ void main() {
       return PostDetailCubit(repo, postId: 'p1');
     },
     expect: () => <PostDetailState>[
-      const PostDetailState(error: 'Post not found'),
+      const PostDetailState(
+        status: PostDetailStatus.failed,
+        error: 'Post not found',
+      ),
     ],
   );
 }

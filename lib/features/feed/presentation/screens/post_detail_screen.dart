@@ -57,6 +57,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             if (state.status == PostDetailStatus.loading) {
               return const Center(child: CircularProgressIndicator());
             }
+            if (state.status == PostDetailStatus.failed) {
+              // ponytail: no retry button; pop and reopen re-fetches
+              return Center(child: Text(state.error ?? 'Post not found'));
+            }
             final Post post = state.post!;
             return Column(
               children: <Widget>[

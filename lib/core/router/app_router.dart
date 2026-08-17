@@ -43,6 +43,11 @@ import 'route_constants.dart';
 class AppRouter {
   AppRouter._();
 
+  static String? _logoutReset({required bool onAuthPage}) {
+    getIt.resetLazySingleton<NotificationsCubit>(); // cancels sub via close()
+    return onAuthPage ? null : Routes.login;
+  }
+
   static final GlobalKey<NavigatorState> rootNavigatorKey =
       GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> _feedNavigatorKey =
@@ -69,7 +74,7 @@ class AppRouter {
           loc == Routes.onboarding;
       return switch (status) {
         AuthStatus.loading => loc == Routes.splash ? null : Routes.splash,
-        AuthStatus.unauthenticated => onAuthPage ? null : Routes.login,
+        AuthStatus.unauthenticated => _logoutReset(onAuthPage: onAuthPage),
         AuthStatus.needsProfile =>
           loc == Routes.onboarding ? null : Routes.onboarding,
         AuthStatus.authenticated => onAuthPage ? Routes.feed : null,

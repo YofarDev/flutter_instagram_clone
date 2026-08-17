@@ -5,7 +5,7 @@ import '../../../../core/models/post.dart';
 
 part 'post_detail_state.freezed.dart';
 
-enum PostDetailStatus { loading, ready }
+enum PostDetailStatus { loading, ready, failed }
 
 @freezed
 sealed class PostDetailState with _$PostDetailState {
