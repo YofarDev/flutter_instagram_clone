@@ -166,5 +166,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "reelsTitle": "Reels",
+  "createReelTitle": "New reel",
+  "reelShare": "Share",
+  "reelCaptionHint": "Write a caption…",
+  "reelPickVideo": "Choose a video",
+  "reelRecordVideo": "Record a video"
 }

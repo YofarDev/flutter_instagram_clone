@@ -17,6 +17,8 @@ import '../../features/notifications/presentation/bloc/notifications_cubit.dart'
 import '../../features/notifications/presentation/bloc/notifications_state.dart';
 import '../../features/notifications/presentation/screens/activity_screen.dart';
 import '../../features/notifications/presentation/widgets/badge_icon.dart';
+import '../../features/reels/presentation/bloc/create_reel_cubit.dart';
+import '../../features/reels/presentation/bloc/reels_cubit.dart';
 import '../models/app_user.dart';
 import '../models/post.dart';
 import '../../features/feed/presentation/bloc/create_post_cubit.dart';
@@ -55,6 +57,8 @@ class AppRouter {
   static final GlobalKey<NavigatorState> _searchNavigatorKey =
       GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> _createNavigatorKey =
+      GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> _reelsNavigatorKey =
       GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> _activityNavigatorKey =
       GlobalKey<NavigatorState>();
@@ -124,6 +128,11 @@ class AppRouter {
                           icon: Icon(Icons.add_box_outlined),
                           selectedIcon: Icon(Icons.add_box),
                           label: 'Create',
+                        ),
+                        const NavigationDestination(
+                          icon: Icon(Icons.movie_outlined),
+                          selectedIcon: Icon(Icons.movie),
+                          label: 'Reels',
                         ),
                         NavigationDestination(
                           icon: BadgeIcon(
@@ -210,6 +219,22 @@ class AppRouter {
                       create: (_) => getIt<CreatePostCubit>(),
                       child: const CreatePostScreen(),
                     ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: _reelsNavigatorKey,
+            routes: <RouteBase>[
+              GoRoute(
+                path: Routes.reels,
+                name: 'Reels',
+                builder: (BuildContext context, GoRouterState state) =>
+                    BlocProvider<ReelsCubit>(
+                  create: (_) => getIt<ReelsCubit>(),
+                  child: const Scaffold(
+                    body: Center(child: Text('Reels placeholder')),
+                  ), // TODO(phase7-task-5): replace with ReelsScreen
+                ),
               ),
             ],
           ),
@@ -332,6 +357,18 @@ class AppRouter {
             child: const EditProfileScreen(),
           );
         },
+      ),
+      GoRoute(
+        path: Routes.createReel,
+        name: 'CreateReel',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (BuildContext context, GoRouterState state) =>
+            BlocProvider<CreateReelCubit>(
+          create: (_) => getIt<CreateReelCubit>(),
+          child: const Scaffold(
+            body: Center(child: Text('Create reel placeholder')),
+          ), // TODO(phase7-task-5): replace with CreateReelScreen
+        ),
       ),
       GoRoute(
         path: Routes.createStory,

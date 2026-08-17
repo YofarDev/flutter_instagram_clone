@@ -31,6 +31,8 @@ import '../../features/profile/presentation/bloc/profile_cubit.dart';
 import '../../features/reels/data/datasources/reels_firebase_datasource.dart';
 import '../../features/reels/data/repositories/reels_repository_impl.dart';
 import '../../features/reels/domain/repositories/reels_repository.dart';
+import '../../features/reels/presentation/bloc/create_reel_cubit.dart';
+import '../../features/reels/presentation/bloc/reels_cubit.dart';
 import '../../features/stories/data/datasources/stories_firebase_datasource.dart';
 import '../../features/stories/data/repositories/stories_repository_impl.dart';
 import '../../features/stories/domain/repositories/stories_repository.dart';
@@ -161,5 +163,11 @@ Future<void> setupServiceLocator() async {
   );
   getIt.registerLazySingleton<IReelsRepository>(
     () => ReelsRepositoryImpl(getIt<IReelsDataSource>()),
+  );
+  getIt.registerFactory<ReelsCubit>(
+    () => ReelsCubit(getIt<IReelsRepository>()),
+  );
+  getIt.registerFactory<CreateReelCubit>(
+    () => CreateReelCubit(getIt<IReelsRepository>()),
   );
 }

@@ -73,5 +73,11 @@
   "notifEmpty": "Aucune activité pour l'instant",
   "notifLikedPost": "{user} a aimé ta publication",
   "notifCommentedPost": "{user} a commenté : {text}",
-  "notifStartedFollowing": "{user} a commencé à te suivre"
+  "notifStartedFollowing": "{user} a commencé à te suivre",
+  "reelsTitle": "Reels",
+  "createReelTitle": "Nouvelle réalisation",
+  "reelShare": "Partager",
+  "reelCaptionHint": "Écris une légende…",
+  "reelPickVideo": "Choisir une vidéo",
+  "reelRecordVideo": "Filmer une vidéo"
 }
