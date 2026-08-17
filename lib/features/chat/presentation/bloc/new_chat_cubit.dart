@@ -64,6 +64,10 @@ class NewChatCubit extends Cubit<NewChatState> {
     );
   }
 
+  void clearError() => emit(state.copyWith(error: null));
+
+  void clearOpened() => emit(state.copyWith(opened: null));
+
   @override
   Future<void> close() {
     _debounce?.cancel();

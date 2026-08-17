@@ -12,6 +12,9 @@ import '../../features/chat/domain/models/conversation.dart';
 import '../../features/chat/presentation/bloc/chat_cubit.dart';
 import '../../features/chat/presentation/bloc/conversations_cubit.dart';
 import '../../features/chat/presentation/bloc/new_chat_cubit.dart';
+import '../../features/chat/presentation/screens/chat_screen.dart';
+import '../../features/chat/presentation/screens/conversations_screen.dart';
+import '../../features/chat/presentation/screens/new_chat_screen.dart';
 import '../../features/explore/presentation/bloc/explore_cubit.dart';
 import '../../features/explore/presentation/bloc/hashtag_cubit.dart';
 import '../../features/explore/presentation/bloc/search_cubit.dart';
@@ -404,12 +407,16 @@ class AppRouter {
         name: 'Conversations',
         parentNavigatorKey: rootNavigatorKey,
         builder: (BuildContext context, GoRouterState state) =>
+            MultiBlocProvider(
+          providers: <BlocProvider<dynamic>>[
+            BlocProvider<AuthCubit>.value(value: getIt<AuthCubit>()),
             BlocProvider<ConversationsCubit>(
-          create: (_) => getIt<ConversationsCubit>(
-            param1: getIt<AuthCubit>().state.user!.uid,
-          ),
-          // TODO(phase8-task-5): replace placeholder with ConversationsScreen
-          child: const Scaffold(body: Center(child: Text('Conversations'))),
+              create: (_) => getIt<ConversationsCubit>(
+                param1: getIt<AuthCubit>().state.user!.uid,
+              ),
+            ),
+          ],
+          child: const ConversationsScreen(),
         ),
       ),
       GoRoute(
@@ -427,10 +434,14 @@ class AppRouter {
             conversation: extra,
             myUid: getIt<AuthCubit>().state.user!.uid,
           );
-          return BlocProvider<ChatCubit>(
-            create: (_) => getIt<ChatCubit>(param1: args),
-            // TODO(phase8-task-5): replace placeholder with ChatScreen
-            child: const Scaffold(body: Center(child: Text('Chat'))),
+          return MultiBlocProvider(
+            providers: <BlocProvider<dynamic>>[
+              BlocProvider<AuthCubit>.value(value: getIt<AuthCubit>()),
+              BlocProvider<ChatCubit>(
+                create: (_) => getIt<ChatCubit>(param1: args),
+              ),
+            ],
+            child: const ChatScreen(),
           );
         },
       ),
@@ -443,8 +454,7 @@ class AppRouter {
           create: (_) => getIt<NewChatCubit>(
             param1: getIt<AuthCubit>().state.user!.uid,
           ),
-          // TODO(phase8-task-5): replace placeholder with NewChatScreen
-          child: const Scaffold(body: Center(child: Text('New chat'))),
+          child: const NewChatScreen(),
         ),
       ),
       GoRoute(
