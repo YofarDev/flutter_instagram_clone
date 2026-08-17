@@ -22,7 +22,7 @@ Built incrementally, one phase at a time:
 - [x] **Phase 2 — Posts & Feed**: image posts (gallery/camera), home feed, like, comment
 - [x] **Phase 3 — Social Graph**: follow/unfollow, profile grid, followers/following lists
 - [x] **Phase 4 — Stories**: 24h stories, story creation, story viewer
-- [ ] **Phase 5 — Explore & Search**: explore grid, user & hashtag search
+- [x] **Phase 5 — Explore & Search**: explore grid, user & hashtag search
 - [ ] **Phase 6 — Notifications**: likes, comments, follows
 - [ ] **Phase 7 — Reels**: short video posts, vertical feed
 - [ ] **Phase 8 — Direct Messages**: 1:1 chat, real-time
