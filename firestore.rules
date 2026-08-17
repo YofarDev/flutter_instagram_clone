@@ -65,6 +65,20 @@ service cloud.firestore {
       }
     }
 
+    match /reels/{reelId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      // strangers may only flip likeCount
+      allow update: if signedIn() && request.resource.data.diff(resource.data)
+          .affectedKeys().hasOnly(['likeCount']);
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+
+      match /likes/{uid} {
+        allow read: if signedIn();
+        allow create, delete: if signedIn() && request.auth.uid == uid;
+      }
+    }
+
     match /notifications/{id} {
       allow read: if signedIn() && resource.data.ownerUid == request.auth.uid;
       // ponytail: client-writable create is spoofable; server-side writes later

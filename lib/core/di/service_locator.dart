@@ -29,6 +29,8 @@ import '../../features/profile/presentation/bloc/edit_profile_cubit.dart';
 import '../../features/profile/presentation/bloc/follow_list_cubit.dart';
 import '../../features/profile/presentation/bloc/profile_cubit.dart';
 import '../../features/reels/data/datasources/reels_firebase_datasource.dart';
+import '../../features/reels/data/repositories/reels_repository_impl.dart';
+import '../../features/reels/domain/repositories/reels_repository.dart';
 import '../../features/stories/data/datasources/stories_firebase_datasource.dart';
 import '../../features/stories/data/repositories/stories_repository_impl.dart';
 import '../../features/stories/domain/repositories/stories_repository.dart';
@@ -156,5 +158,8 @@ Future<void> setupServiceLocator() async {
   // --- Reels feature ---
   getIt.registerLazySingleton<IReelsDataSource>(
     () => const ReelsFirebaseDataSource(),
+  );
+  getIt.registerLazySingleton<IReelsRepository>(
+    () => ReelsRepositoryImpl(getIt<IReelsDataSource>()),
   );
 }
