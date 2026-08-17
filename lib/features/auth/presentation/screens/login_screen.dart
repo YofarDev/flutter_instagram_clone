@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/router/route_constants.dart';
+import '../../../../core/widgets/wordmark.dart';
 import '../bloc/auth_cubit.dart';
 import '../bloc/auth_state.dart';
 import '../widgets/auth_text_field.dart';
@@ -51,11 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      Text(
-                        'Instagram',
-                        style: Theme.of(context).textTheme.headlineLarge,
-                        textAlign: TextAlign.center,
-                      ),
+                      const Wordmark(fontSize: 48),
                       const SizedBox(height: 48),
                       AuthTextField(
                         label: l10n.authEmail,

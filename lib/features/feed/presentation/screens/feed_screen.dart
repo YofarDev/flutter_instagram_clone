@@ -6,6 +6,7 @@ import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/router/route_constants.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../../../core/models/post.dart';
+import '../../../../core/widgets/wordmark.dart';
 import '../../../stories/presentation/widgets/stories_bar.dart';
 import '../bloc/feed_cubit.dart';
 import '../bloc/feed_state.dart';
@@ -20,7 +21,7 @@ class FeedScreen extends StatelessWidget {
     final String? username = context.watch<AuthCubit>().state.user?.username;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Instagram'),
+        title: const Wordmark(),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.send_outlined),

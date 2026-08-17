@@ -1,0 +1,12 @@
+flutter_native_splash:
+  color: "#FFFFFF"
+  color_dark: "#000000"
+  image: scripts/seed/assets/wordmark_dark.png
+  image_dark: scripts/seed/assets/wordmark_light.png
+  android_12:
+    # A12+ circular icon crop clips the wordmark; color-only
+    color: "#FFFFFF"
+    color_dark: "#000000"
+  android: true
+  ios: true
+  web: false

@@ -1,0 +1,11 @@
+flutter_launcher_icons:
+  image_path: scripts/seed/assets/icon_full.png
+  android: true
+  adaptive_icon_background: scripts/seed/assets/icon_bg.png
+  adaptive_icon_foreground: scripts/seed/assets/icon_fg.png
+  ios: true
+  remove_alpha_ios: true
+  web:
+    generate: false
+  windows:
+    generate: false
