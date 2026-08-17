@@ -29,8 +29,9 @@ void main() {
   blocTest<HashtagCubit, HashtagState>(
     'stream emits ready with tagged posts',
     build: () {
-      when(() => repo.watchPostsByTag(tag: 'sunset'))
-          .thenAnswer((_) => Stream<List<Post>>.value(<Post>[post]));
+      when(
+        () => repo.watchPostsByTag(tag: 'sunset'),
+      ).thenAnswer((_) => Stream<List<Post>>.value(<Post>[post]));
       return HashtagCubit(repo, tag: 'sunset');
     },
     verify: (HashtagCubit cubit) {
@@ -47,13 +48,12 @@ void main() {
       final StreamController<List<Post>> controller =
           StreamController<List<Post>>();
       addTearDown(controller.close);
-      when(() => repo.watchPostsByTag(tag: 'sunset'))
-          .thenAnswer((_) => controller.stream);
+      when(
+        () => repo.watchPostsByTag(tag: 'sunset'),
+      ).thenAnswer((_) => controller.stream);
       controller.addError(Exception('db down'));
       return HashtagCubit(repo, tag: 'sunset');
     },
-    expect: () => <HashtagState>[
-      HashtagState(error: 'Failed to load posts'),
-    ],
+    expect: () => <HashtagState>[HashtagState(error: 'Failed to load posts')],
   );
 }

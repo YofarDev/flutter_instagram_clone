@@ -21,9 +21,7 @@ void main() {
     'captionChanged updates caption',
     build: () => CreatePostCubit(repo),
     act: (CreatePostCubit cubit) => cubit.captionChanged('hello'),
-    expect: () => const <CreatePostState>[
-      CreatePostState(caption: 'hello'),
-    ],
+    expect: () => const <CreatePostState>[CreatePostState(caption: 'hello')],
   );
 
   blocTest<CreatePostCubit, CreatePostState>(
@@ -53,14 +51,20 @@ void main() {
       ).thenAnswer((_) async => const Right<Failure, void>(null));
       return CreatePostCubit(repo);
     },
-    seed: () => const CreatePostState(pickedPath: '/tmp/img.jpg', caption: ' hi '),
+    seed: () =>
+        const CreatePostState(pickedPath: '/tmp/img.jpg', caption: ' hi '),
     act: (CreatePostCubit cubit) => cubit.submit(),
     verify: (_) {
-      verify(() => repo.createPost(caption: 'hi', filePath: '/tmp/img.jpg'))
-          .called(1);
+      verify(
+        () => repo.createPost(caption: 'hi', filePath: '/tmp/img.jpg'),
+      ).called(1);
     },
     expect: () => const <CreatePostState>[
-      CreatePostState(pickedPath: '/tmp/img.jpg', caption: ' hi ', submitting: true),
+      CreatePostState(
+        pickedPath: '/tmp/img.jpg',
+        caption: ' hi ',
+        submitting: true,
+      ),
       CreatePostState(
         pickedPath: '/tmp/img.jpg',
         caption: ' hi ',
@@ -79,7 +83,8 @@ void main() {
           filePath: any(named: 'filePath'),
         ),
       ).thenAnswer(
-        (_) async => const Left<Failure, void>(Failure.serverError(message: 'boom')),
+        (_) async =>
+            const Left<Failure, void>(Failure.serverError(message: 'boom')),
       );
       return CreatePostCubit(repo);
     },

@@ -34,8 +34,7 @@ class HashtagScreen extends StatelessWidget {
               return const SizedBox.shrink();
             }
             return GridView.builder(
-              gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
                 childAspectRatio: 1,
                 mainAxisSpacing: 2,
@@ -45,10 +44,8 @@ class HashtagScreen extends StatelessWidget {
               itemBuilder: (BuildContext context, int index) {
                 final Post post = state.posts[index];
                 return InkWell(
-                  onTap: () => context.push(
-                    Routes.postDetailPath(post.id),
-                    extra: post,
-                  ),
+                  onTap: () =>
+                      context.push(Routes.postDetailPath(post.id), extra: post),
                   child: Image.network(
                     post.imageUrl,
                     fit: BoxFit.cover,

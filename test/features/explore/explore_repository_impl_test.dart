@@ -30,64 +30,74 @@ void main() {
   });
 
   group('watchExplorePosts', () {
-    test('passes datasource stream through unchanged and forwards limit',
-        () async {
-      when(() => ds.watchExplorePosts(limit: 12))
-          .thenAnswer((_) => Stream<List<Post>>.value(<Post>[post]));
+    test(
+      'passes datasource stream through unchanged and forwards limit',
+      () async {
+        when(
+          () => ds.watchExplorePosts(limit: 12),
+        ).thenAnswer((_) => Stream<List<Post>>.value(<Post>[post]));
 
-      final List<List<Post>> emitted =
-          await repo.watchExplorePosts(limit: 12).toList();
+        final List<List<Post>> emitted = await repo
+            .watchExplorePosts(limit: 12)
+            .toList();
 
-      expect(emitted, <List<Post>>[
-        <Post>[post],
-      ]);
-      verify(() => ds.watchExplorePosts(limit: 12)).called(1);
-    });
+        expect(emitted, <List<Post>>[
+          <Post>[post],
+        ]);
+        verify(() => ds.watchExplorePosts(limit: 12)).called(1);
+      },
+    );
   });
 
   group('watchPostsByTag', () {
-    test('passes datasource stream through unchanged and forwards tag',
-        () async {
-      when(() => ds.watchPostsByTag(tag: 'sunset'))
-          .thenAnswer((_) => Stream<List<Post>>.value(<Post>[post]));
+    test(
+      'passes datasource stream through unchanged and forwards tag',
+      () async {
+        when(
+          () => ds.watchPostsByTag(tag: 'sunset'),
+        ).thenAnswer((_) => Stream<List<Post>>.value(<Post>[post]));
 
-      final List<List<Post>> emitted =
-          await repo.watchPostsByTag(tag: 'sunset').toList();
+        final List<List<Post>> emitted = await repo
+            .watchPostsByTag(tag: 'sunset')
+            .toList();
 
-      expect(emitted, <List<Post>>[
-        <Post>[post],
-      ]);
-      verify(() => ds.watchPostsByTag(tag: 'sunset')).called(1);
-    });
+        expect(emitted, <List<Post>>[
+          <Post>[post],
+        ]);
+        verify(() => ds.watchPostsByTag(tag: 'sunset')).called(1);
+      },
+    );
   });
 
   group('searchUsers', () {
-    test('returns Right with users from datasource and forwards query',
-        () async {
-      when(() => ds.searchUsers(query: 'al'))
-          .thenAnswer((_) async => <AppUser>[user]);
+    test(
+      'returns Right with users from datasource and forwards query',
+      () async {
+        when(
+          () => ds.searchUsers(query: 'al'),
+        ).thenAnswer((_) async => <AppUser>[user]);
 
-      final Either<Failure, List<AppUser>> result =
-          await repo.searchUsers(query: 'al');
+        final Either<Failure, List<AppUser>> result = await repo.searchUsers(
+          query: 'al',
+        );
 
-      final List<AppUser>? users = result.fold(
-        (_) => null,
-        (List<AppUser> u) => u,
-      );
-      expect(users, <AppUser>[user]);
-      verify(() => ds.searchUsers(query: 'al')).called(1);
-    });
+        final List<AppUser>? users = result.fold(
+          (_) => null,
+          (List<AppUser> u) => u,
+        );
+        expect(users, <AppUser>[user]);
+        verify(() => ds.searchUsers(query: 'al')).called(1);
+      },
+    );
 
     test('returns Left(Failure.serverError) when datasource throws', () async {
       when(() => ds.searchUsers(query: 'al')).thenThrow(Exception('boom'));
 
-      final Either<Failure, List<AppUser>> result =
-          await repo.searchUsers(query: 'al');
-
-      final Failure? failure = result.fold(
-        (Failure f) => f,
-        (_) => null,
+      final Either<Failure, List<AppUser>> result = await repo.searchUsers(
+        query: 'al',
       );
+
+      final Failure? failure = result.fold((Failure f) => f, (_) => null);
       expect(failure, isNotNull);
       expect(failure!.message, contains('boom'));
     });

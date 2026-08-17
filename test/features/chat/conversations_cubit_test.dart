@@ -51,8 +51,9 @@ void main() {
       final StreamController<List<Conversation>> controller =
           StreamController<List<Conversation>>();
       addTearDown(controller.close);
-      when(() => repo.watchConversations(myUid: 'me'))
-          .thenAnswer((_) => controller.stream);
+      when(
+        () => repo.watchConversations(myUid: 'me'),
+      ).thenAnswer((_) => controller.stream);
       controller.addError(Exception('db down'));
       return ConversationsCubit(repo, myUid: 'me');
     },

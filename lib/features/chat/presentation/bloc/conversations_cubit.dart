@@ -8,14 +8,18 @@ import 'conversations_state.dart';
 
 class ConversationsCubit extends Cubit<ConversationsState> {
   ConversationsCubit(this._repository, {required String myUid})
-      : super(const ConversationsState()) {
-    _sub = _repository.watchConversations(myUid: myUid).listen(
+    : super(const ConversationsState()) {
+    _sub = _repository
+        .watchConversations(myUid: myUid)
+        .listen(
           (List<Conversation> conversations) {
             if (isClosed) return;
-            emit(state.copyWith(
-              status: ConversationsStatus.ready,
-              conversations: conversations,
-            ));
+            emit(
+              state.copyWith(
+                status: ConversationsStatus.ready,
+                conversations: conversations,
+              ),
+            );
           },
           onError: (Object e) {
             if (isClosed) return;

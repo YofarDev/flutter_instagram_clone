@@ -17,13 +17,10 @@ class ProfileArgs {
 }
 
 class ProfileCubit extends Cubit<ProfileState> {
-  ProfileCubit(
-    this._repository, {
-    required String uid,
-    required bool isMe,
-  }  )  : _uid = uid, // ignore: prefer_initializing_formals
-        _isMe = isMe, // ignore: prefer_initializing_formals
-        super(ProfileState(isMe: isMe)) {
+  ProfileCubit(this._repository, {required String uid, required bool isMe})
+    : _uid = uid, // ignore: prefer_initializing_formals
+      _isMe = isMe, // ignore: prefer_initializing_formals
+      super(ProfileState(isMe: isMe)) {
     _subscribe();
     if (!_isMe) {
       _subFollow = _repository
@@ -46,7 +43,9 @@ class ProfileCubit extends Cubit<ProfileState> {
   void _subscribe() {
     _sub?.cancel();
     final int gen = ++_gen;
-    _sub = _repository.watchUserPosts(uid: _uid, limit: _limit).listen(
+    _sub = _repository
+        .watchUserPosts(uid: _uid, limit: _limit)
+        .listen(
           (List<Post> posts) => _onPosts(posts, gen),
           onError: (Object e) {
             if (isClosed) return;
@@ -57,11 +56,13 @@ class ProfileCubit extends Cubit<ProfileState> {
 
   void _onPosts(List<Post> posts, int gen) {
     if (isClosed || gen != _gen) return;
-    emit(state.copyWith(
-      status: ProfileStatus.ready,
-      posts: posts,
-      hasMore: posts.length >= _limit,
-    ));
+    emit(
+      state.copyWith(
+        status: ProfileStatus.ready,
+        posts: posts,
+        hasMore: posts.length >= _limit,
+      ),
+    );
   }
 
   void _onFollowing(bool following) {
@@ -70,15 +71,15 @@ class ProfileCubit extends Cubit<ProfileState> {
   }
 
   Future<void> _loadProfile() async {
-    final Either<Failure, UserProfile> either =
-        await _repository.getProfile(uid: _uid);
+    final Either<Failure, UserProfile> either = await _repository.getProfile(
+      uid: _uid,
+    );
     if (isClosed) return;
     either.fold(
       (Failure f) =>
           emit(state.copyWith(status: ProfileStatus.ready, error: f.message)),
-      (UserProfile profile) => emit(
-        state.copyWith(status: ProfileStatus.ready, profile: profile),
-      ),
+      (UserProfile profile) =>
+          emit(state.copyWith(status: ProfileStatus.ready, profile: profile)),
     );
   }
 
@@ -86,28 +87,31 @@ class ProfileCubit extends Cubit<ProfileState> {
     if (_isMe) return;
     final bool was = state.isFollowing;
     final UserProfile? profile = state.profile;
-    emit(state.copyWith(
-      isFollowing: !was,
-      profile: profile?.copyWith(
-        followerCount: profile.followerCount + (was ? -1 : 1),
+    emit(
+      state.copyWith(
+        isFollowing: !was,
+        profile: profile?.copyWith(
+          followerCount: profile.followerCount + (was ? -1 : 1),
+        ),
       ),
-    ));
-    final Either<Failure, void> either =
-        await _repository.toggleFollow(uid: _uid, currentlyFollowing: was);
+    );
+    final Either<Failure, void> either = await _repository.toggleFollow(
+      uid: _uid,
+      currentlyFollowing: was,
+    );
     if (isClosed) return;
-    either.fold(
-      (Failure f) {
-        final UserProfile? current = state.profile;
-        emit(state.copyWith(
+    either.fold((Failure f) {
+      final UserProfile? current = state.profile;
+      emit(
+        state.copyWith(
           isFollowing: was,
           profile: current?.copyWith(
             followerCount: current.followerCount + (was ? 1 : -1),
           ),
           error: f.message,
-        ));
-      },
-      (_) {},
-    );
+        ),
+      );
+    }, (_) {});
   }
 
   void loadMore() {

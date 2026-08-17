@@ -46,10 +46,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       return;
     }
     context.read<AuthCubit>().completeProfile(
-          username: _username.text.trim(),
-          bio: _bio.text.trim().isEmpty ? null : _bio.text.trim(),
-          avatarPath: _avatarPath,
-        );
+      username: _username.text.trim(),
+      bio: _bio.text.trim().isEmpty ? null : _bio.text.trim(),
+      avatarPath: _avatarPath,
+    );
   }
 
   @override
@@ -112,8 +112,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                       const SizedBox(height: 24),
                       FilledButton(
-                        onPressed:
-                            state.submitting ? null : _submit,
+                        onPressed: state.submitting ? null : _submit,
                         child: Text(l10n.onboardingDone),
                       ),
                     ],

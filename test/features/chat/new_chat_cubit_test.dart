@@ -30,9 +30,9 @@ void main() {
   blocTest<NewChatCubit, NewChatState>(
     'debounces rapid keystrokes into a single search',
     build: () {
-      when(() => exploreRepo.searchUsers(query: 'al')).thenAnswer(
-        (_) async => Right<Failure, List<AppUser>>(<AppUser>[user]),
-      );
+      when(
+        () => exploreRepo.searchUsers(query: 'al'),
+      ).thenAnswer((_) async => Right<Failure, List<AppUser>>(<AppUser>[user]));
       return NewChatCubit(exploreRepo, chatRepo, myUid: 'me');
     },
     act: (NewChatCubit cubit) {
@@ -76,15 +76,14 @@ void main() {
     build: () {
       final List<Either<Failure, Conversation>> answers =
           <Either<Failure, Conversation>>[
-        Right<Failure, Conversation>(convo),
-        const Left<Failure, Conversation>(
-          Failure.serverError(message: 'boom'),
-        ),
-      ];
-      when(() => chatRepo.getOrCreateConversation(
-            myUid: 'me',
-            otherUid: 'u1',
-          )).thenAnswer((_) async => answers.removeAt(0));
+            Right<Failure, Conversation>(convo),
+            const Left<Failure, Conversation>(
+              Failure.serverError(message: 'boom'),
+            ),
+          ];
+      when(
+        () => chatRepo.getOrCreateConversation(myUid: 'me', otherUid: 'u1'),
+      ).thenAnswer((_) async => answers.removeAt(0));
       return NewChatCubit(exploreRepo, chatRepo, myUid: 'me');
     },
     act: (NewChatCubit cubit) async {

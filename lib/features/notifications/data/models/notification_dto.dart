@@ -40,29 +40,29 @@ class NotificationDto {
   final bool read;
 
   Map<String, dynamic> toMap() => <String, dynamic>{
-        'ownerUid': ownerUid,
-        'type': type.name,
-        'actorId': actorId,
-        'actorUsername': actorUsername,
-        'actorAvatarUrl': actorAvatarUrl,
-        'postId': postId,
-        'postImageUrl': postImageUrl,
-        'commentText': commentText,
-        'createdAt': createdAtMillis,
-        'read': read,
-      };
+    'ownerUid': ownerUid,
+    'type': type.name,
+    'actorId': actorId,
+    'actorUsername': actorUsername,
+    'actorAvatarUrl': actorAvatarUrl,
+    'postId': postId,
+    'postImageUrl': postImageUrl,
+    'commentText': commentText,
+    'createdAt': createdAtMillis,
+    'read': read,
+  };
 
   NotificationItem toDomain(String id) => NotificationItem(
-        id: id,
-        type: type,
-        ownerUid: ownerUid,
-        actorId: actorId,
-        actorUsername: actorUsername,
-        actorAvatarUrl: actorAvatarUrl,
-        postId: postId,
-        postImageUrl: postImageUrl,
-        commentText: commentText,
-        createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMillis),
-        read: read,
-      );
+    id: id,
+    type: type,
+    ownerUid: ownerUid,
+    actorId: actorId,
+    actorUsername: actorUsername,
+    actorAvatarUrl: actorAvatarUrl,
+    postId: postId,
+    postImageUrl: postImageUrl,
+    commentText: commentText,
+    createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMillis),
+    read: read,
+  );
 }

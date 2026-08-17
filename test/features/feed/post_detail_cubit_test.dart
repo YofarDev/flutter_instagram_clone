@@ -40,11 +40,13 @@ void main() {
 
   // ponytail: exact-arg stubs, no registerFallbackValue needed
   void stubQuietCtor() {
-    when(() => repo.watchComments(postId: 'p1'))
-        .thenAnswer((_) => const Stream<List<Comment>>.empty());
+    when(
+      () => repo.watchComments(postId: 'p1'),
+    ).thenAnswer((_) => const Stream<List<Comment>>.empty());
     when(() => repo.fetchLikedPostIds(postIds: <String>['p1'])).thenAnswer(
-      (_) async =>
-          const Left<Failure, Set<String>>(Failure.serverError(message: 'offline')),
+      (_) async => const Left<Failure, Set<String>>(
+        Failure.serverError(message: 'offline'),
+      ),
     );
   }
 
@@ -66,11 +68,7 @@ void main() {
     },
     wait: const Duration(milliseconds: 200),
     expect: () => <PostDetailState>[
-      PostDetailState(
-        post: p1,
-        status: PostDetailStatus.ready,
-        isLiked: true,
-      ),
+      PostDetailState(post: p1, status: PostDetailStatus.ready, isLiked: true),
       PostDetailState(
         post: p1,
         status: PostDetailStatus.ready,
@@ -84,8 +82,9 @@ void main() {
     'comments stream error sets error message',
     build: () {
       stubQuietCtor();
-      when(() => repo.watchComments(postId: 'p1'))
-          .thenAnswer((_) => Stream<List<Comment>>.error(Exception('db down')));
+      when(
+        () => repo.watchComments(postId: 'p1'),
+      ).thenAnswer((_) => Stream<List<Comment>>.error(Exception('db down')));
       return PostDetailCubit(repo, post: p1);
     },
     expect: () => <PostDetailState>[
@@ -112,10 +111,12 @@ void main() {
     act: (PostDetailCubit cubit) => cubit.toggleLike(),
     verify: (_) {
       // repo receives the optimistically flipped post (likeCount 6)
-      verify(() => repo.toggleLike(
-        post: p1.copyWith(likeCount: 6),
-        currentlyLiked: false,
-      )).called(1);
+      verify(
+        () => repo.toggleLike(
+          post: p1.copyWith(likeCount: 6),
+          currentlyLiked: false,
+        ),
+      ).called(1);
     },
     expect: () => <PostDetailState>[
       PostDetailState(
@@ -148,11 +149,7 @@ void main() {
         status: PostDetailStatus.ready,
         isLiked: true,
       ),
-      PostDetailState(
-        post: p1,
-        status: PostDetailStatus.ready,
-        error: 'boom',
-      ),
+      PostDetailState(post: p1, status: PostDetailStatus.ready, error: 'boom'),
     ],
   );
 
@@ -179,16 +176,16 @@ void main() {
     'addComment success sends trimmed text',
     build: () {
       stubQuietCtor();
-      when(() => repo.addComment(
-              postId: 'p1', postOwnerId: 'u1', text: 'hey'))
-          .thenAnswer((_) async => const Right<Failure, void>(null));
+      when(
+        () => repo.addComment(postId: 'p1', postOwnerId: 'u1', text: 'hey'),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
       return PostDetailCubit(repo, post: p1);
     },
     act: (PostDetailCubit cubit) => cubit.addComment(' hey '),
     verify: (_) {
-      verify(() => repo.addComment(
-              postId: 'p1', postOwnerId: 'u1', text: 'hey'))
-          .called(1);
+      verify(
+        () => repo.addComment(postId: 'p1', postOwnerId: 'u1', text: 'hey'),
+      ).called(1);
     },
     expect: () => <PostDetailState>[
       PostDetailState(post: p1, status: PostDetailStatus.ready, sending: true),
@@ -203,9 +200,9 @@ void main() {
     'addComment failure sets error',
     build: () {
       stubQuietCtor();
-      when(() => repo.addComment(
-              postId: 'p1', postOwnerId: 'u1', text: 'hey'))
-          .thenAnswer(
+      when(
+        () => repo.addComment(postId: 'p1', postOwnerId: 'u1', text: 'hey'),
+      ).thenAnswer(
         (_) async =>
             const Left<Failure, void>(Failure.serverError(message: 'boom')),
       );
@@ -214,24 +211,23 @@ void main() {
     act: (PostDetailCubit cubit) => cubit.addComment('hey'),
     expect: () => <PostDetailState>[
       PostDetailState(post: p1, status: PostDetailStatus.ready, sending: true),
-      PostDetailState(
-        post: p1,
-        status: PostDetailStatus.ready,
-        error: 'boom',
-      ),
+      PostDetailState(post: p1, status: PostDetailStatus.ready, error: 'boom'),
     ],
   );
 
   blocTest<PostDetailCubit, PostDetailState>(
     'postId path fetches post then goes ready',
     build: () {
-      when(() => repo.getPostById(postId: 'p1'))
-          .thenAnswer((_) async => Right<Failure, Post>(p1));
-      when(() => repo.watchComments(postId: 'p1'))
-          .thenAnswer((_) => const Stream<List<Comment>>.empty());
+      when(
+        () => repo.getPostById(postId: 'p1'),
+      ).thenAnswer((_) async => Right<Failure, Post>(p1));
+      when(
+        () => repo.watchComments(postId: 'p1'),
+      ).thenAnswer((_) => const Stream<List<Comment>>.empty());
       when(() => repo.fetchLikedPostIds(postIds: <String>['p1'])).thenAnswer(
-        (_) async =>
-            const Left<Failure, Set<String>>(Failure.serverError(message: 'offline')),
+        (_) async => const Left<Failure, Set<String>>(
+          Failure.serverError(message: 'offline'),
+        ),
       );
       return PostDetailCubit(repo, postId: 'p1');
     },

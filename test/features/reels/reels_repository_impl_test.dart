@@ -28,10 +28,13 @@ void main() {
 
   group('watchReels', () {
     test('passes datasource stream through unchanged', () async {
-      when(() => ds.watchReels(limit: 10))
-          .thenAnswer((_) => Stream<List<Reel>>.value(<Reel>[reel]));
+      when(
+        () => ds.watchReels(limit: 10),
+      ).thenAnswer((_) => Stream<List<Reel>>.value(<Reel>[reel]));
 
-      final List<List<Reel>> emitted = await repo.watchReels(limit: 10).toList();
+      final List<List<Reel>> emitted = await repo
+          .watchReels(limit: 10)
+          .toList();
 
       expect(emitted, <List<Reel>>[
         <Reel>[reel],
@@ -42,26 +45,29 @@ void main() {
 
   group('createReel', () {
     test('returns Right(null) on success', () async {
-      when(() => ds.createReel(caption: 'hi', filePath: '/tmp/v.mp4'))
-          .thenAnswer((_) async {});
+      when(
+        () => ds.createReel(caption: 'hi', filePath: '/tmp/v.mp4'),
+      ).thenAnswer((_) async {});
 
-      final Either<Failure, void> result =
-          await repo.createReel(caption: 'hi', filePath: '/tmp/v.mp4');
+      final Either<Failure, void> result = await repo.createReel(
+        caption: 'hi',
+        filePath: '/tmp/v.mp4',
+      );
 
       expect(result, const Right<Failure, void>(null));
     });
 
     test('returns Left(Failure.serverError) when datasource throws', () async {
-      when(() => ds.createReel(caption: 'hi', filePath: '/tmp/v.mp4'))
-          .thenThrow(Exception('upload failed'));
+      when(
+        () => ds.createReel(caption: 'hi', filePath: '/tmp/v.mp4'),
+      ).thenThrow(Exception('upload failed'));
 
-      final Either<Failure, void> result =
-          await repo.createReel(caption: 'hi', filePath: '/tmp/v.mp4');
-
-      final Failure? failure = result.fold(
-        (Failure f) => f,
-        (_) => null,
+      final Either<Failure, void> result = await repo.createReel(
+        caption: 'hi',
+        filePath: '/tmp/v.mp4',
       );
+
+      final Failure? failure = result.fold((Failure f) => f, (_) => null);
       expect(failure, isNotNull);
       expect(failure!.message, contains('upload failed'));
     });
@@ -69,25 +75,26 @@ void main() {
 
   group('fetchLikedReelIds', () {
     test('returns Right with the liked ids from datasource', () async {
-      when(() => ds.fetchLikedReelIds(reelIds: <String>['r1', 'r2']))
-          .thenAnswer((_) async => <String>{'r1'});
+      when(
+        () => ds.fetchLikedReelIds(reelIds: <String>['r1', 'r2']),
+      ).thenAnswer((_) async => <String>{'r1'});
 
-      final Either<Failure, Set<String>> result =
-          await repo.fetchLikedReelIds(reelIds: <String>['r1', 'r2']);
-
-      final Set<String>? ids = result.fold(
-        (_) => null,
-        (Set<String> s) => s,
+      final Either<Failure, Set<String>> result = await repo.fetchLikedReelIds(
+        reelIds: <String>['r1', 'r2'],
       );
+
+      final Set<String>? ids = result.fold((_) => null, (Set<String> s) => s);
       expect(ids, <String>{'r1'});
     });
 
     test('returns Left when datasource throws', () async {
-      when(() => ds.fetchLikedReelIds(reelIds: <String>['r1']))
-          .thenThrow(Exception('reads failed'));
+      when(
+        () => ds.fetchLikedReelIds(reelIds: <String>['r1']),
+      ).thenThrow(Exception('reads failed'));
 
-      final Either<Failure, Set<String>> result =
-          await repo.fetchLikedReelIds(reelIds: <String>['r1']);
+      final Either<Failure, Set<String>> result = await repo.fetchLikedReelIds(
+        reelIds: <String>['r1'],
+      );
 
       expect(result.isLeft(), true);
     });
@@ -95,23 +102,30 @@ void main() {
 
   group('toggleReelLike', () {
     test('returns Right(null) and forwards params on success', () async {
-      when(() => ds.toggleReelLike(reelId: 'r1', currentlyLiked: false))
-          .thenAnswer((_) async {});
+      when(
+        () => ds.toggleReelLike(reelId: 'r1', currentlyLiked: false),
+      ).thenAnswer((_) async {});
 
-      final Either<Failure, void> result =
-          await repo.toggleReelLike(reelId: 'r1', currentlyLiked: false);
+      final Either<Failure, void> result = await repo.toggleReelLike(
+        reelId: 'r1',
+        currentlyLiked: false,
+      );
 
       expect(result, const Right<Failure, void>(null));
-      verify(() => ds.toggleReelLike(reelId: 'r1', currentlyLiked: false))
-          .called(1);
+      verify(
+        () => ds.toggleReelLike(reelId: 'r1', currentlyLiked: false),
+      ).called(1);
     });
 
     test('returns Left when datasource throws', () async {
-      when(() => ds.toggleReelLike(reelId: 'r1', currentlyLiked: true))
-          .thenThrow(Exception('tx failed'));
+      when(
+        () => ds.toggleReelLike(reelId: 'r1', currentlyLiked: true),
+      ).thenThrow(Exception('tx failed'));
 
-      final Either<Failure, void> result =
-          await repo.toggleReelLike(reelId: 'r1', currentlyLiked: true);
+      final Either<Failure, void> result = await repo.toggleReelLike(
+        reelId: 'r1',
+        currentlyLiked: true,
+      );
 
       expect(result.isLeft(), true);
     });

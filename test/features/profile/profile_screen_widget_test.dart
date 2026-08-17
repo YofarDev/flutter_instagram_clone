@@ -17,23 +17,23 @@ import 'package:flutter_instagram_clone/features/profile/presentation/screens/pr
 class MockProfileRepository extends Mock implements IProfileRepository {}
 
 UserProfile _profile() => UserProfile(
-      uid: 'u1',
-      email: 'yo@x.dev',
-      username: 'yo',
-      followerCount: 3,
-      followingCount: 2,
-      postCount: 5,
-    );
+  uid: 'u1',
+  email: 'yo@x.dev',
+  username: 'yo',
+  followerCount: 3,
+  followingCount: 2,
+  postCount: 5,
+);
 
 Post _post() => Post(
-      id: 'p1',
-      authorId: 'u1',
-      authorUsername: 'yo',
-      imageUrl: 'http://x',
-      caption: 'hello',
-      createdAt: DateTime(2026, 1, 1),
-      likeCount: 3,
-    );
+  id: 'p1',
+  authorId: 'u1',
+  authorUsername: 'yo',
+  imageUrl: 'http://x',
+  caption: 'hello',
+  createdAt: DateTime(2026, 1, 1),
+  likeCount: 3,
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -44,18 +44,24 @@ void main() {
   setUp(() {
     repo = MockProfileRepository();
     toggleGate = Completer<Either<Failure, void>>();
-    when(() => repo.getProfile(uid: any(named: 'uid')))
-        .thenAnswer((_) async => Right<Failure, UserProfile>(_profile()));
-    when(() => repo.watchUserPosts(
-          uid: any(named: 'uid'),
-          limit: any(named: 'limit'),
-        )).thenAnswer((_) => Stream<List<Post>>.value(<Post>[_post()]));
-    when(() => repo.watchIsFollowing(uid: any(named: 'uid')))
-        .thenAnswer((_) => Stream<bool>.value(false));
-    when(() => repo.toggleFollow(
-          uid: any(named: 'uid'),
-          currentlyFollowing: any(named: 'currentlyFollowing'),
-        )).thenAnswer((_) => toggleGate.future);
+    when(
+      () => repo.getProfile(uid: any(named: 'uid')),
+    ).thenAnswer((_) async => Right<Failure, UserProfile>(_profile()));
+    when(
+      () => repo.watchUserPosts(
+        uid: any(named: 'uid'),
+        limit: any(named: 'limit'),
+      ),
+    ).thenAnswer((_) => Stream<List<Post>>.value(<Post>[_post()]));
+    when(
+      () => repo.watchIsFollowing(uid: any(named: 'uid')),
+    ).thenAnswer((_) => Stream<bool>.value(false));
+    when(
+      () => repo.toggleFollow(
+        uid: any(named: 'uid'),
+        currentlyFollowing: any(named: 'currentlyFollowing'),
+      ),
+    ).thenAnswer((_) => toggleGate.future);
   });
 
   Widget subject() {
@@ -75,8 +81,9 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('renders username, counts, follow button and one grid image',
-      (WidgetTester tester) async {
+  testWidgets('renders username, counts, follow button and one grid image', (
+    WidgetTester tester,
+  ) async {
     await pumpSubject(tester);
 
     // username in app bar + bold body text
@@ -88,15 +95,17 @@ void main() {
     expect(find.byType(Image), findsOneWidget);
   });
 
-  testWidgets('follow tap flips button optimistically before repo resolves',
-      (WidgetTester tester) async {
+  testWidgets('follow tap flips button optimistically before repo resolves', (
+    WidgetTester tester,
+  ) async {
     await pumpSubject(tester);
 
     await tester.tap(find.text('Follow'));
     await tester.pump();
 
     expect(find.text('Unfollow'), findsOneWidget);
-    verify(() => repo.toggleFollow(uid: 'u1', currentlyFollowing: false))
-        .called(1);
+    verify(
+      () => repo.toggleFollow(uid: 'u1', currentlyFollowing: false),
+    ).called(1);
   });
 }

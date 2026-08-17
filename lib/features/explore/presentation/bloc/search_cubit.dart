@@ -29,8 +29,9 @@ class SearchCubit extends Cubit<SearchState> {
       return;
     }
     emit(state.copyWith(searching: true));
-    final Either<Failure, List<AppUser>> either =
-        await _repository.searchUsers(query: q);
+    final Either<Failure, List<AppUser>> either = await _repository.searchUsers(
+      query: q,
+    );
     if (isClosed || q != state.query.trim().toLowerCase()) return;
     either.fold(
       (Failure f) => emit(state.copyWith(searching: false, error: f.message)),

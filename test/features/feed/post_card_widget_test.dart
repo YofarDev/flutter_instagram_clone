@@ -19,15 +19,15 @@ class MockFeedRepository extends Mock implements IFeedRepository {}
 class MockProfileRepository extends Mock implements IProfileRepository {}
 
 Post _post() => Post(
-      id: 'p1',
-      authorId: 'u1',
-      authorUsername: 'alice',
-      imageUrl: 'http://x',
-      caption: 'hello world',
-      createdAt: DateTime(2026, 1, 1),
-      likeCount: 3,
-      commentCount: 2,
-    );
+  id: 'p1',
+  authorId: 'u1',
+  authorUsername: 'alice',
+  imageUrl: 'http://x',
+  caption: 'hello world',
+  createdAt: DateTime(2026, 1, 1),
+  likeCount: 3,
+  commentCount: 2,
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -42,17 +42,21 @@ void main() {
     repo = MockFeedRepository();
     profileRepo = MockProfileRepository();
     toggleGate = Completer<Either<Failure, void>>();
-    when(() => repo.watchFeed(limit: any(named: 'limit')))
-        .thenAnswer((_) => const Stream<List<Post>>.empty());
-    when(() => profileRepo.watchFollowingIds(uid: any(named: 'uid')))
-        .thenAnswer((_) => const Stream<List<String>>.empty());
-    when(() => repo.fetchLikedPostIds(postIds: any(named: 'postIds')))
-        .thenAnswer(
-            (_) async => const Right<Failure, Set<String>>(<String>{}));
-    when(() => repo.toggleLike(
-          post: any(named: 'post'),
-          currentlyLiked: any(named: 'currentlyLiked'),
-        )).thenAnswer((_) => toggleGate.future);
+    when(
+      () => repo.watchFeed(limit: any(named: 'limit')),
+    ).thenAnswer((_) => const Stream<List<Post>>.empty());
+    when(
+      () => profileRepo.watchFollowingIds(uid: any(named: 'uid')),
+    ).thenAnswer((_) => const Stream<List<String>>.empty());
+    when(
+      () => repo.fetchLikedPostIds(postIds: any(named: 'postIds')),
+    ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
+    when(
+      () => repo.toggleLike(
+        post: any(named: 'post'),
+        currentlyLiked: any(named: 'currentlyLiked'),
+      ),
+    ).thenAnswer((_) => toggleGate.future);
   });
 
   Widget subject() {
@@ -85,8 +89,9 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('like tap flips icon optimistically before repo resolves',
-      (WidgetTester tester) async {
+  testWidgets('like tap flips icon optimistically before repo resolves', (
+    WidgetTester tester,
+  ) async {
     await pumpSubject(tester);
 
     expect(find.byIcon(Icons.favorite_border), findsOneWidget);
@@ -99,14 +104,14 @@ void main() {
     expect(find.byIcon(Icons.favorite_border), findsNothing);
     expect(tester.widget<Icon>(find.byIcon(Icons.favorite)).color, Colors.red);
 
-    verify(() => repo.toggleLike(
-          post: any(named: 'post'),
-          currentlyLiked: false,
-        )).called(1);
+    verify(
+      () => repo.toggleLike(post: any(named: 'post'), currentlyLiked: false),
+    ).called(1);
   });
 
-  testWidgets('renders username, caption and counts from post',
-      (WidgetTester tester) async {
+  testWidgets('renders username, caption and counts from post', (
+    WidgetTester tester,
+  ) async {
     await pumpSubject(tester);
 
     expect(find.text('alice'), findsOneWidget);

@@ -24,11 +24,16 @@ class ExploreFirebaseDataSource implements IExploreDataSource {
       .orderBy('createdAt', descending: true)
       .limit(limit)
       .snapshots()
-      .map((QuerySnapshot<Object?> snap) => snap.docs
-          .map((QueryDocumentSnapshot<Object?> doc) =>
-              PostDto.fromMap(doc.id, doc.data() as Map<String, dynamic>)
-                  .toDomain(doc.id))
-          .toList());
+      .map(
+        (QuerySnapshot<Object?> snap) => snap.docs
+            .map(
+              (QueryDocumentSnapshot<Object?> doc) => PostDto.fromMap(
+                doc.id,
+                doc.data() as Map<String, dynamic>,
+              ).toDomain(doc.id),
+            )
+            .toList(),
+      );
 
   @override
   Future<List<AppUser>> searchUsers({required String query}) async {
@@ -57,9 +62,14 @@ class ExploreFirebaseDataSource implements IExploreDataSource {
       .where('tags', arrayContains: tag)
       .orderBy('createdAt', descending: true)
       .snapshots()
-      .map((QuerySnapshot<Object?> snap) => snap.docs
-          .map((QueryDocumentSnapshot<Object?> doc) =>
-              PostDto.fromMap(doc.id, doc.data() as Map<String, dynamic>)
-                  .toDomain(doc.id))
-          .toList());
+      .map(
+        (QuerySnapshot<Object?> snap) => snap.docs
+            .map(
+              (QueryDocumentSnapshot<Object?> doc) => PostDto.fromMap(
+                doc.id,
+                doc.data() as Map<String, dynamic>,
+              ).toDomain(doc.id),
+            )
+            .toList(),
+      );
 }

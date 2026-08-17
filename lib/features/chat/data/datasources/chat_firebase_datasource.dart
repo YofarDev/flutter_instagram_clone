@@ -39,10 +39,17 @@ class ChatFirebaseDataSource implements IChatDataSource {
         .orderBy('updatedAt', descending: true)
         .limit(30)
         .snapshots()
-        .map((QuerySnapshot<Object?> snap) => snap.docs
-            .map((QueryDocumentSnapshot<Object?> doc) => ConversationDto
-                .fromMap(doc.id, doc.data() as Map<String, dynamic>, myUid))
-            .toList());
+        .map(
+          (QuerySnapshot<Object?> snap) => snap.docs
+              .map(
+                (QueryDocumentSnapshot<Object?> doc) => ConversationDto.fromMap(
+                  doc.id,
+                  doc.data() as Map<String, dynamic>,
+                  myUid,
+                ),
+              )
+              .toList(),
+        );
   }
 
   @override
@@ -56,13 +63,17 @@ class ChatFirebaseDataSource implements IChatDataSource {
         .orderBy('createdAt', descending: true)
         .limit(50)
         .snapshots()
-        .map((QuerySnapshot<Object?> snap) => snap.docs
-            .map((QueryDocumentSnapshot<Object?> doc) =>
-                ChatMessageDto.fromMap(doc.data() as Map<String, dynamic>)
-                    .toDomain(doc.id, conversationId))
-            .toList()
-            .reversed
-            .toList());
+        .map(
+          (QuerySnapshot<Object?> snap) => snap.docs
+              .map(
+                (QueryDocumentSnapshot<Object?> doc) => ChatMessageDto.fromMap(
+                  doc.data() as Map<String, dynamic>,
+                ).toDomain(doc.id, conversationId),
+              )
+              .toList()
+              .reversed
+              .toList(),
+        );
   }
 
   @override
@@ -70,8 +81,9 @@ class ChatFirebaseDataSource implements IChatDataSource {
     required String myUid,
     required String otherUid,
   }) async {
-    final DocumentReference<Object?> ref =
-        _db.collection('conversations').doc(conversationIdFor(myUid, otherUid));
+    final DocumentReference<Object?> ref = _db
+        .collection('conversations')
+        .doc(conversationIdFor(myUid, otherUid));
     final DocumentSnapshot<Object?> snap = await ref.get();
     if (snap.exists) {
       return ConversationDto.fromMap(
@@ -80,12 +92,11 @@ class ChatFirebaseDataSource implements IChatDataSource {
         myUid,
       );
     }
-    final List<DocumentSnapshot<Object?>> profiles = await Future.wait(
-      <Future<DocumentSnapshot<Object?>>>[
-        _db.collection('users').doc(myUid).get(),
-        _db.collection('users').doc(otherUid).get(),
-      ],
-    );
+    final List<DocumentSnapshot<Object?>> profiles =
+        await Future.wait(<Future<DocumentSnapshot<Object?>>>[
+          _db.collection('users').doc(myUid).get(),
+          _db.collection('users').doc(otherUid).get(),
+        ]);
     Map<String, dynamic> metaFor(DocumentSnapshot<Object?> profile) {
       final Map<String, dynamic> data =
           profile.data() as Map<String, dynamic>? ?? <String, dynamic>{};

@@ -54,19 +54,20 @@ class ConversationsScreen extends StatelessWidget {
               itemBuilder: (BuildContext context, int index) {
                 final Conversation conversation = state.conversations[index];
                 final String username = conversation.otherUser.username ?? '';
-                final String prefix =
-                    conversation.lastMessageSenderId == myUid
-                        ? l10n.dmYouPrefix
-                        : '';
+                final String prefix = conversation.lastMessageSenderId == myUid
+                    ? l10n.dmYouPrefix
+                    : '';
                 return ListTile(
                   leading: CircleAvatar(
                     backgroundImage: conversation.otherUser.avatarUrl != null
                         ? NetworkImage(conversation.otherUser.avatarUrl!)
                         : null,
                     child: conversation.otherUser.avatarUrl == null
-                        ? Text(username.isNotEmpty
-                            ? username[0].toUpperCase()
-                            : '?')
+                        ? Text(
+                            username.isNotEmpty
+                                ? username[0].toUpperCase()
+                                : '?',
+                          )
                         : null,
                   ),
                   title: Text(
@@ -81,8 +82,7 @@ class ConversationsScreen extends StatelessWidget {
                   trailing: conversation.lastMessageAt == null
                       ? null
                       : Text(timeAgo(conversation.lastMessageAt!)),
-                  onTap: () =>
-                      context.push(Routes.chat, extra: conversation),
+                  onTap: () => context.push(Routes.chat, extra: conversation),
                 );
               },
             );

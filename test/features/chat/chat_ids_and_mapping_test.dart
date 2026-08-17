@@ -18,25 +18,18 @@ void main() {
 
   group('ConversationDto.fromMap', () {
     test('resolves the other participant and last message', () {
-      final Conversation conv = ConversationDto.fromMap(
-        'c1',
-        <String, dynamic>{
-          'participants': <String>['u1', 'u2'],
-          'participantMeta': <String, dynamic>{
-            'u2': <String, dynamic>{
-              'username': 'bob',
-              'avatarUrl': 'http://a',
-            },
-          },
-          'lastMessage': <String, dynamic>{
-            'text': 'hi',
-            'senderId': 'u1',
-            'createdAt': 42,
-          },
-          'updatedAt': 42,
+      final Conversation conv = ConversationDto.fromMap('c1', <String, dynamic>{
+        'participants': <String>['u1', 'u2'],
+        'participantMeta': <String, dynamic>{
+          'u2': <String, dynamic>{'username': 'bob', 'avatarUrl': 'http://a'},
         },
-        'u1',
-      );
+        'lastMessage': <String, dynamic>{
+          'text': 'hi',
+          'senderId': 'u1',
+          'createdAt': 42,
+        },
+        'updatedAt': 42,
+      }, 'u1');
 
       expect(conv.id, 'c1');
       expect(conv.otherUser.uid, 'u2');
@@ -48,14 +41,10 @@ void main() {
     });
 
     test('missing meta and lastMessage fall back to empty defaults', () {
-      final Conversation conv = ConversationDto.fromMap(
-        'c2',
-        <String, dynamic>{
-          'participants': <String>['u1', 'u2'],
-          'updatedAt': 1,
-        },
-        'u1',
-      );
+      final Conversation conv = ConversationDto.fromMap('c2', <String, dynamic>{
+        'participants': <String>['u1', 'u2'],
+        'updatedAt': 1,
+      }, 'u1');
 
       expect(conv.otherUser.uid, 'u2');
       expect(conv.otherUser.username, '');

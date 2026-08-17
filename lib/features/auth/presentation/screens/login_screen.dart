@@ -70,9 +70,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: state.submitting
                             ? null
                             : () => context.read<AuthCubit>().signIn(
-                                  email: _email.text.trim(),
-                                  password: _password.text,
-                                ),
+                                email: _email.text.trim(),
+                                password: _password.text,
+                              ),
                         child: Text(l10n.authLogin),
                       ),
                       const SizedBox(height: 16),
@@ -82,15 +82,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: state.submitting
                             ? null
                             : () =>
-                                context.read<AuthCubit>().signInWithGoogle(),
+                                  context.read<AuthCubit>().signInWithGoogle(),
                         icon: const Icon(Icons.login),
                         label: Text(l10n.authGoogleButton),
                       ),
                       const SizedBox(height: 24),
                       TextButton(
                         onPressed: () => context.go(Routes.signup),
-                        child:
-                            Text('${l10n.authNoAccount} ${l10n.authSignup}'),
+                        child: Text('${l10n.authNoAccount} ${l10n.authSignup}'),
                       ),
                     ],
                   );

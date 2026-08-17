@@ -32,18 +32,17 @@ void main() {
   setUp(() {
     exploreRepo = MockExploreRepository();
     chatRepo = MockChatRepository();
-    when(() => exploreRepo.searchUsers(query: 'al'))
-        .thenAnswer((_) async => Right<Failure, List<AppUser>>(
-              <AppUser>[_alice()],
-            ));
-    when(() => chatRepo.getOrCreateConversation(
-          myUid: 'me',
-          otherUid: 'u1',
-        )).thenAnswer((_) async => Right<Failure, Conversation>(_conversation()));
+    when(() => exploreRepo.searchUsers(query: 'al')).thenAnswer(
+      (_) async => Right<Failure, List<AppUser>>(<AppUser>[_alice()]),
+    );
+    when(
+      () => chatRepo.getOrCreateConversation(myUid: 'me', otherUid: 'u1'),
+    ).thenAnswer((_) async => Right<Failure, Conversation>(_conversation()));
   });
 
-  testWidgets('search shows user row and tap opens conversation',
-      (WidgetTester tester) async {
+  testWidgets('search shows user row and tap opens conversation', (
+    WidgetTester tester,
+  ) async {
     final GoRouter router = GoRouter(
       routes: <RouteBase>[
         GoRoute(
@@ -79,9 +78,8 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
 
-    verify(() => chatRepo.getOrCreateConversation(
-          myUid: 'me',
-          otherUid: 'u1',
-        )).called(1);
+    verify(
+      () => chatRepo.getOrCreateConversation(myUid: 'me', otherUid: 'u1'),
+    ).called(1);
   });
 }

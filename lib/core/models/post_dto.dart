@@ -14,18 +14,18 @@ class PostDto {
   });
 
   factory PostDto.fromMap(String id, Map<String, dynamic> map) => PostDto(
-        authorId: map['authorId'] as String,
-        authorUsername: map['authorUsername'] as String,
-        authorAvatarUrl: map['authorAvatarUrl'] as String?,
-        imageUrl: map['imageUrl'] as String,
-        caption: map['caption'] as String? ?? '',
-        createdAtMillis: map['createdAt'] as int,
-        likeCount: map['likeCount'] as int? ?? 0,
-        commentCount: map['commentCount'] as int? ?? 0,
-        tags: ((map['tags'] as List<dynamic>?) ?? <dynamic>[])
-            .map((dynamic e) => e as String)
-            .toList(),
-      );
+    authorId: map['authorId'] as String,
+    authorUsername: map['authorUsername'] as String,
+    authorAvatarUrl: map['authorAvatarUrl'] as String?,
+    imageUrl: map['imageUrl'] as String,
+    caption: map['caption'] as String? ?? '',
+    createdAtMillis: map['createdAt'] as int,
+    likeCount: map['likeCount'] as int? ?? 0,
+    commentCount: map['commentCount'] as int? ?? 0,
+    tags: ((map['tags'] as List<dynamic>?) ?? <dynamic>[])
+        .map((dynamic e) => e as String)
+        .toList(),
+  );
 
   final String authorId;
   final String authorUsername;
@@ -38,27 +38,27 @@ class PostDto {
   final List<String> tags;
 
   Map<String, dynamic> toMap() => <String, dynamic>{
-        'authorId': authorId,
-        'authorUsername': authorUsername,
-        'authorAvatarUrl': authorAvatarUrl,
-        'imageUrl': imageUrl,
-        'caption': caption,
-        'createdAt': createdAtMillis,
-        'likeCount': likeCount,
-        'commentCount': commentCount,
-        'tags': tags,
-      };
+    'authorId': authorId,
+    'authorUsername': authorUsername,
+    'authorAvatarUrl': authorAvatarUrl,
+    'imageUrl': imageUrl,
+    'caption': caption,
+    'createdAt': createdAtMillis,
+    'likeCount': likeCount,
+    'commentCount': commentCount,
+    'tags': tags,
+  };
 
   Post toDomain(String id) => Post(
-        id: id,
-        authorId: authorId,
-        authorUsername: authorUsername,
-        authorAvatarUrl: authorAvatarUrl,
-        imageUrl: imageUrl,
-        caption: caption,
-        createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMillis),
-        likeCount: likeCount,
-        commentCount: commentCount,
-        tags: tags,
-      );
+    id: id,
+    authorId: authorId,
+    authorUsername: authorUsername,
+    authorAvatarUrl: authorAvatarUrl,
+    imageUrl: imageUrl,
+    caption: caption,
+    createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMillis),
+    likeCount: likeCount,
+    commentCount: commentCount,
+    tags: tags,
+  );
 }

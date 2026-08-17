@@ -18,8 +18,7 @@ class ConversationDto {
       orElse: () => myUid,
     );
     final Map<String, dynamic> meta =
-        map['participantMeta'] as Map<String, dynamic>? ??
-            <String, dynamic>{};
+        map['participantMeta'] as Map<String, dynamic>? ?? <String, dynamic>{};
     final Map<String, dynamic> otherMeta =
         meta[otherUid] as Map<String, dynamic>? ?? <String, dynamic>{};
     final Map<String, dynamic>? lastMessage =
@@ -36,7 +35,9 @@ class ConversationDto {
       lastMessageSenderId: lastMessage?['senderId'] as String?,
       lastMessageAt: lastMessage == null
           ? null
-          : DateTime.fromMillisecondsSinceEpoch(lastMessage['createdAt'] as int),
+          : DateTime.fromMillisecondsSinceEpoch(
+              lastMessage['createdAt'] as int,
+            ),
     );
   }
 }

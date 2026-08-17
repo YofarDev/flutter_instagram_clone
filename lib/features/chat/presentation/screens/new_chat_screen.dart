@@ -92,9 +92,11 @@ class _NewChatScreenState extends State<NewChatScreen> {
                               ? NetworkImage(user.avatarUrl!)
                               : null,
                           child: user.avatarUrl == null
-                              ? Text(username.isNotEmpty
-                                  ? username[0].toUpperCase()
-                                  : '?')
+                              ? Text(
+                                  username.isNotEmpty
+                                      ? username[0].toUpperCase()
+                                      : '?',
+                                )
                               : null,
                         ),
                         title: Text(username),
@@ -107,8 +109,9 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                 ),
                               )
                             : null,
-                        onTap: () =>
-                            context.read<NewChatCubit>().startConversation(user),
+                        onTap: () => context
+                            .read<NewChatCubit>()
+                            .startConversation(user),
                       );
                     },
                   ),

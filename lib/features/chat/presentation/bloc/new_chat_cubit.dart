@@ -15,7 +15,7 @@ class NewChatCubit extends Cubit<NewChatState> {
     this._exploreRepository,
     this._chatRepository, {
     required this._myUid,
-  })  : super(const NewChatState());
+  }) : super(const NewChatState());
 
   final IExploreRepository _exploreRepository;
   final IChatRepository _chatRepository;
@@ -37,8 +37,8 @@ class NewChatCubit extends Cubit<NewChatState> {
       return;
     }
     emit(state.copyWith(searching: true));
-    final Either<Failure, List<AppUser>> either =
-        await _exploreRepository.searchUsers(query: q);
+    final Either<Failure, List<AppUser>> either = await _exploreRepository
+        .searchUsers(query: q);
     if (isClosed || q != state.query.trim().toLowerCase()) return;
     either.fold(
       (Failure f) => emit(state.copyWith(searching: false, error: f.message)),
@@ -50,17 +50,13 @@ class NewChatCubit extends Cubit<NewChatState> {
   Future<void> startConversation(AppUser user) async {
     if (state.opening) return;
     emit(state.copyWith(opening: true, error: null));
-    final Either<Failure, Conversation> either =
-        await _chatRepository.getOrCreateConversation(
-      myUid: _myUid,
-      otherUid: user.uid,
-    );
+    final Either<Failure, Conversation> either = await _chatRepository
+        .getOrCreateConversation(myUid: _myUid, otherUid: user.uid);
     if (isClosed) return;
     either.fold(
       (Failure f) => emit(state.copyWith(opening: false, error: f.message)),
-      (Conversation conversation) => emit(
-        state.copyWith(opening: false, opened: conversation),
-      ),
+      (Conversation conversation) =>
+          emit(state.copyWith(opening: false, opened: conversation)),
     );
   }
 

@@ -12,14 +12,14 @@ class ReelDto {
   });
 
   factory ReelDto.fromMap(Map<String, dynamic> map) => ReelDto(
-        uid: map['uid'] as String,
-        authorUsername: map['username'] as String,
-        authorAvatarUrl: map['avatarUrl'] as String?,
-        videoUrl: map['videoUrl'] as String,
-        caption: map['caption'] as String? ?? '',
-        createdAtMillis: map['createdAt'] as int,
-        likeCount: map['likeCount'] as int? ?? 0,
-      );
+    uid: map['uid'] as String,
+    authorUsername: map['username'] as String,
+    authorAvatarUrl: map['avatarUrl'] as String?,
+    videoUrl: map['videoUrl'] as String,
+    caption: map['caption'] as String? ?? '',
+    createdAtMillis: map['createdAt'] as int,
+    likeCount: map['likeCount'] as int? ?? 0,
+  );
 
   final String uid;
   final String authorUsername;
@@ -30,23 +30,23 @@ class ReelDto {
   final int likeCount;
 
   Map<String, dynamic> toMap() => <String, dynamic>{
-        'uid': uid,
-        'username': authorUsername,
-        'avatarUrl': authorAvatarUrl,
-        'videoUrl': videoUrl,
-        'caption': caption,
-        'createdAt': createdAtMillis,
-        'likeCount': likeCount,
-      };
+    'uid': uid,
+    'username': authorUsername,
+    'avatarUrl': authorAvatarUrl,
+    'videoUrl': videoUrl,
+    'caption': caption,
+    'createdAt': createdAtMillis,
+    'likeCount': likeCount,
+  };
 
   Reel toDomain(String id) => Reel(
-        id: id,
-        uid: uid,
-        authorUsername: authorUsername,
-        authorAvatarUrl: authorAvatarUrl,
-        videoUrl: videoUrl,
-        caption: caption,
-        createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMillis),
-        likeCount: likeCount,
-      );
+    id: id,
+    uid: uid,
+    authorUsername: authorUsername,
+    authorAvatarUrl: authorAvatarUrl,
+    videoUrl: videoUrl,
+    caption: caption,
+    createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMillis),
+    likeCount: likeCount,
+  );
 }

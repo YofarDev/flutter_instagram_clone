@@ -23,9 +23,9 @@ void main() {
   blocTest<SearchCubit, SearchState>(
     'debounces rapid keystrokes into a single search',
     build: () {
-      when(() => repo.searchUsers(query: 'al')).thenAnswer(
-        (_) async => Right<Failure, List<AppUser>>(<AppUser>[user]),
-      );
+      when(
+        () => repo.searchUsers(query: 'al'),
+      ).thenAnswer((_) async => Right<Failure, List<AppUser>>(<AppUser>[user]));
       return SearchCubit(repo);
     },
     act: (SearchCubit cubit) {

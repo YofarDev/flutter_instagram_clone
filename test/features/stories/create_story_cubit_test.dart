@@ -30,8 +30,9 @@ void main() {
   blocTest<CreateStoryCubit, CreateStoryState>(
     'submit success emits submitting then success',
     build: () {
-      when(() => repo.createStory(filePath: any(named: 'filePath')))
-          .thenAnswer((_) async => const Right<Failure, void>(null));
+      when(
+        () => repo.createStory(filePath: any(named: 'filePath')),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
       return CreateStoryCubit(repo);
     },
     seed: () => const CreateStoryState(pickedPath: '/tmp/story.jpg'),
@@ -52,9 +53,10 @@ void main() {
   blocTest<CreateStoryCubit, CreateStoryState>(
     'submit failure sets error and keeps success false',
     build: () {
-      when(() => repo.createStory(filePath: any(named: 'filePath')))
-          .thenAnswer(
-              (_) async => const Left<Failure, void>(Failure.serverError(message: 'boom')));
+      when(() => repo.createStory(filePath: any(named: 'filePath'))).thenAnswer(
+        (_) async =>
+            const Left<Failure, void>(Failure.serverError(message: 'boom')),
+      );
       return CreateStoryCubit(repo);
     },
     seed: () => const CreateStoryState(pickedPath: '/tmp/story.jpg'),

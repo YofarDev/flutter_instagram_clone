@@ -43,8 +43,9 @@ void main() {
 
   setUp(() {
     repo = MockIStoriesRepository();
-    when(() => repo.markViewed(storyId: any(named: 'storyId')))
-        .thenAnswer((_) async => const Right<Failure, void>(null));
+    when(
+      () => repo.markViewed(storyId: any(named: 'storyId')),
+    ).thenAnswer((_) async => const Right<Failure, void>(null));
   });
 
   blocTest<StoryViewerCubit, StoryViewerState>(
@@ -65,7 +66,11 @@ void main() {
     act: (StoryViewerCubit cubit) => cubit.next(),
     expect: () => <StoryViewerState>[
       StoryViewerState(trays: trays, viewedIds: const <String>{'a1'}),
-      StoryViewerState(trays: trays, storyIndex: 1, viewedIds: const <String>{'a1'}),
+      StoryViewerState(
+        trays: trays,
+        storyIndex: 1,
+        viewedIds: const <String>{'a1'},
+      ),
     ],
   );
 
@@ -75,8 +80,16 @@ void main() {
     seed: () => StoryViewerState(trays: trays, storyIndex: 1),
     act: (StoryViewerCubit cubit) => cubit.next(),
     expect: () => <StoryViewerState>[
-      StoryViewerState(trays: trays, storyIndex: 1, viewedIds: const <String>{'a2'}),
-      StoryViewerState(trays: trays, trayIndex: 1, viewedIds: const <String>{'a2'}),
+      StoryViewerState(
+        trays: trays,
+        storyIndex: 1,
+        viewedIds: const <String>{'a2'},
+      ),
+      StoryViewerState(
+        trays: trays,
+        trayIndex: 1,
+        viewedIds: const <String>{'a2'},
+      ),
     ],
   );
 
@@ -85,7 +98,11 @@ void main() {
     build: () => StoryViewerCubit(repo, trays: trays, initialTrayIndex: 1),
     act: (StoryViewerCubit cubit) => cubit.next(),
     expect: () => <StoryViewerState>[
-      StoryViewerState(trays: trays, trayIndex: 1, viewedIds: const <String>{'b1'}),
+      StoryViewerState(
+        trays: trays,
+        trayIndex: 1,
+        viewedIds: const <String>{'b1'},
+      ),
       StoryViewerState(
         trays: trays,
         trayIndex: 1,
@@ -123,9 +140,21 @@ void main() {
     },
     expect: () => <StoryViewerState>[
       StoryViewerState(trays: trays, viewedIds: const <String>{'a1'}),
-      StoryViewerState(trays: trays, storyIndex: 1, viewedIds: const <String>{'a1'}),
-      StoryViewerState(trays: trays, storyIndex: 1, viewedIds: const <String>{'a1', 'a2'}),
-      StoryViewerState(trays: trays, trayIndex: 1, viewedIds: const <String>{'a1', 'a2'}),
+      StoryViewerState(
+        trays: trays,
+        storyIndex: 1,
+        viewedIds: const <String>{'a1'},
+      ),
+      StoryViewerState(
+        trays: trays,
+        storyIndex: 1,
+        viewedIds: const <String>{'a1', 'a2'},
+      ),
+      StoryViewerState(
+        trays: trays,
+        trayIndex: 1,
+        viewedIds: const <String>{'a1', 'a2'},
+      ),
     ],
   );
 }

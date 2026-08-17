@@ -74,9 +74,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               padding: const EdgeInsets.all(16),
               children: <Widget>[
                 GestureDetector(
-                  onTap: () => context
-                      .read<CreatePostCubit>()
-                      .pickImage(ImageSource.gallery),
+                  onTap: () => context.read<CreatePostCubit>().pickImage(
+                    ImageSource.gallery,
+                  ),
                   child: AspectRatio(
                     aspectRatio: 1,
                     child: Image.file(
@@ -88,12 +88,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 const SizedBox(height: 16),
                 TextField(
                   controller: _caption,
-                  decoration:
-                      InputDecoration(hintText: l10n.postCaptionHint),
+                  decoration: InputDecoration(hintText: l10n.postCaptionHint),
                   maxLines: 3,
-                  onChanged: (String value) => context
-                      .read<CreatePostCubit>()
-                      .captionChanged(value),
+                  onChanged: (String value) =>
+                      context.read<CreatePostCubit>().captionChanged(value),
                 ),
                 const SizedBox(height: 16),
                 FilledButton(

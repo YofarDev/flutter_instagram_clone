@@ -30,8 +30,7 @@ void main() {
   blocTest<EditProfileCubit, EditProfileState>(
     'submit with blank username is a no-op',
     build: () => EditProfileCubit(repo, user: baseUser),
-    seed: () =>
-        EditProfileState(initial: baseUser, username: '   ', bio: 'hi'),
+    seed: () => EditProfileState(initial: baseUser, username: '   ', bio: 'hi'),
     act: (EditProfileCubit cubit) => cubit.submit(),
     verify: (EditProfileCubit cubit) {
       verifyNever(() => repo.saveProfile(user: any(named: 'user')));
@@ -87,11 +86,8 @@ void main() {
       );
       return EditProfileCubit(repo, user: baseUser);
     },
-    seed: () => EditProfileState(
-      initial: baseUser,
-      username: 'taken',
-      bio: 'hi',
-    ),
+    seed: () =>
+        EditProfileState(initial: baseUser, username: 'taken', bio: 'hi'),
     act: (EditProfileCubit cubit) => cubit.submit(),
     verify: (EditProfileCubit cubit) {
       verifyNever(
@@ -123,9 +119,9 @@ void main() {
       when(() => repo.uploadAvatar(uid: 'u1', filePath: 'pick')).thenAnswer(
         (_) async => const Right<Failure, String>('http://img/new.png'),
       );
-      when(() => repo.saveProfile(user: any(named: 'user'))).thenAnswer(
-        (_) async => const Right<Failure, void>(null),
-      );
+      when(
+        () => repo.saveProfile(user: any(named: 'user')),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
       return EditProfileCubit(repo, user: baseUser);
     },
     seed: () => EditProfileState(
@@ -166,16 +162,13 @@ void main() {
   blocTest<EditProfileCubit, EditProfileState>(
     'keeps old avatarUrl when no new pick',
     build: () {
-      when(() => repo.saveProfile(user: any(named: 'user'))).thenAnswer(
-        (_) async => const Right<Failure, void>(null),
-      );
+      when(
+        () => repo.saveProfile(user: any(named: 'user')),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
       return EditProfileCubit(repo, user: baseUser);
     },
-    seed: () => EditProfileState(
-      initial: baseUser,
-      username: 'newname',
-      bio: 'hi',
-    ),
+    seed: () =>
+        EditProfileState(initial: baseUser, username: 'newname', bio: 'hi'),
     act: (EditProfileCubit cubit) => cubit.submit(),
     verify: (EditProfileCubit cubit) {
       verifyNever(

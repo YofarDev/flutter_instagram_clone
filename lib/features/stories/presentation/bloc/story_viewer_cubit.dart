@@ -50,10 +50,12 @@ class StoryViewerCubit extends Cubit<StoryViewerState> {
       emit(state.copyWith(storyIndex: state.storyIndex - 1));
     } else if (state.trayIndex > 0) {
       final List<Story> prevStories = state.trays[state.trayIndex - 1].stories;
-      emit(state.copyWith(
-        trayIndex: state.trayIndex - 1,
-        storyIndex: prevStories.length - 1,
-      ));
+      emit(
+        state.copyWith(
+          trayIndex: state.trayIndex - 1,
+          storyIndex: prevStories.length - 1,
+        ),
+      );
     }
   }
 

@@ -20,17 +20,17 @@ class ExploreRepositoryImpl implements IExploreRepository {
       _ds.watchPostsByTag(tag: tag);
 
   @override
-  Future<Either<Failure, List<AppUser>>> searchUsers(
-      {required String query}) async {
+  Future<Either<Failure, List<AppUser>>> searchUsers({
+    required String query,
+  }) async {
     try {
-      return Right<Failure, List<AppUser>>(
-        await _ds.searchUsers(query: query),
-      );
+      return Right<Failure, List<AppUser>>(await _ds.searchUsers(query: query));
     } catch (e) {
       return Left<Failure, List<AppUser>>(_mapError(e));
     }
   }
 
-  Failure _mapError(Object e) =>
-      Failure.serverError(message: e.toString()); // ponytail: firestore errors are descriptive strings
+  Failure _mapError(Object e) => Failure.serverError(
+    message: e.toString(),
+  ); // ponytail: firestore errors are descriptive strings
 }

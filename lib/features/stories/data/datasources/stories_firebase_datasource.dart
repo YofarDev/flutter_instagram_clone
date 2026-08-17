@@ -26,8 +26,10 @@ class StoriesFirebaseDataSource implements IStoriesDataSource {
   // ponytail: users-doc read per write; cache if read costs ever matter
   Future<({String username, String? avatarUrl})> _currentUserProfile() async {
     final User user = FirebaseAuth.instance.currentUser!;
-    final DocumentSnapshot<Object?> profile =
-        await _db.collection('users').doc(user.uid).get();
+    final DocumentSnapshot<Object?> profile = await _db
+        .collection('users')
+        .doc(user.uid)
+        .get();
     final Map<String, dynamic> data =
         profile.data() as Map<String, dynamic>? ?? <String, dynamic>{};
     return (
@@ -40,19 +42,24 @@ class StoriesFirebaseDataSource implements IStoriesDataSource {
   Stream<List<Story>> watchStories() {
     // ponytail: cutoff fixed at subscribe; stories outliving 24h vanish on
     // next snapshot only if cutoff recomputed — accepted staleness
-    final int cutoff =
-        DateTime.now().subtract(const Duration(hours: 24)).millisecondsSinceEpoch;
+    final int cutoff = DateTime.now()
+        .subtract(const Duration(hours: 24))
+        .millisecondsSinceEpoch;
     return _db
         .collection('stories')
         .where('createdAt', isGreaterThan: cutoff)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((QuerySnapshot<Object?> snap) => snap.docs
-            .map((QueryDocumentSnapshot<Object?> doc) => StoryDto.fromMap(
+        .map(
+          (QuerySnapshot<Object?> snap) => snap.docs
+              .map(
+                (QueryDocumentSnapshot<Object?> doc) => StoryDto.fromMap(
                   doc.id,
                   doc.data() as Map<String, dynamic>,
-                ).toDomain(doc.id))
-            .toList());
+                ).toDomain(doc.id),
+              )
+              .toList(),
+        );
   }
 
   @override
@@ -64,13 +71,17 @@ class StoriesFirebaseDataSource implements IStoriesDataSource {
     await ref.putFile(File(filePath));
     final String imageUrl = await ref.getDownloadURL();
     try {
-      await _db.collection('stories').add(StoryDto(
-            uid: _uid,
-            authorUsername: profile.username,
-            authorAvatarUrl: profile.avatarUrl,
-            imageUrl: imageUrl,
-            createdAtMillis: millis,
-          ).toMap());
+      await _db
+          .collection('stories')
+          .add(
+            StoryDto(
+              uid: _uid,
+              authorUsername: profile.username,
+              authorAvatarUrl: profile.avatarUrl,
+              imageUrl: imageUrl,
+              createdAtMillis: millis,
+            ).toMap(),
+          );
     } catch (e) {
       // ponytail: best-effort cleanup, orphan possible if delete fails too
       unawaited(ref.delete().catchError((_) => ref));
@@ -84,8 +95,10 @@ class StoriesFirebaseDataSource implements IStoriesDataSource {
   }) async {
     if (storyIds.isEmpty) return <String>{};
     final List<DocumentReference<Object?>> refs = storyIds
-        .map((String id) =>
-            _db.collection('stories').doc(id).collection('viewers').doc(_uid))
+        .map(
+          (String id) =>
+              _db.collection('stories').doc(id).collection('viewers').doc(_uid),
+        )
         .toList();
     // ponytail: per-doc gets instead of getAll (not exposed by cloud_firestore
     // 6.x); same N reads, N RPCs — batch if feed size makes it matter

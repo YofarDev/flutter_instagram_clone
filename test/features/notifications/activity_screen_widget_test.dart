@@ -22,19 +22,18 @@ NotificationItem _item({
   bool read = false,
   String? postImageUrl,
   String? commentText,
-}) =>
-    NotificationItem(
-      id: id,
-      type: type,
-      ownerUid: 'me',
-      actorId: actorId,
-      actorUsername: actorUsername,
-      postImageUrl: postImageUrl,
-      postId: postImageUrl != null ? 'post-$id' : null,
-      commentText: commentText,
-      createdAt: DateTime(2026, 1, 1),
-      read: read,
-    );
+}) => NotificationItem(
+  id: id,
+  type: type,
+  ownerUid: 'me',
+  actorId: actorId,
+  actorUsername: actorUsername,
+  postImageUrl: postImageUrl,
+  postId: postImageUrl != null ? 'post-$id' : null,
+  commentText: commentText,
+  createdAt: DateTime(2026, 1, 1),
+  read: read,
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -45,8 +44,9 @@ void main() {
   setUp(() {
     repo = MockNotificationsRepository();
     cubit = NotificationsCubit(repo);
-    when(() => repo.markAllRead(uid: any(named: 'uid')))
-        .thenAnswer((_) async => const Right<Failure, void>(null));
+    when(
+      () => repo.markAllRead(uid: any(named: 'uid')),
+    ).thenAnswer((_) async => const Right<Failure, void>(null));
   });
 
   tearDown(() async => cubit.close());
@@ -66,7 +66,9 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('renders rows per notification type', (WidgetTester tester) async {
+  testWidgets('renders rows per notification type', (
+    WidgetTester tester,
+  ) async {
     when(() => repo.watchNotifications(uid: 'me')).thenAnswer(
       (_) => Stream<List<NotificationItem>>.value(<NotificationItem>[
         _item(
@@ -106,7 +108,8 @@ void main() {
 
   testWidgets('markAllRead called on mount', (WidgetTester tester) async {
     when(() => repo.watchNotifications(uid: 'me')).thenAnswer(
-        (_) => Stream<List<NotificationItem>>.value(<NotificationItem>[]));
+      (_) => Stream<List<NotificationItem>>.value(<NotificationItem>[]),
+    );
     cubit.init('me');
 
     await pumpSubject(tester);
@@ -116,7 +119,8 @@ void main() {
 
   testWidgets('empty stream shows empty state', (WidgetTester tester) async {
     when(() => repo.watchNotifications(uid: 'me')).thenAnswer(
-        (_) => Stream<List<NotificationItem>>.value(<NotificationItem>[]));
+      (_) => Stream<List<NotificationItem>>.value(<NotificationItem>[]),
+    );
     cubit.init('me');
 
     await pumpSubject(tester);

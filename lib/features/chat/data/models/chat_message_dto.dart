@@ -8,26 +8,26 @@ class ChatMessageDto {
   });
 
   factory ChatMessageDto.fromMap(Map<String, dynamic> map) => ChatMessageDto(
-        senderId: map['senderId'] as String,
-        text: map['text'] as String,
-        createdAtMillis: map['createdAt'] as int,
-      );
+    senderId: map['senderId'] as String,
+    text: map['text'] as String,
+    createdAtMillis: map['createdAt'] as int,
+  );
 
   final String senderId;
   final String text;
   final int createdAtMillis;
 
   Map<String, dynamic> toMap() => <String, dynamic>{
-        'senderId': senderId,
-        'text': text,
-        'createdAt': createdAtMillis,
-      };
+    'senderId': senderId,
+    'text': text,
+    'createdAt': createdAtMillis,
+  };
 
   ChatMessage toDomain(String id, String conversationId) => ChatMessage(
-        id: id,
-        conversationId: conversationId,
-        senderId: senderId,
-        text: text,
-        createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMillis),
-      );
+    id: id,
+    conversationId: conversationId,
+    senderId: senderId,
+    text: text,
+    createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMillis),
+  );
 }

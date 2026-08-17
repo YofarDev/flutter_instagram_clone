@@ -48,7 +48,10 @@ class ReelsRepositoryImpl implements IReelsRepository {
   }) async {
     try {
       return Right<Failure, void>(
-        await _ds.toggleReelLike(reelId: reelId, currentlyLiked: currentlyLiked),
+        await _ds.toggleReelLike(
+          reelId: reelId,
+          currentlyLiked: currentlyLiked,
+        ),
       );
     } catch (e) {
       return Left<Failure, void>(_mapError(e));

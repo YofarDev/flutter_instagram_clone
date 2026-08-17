@@ -50,11 +50,14 @@ void main() {
   blocTest<ReelsCubit, ReelsState>(
     'initial load hydrates liked ids and sets hasMore',
     build: () {
-      when(() => repo.watchReels(limit: any(named: 'limit')))
-          .thenAnswer((_) => Stream<List<Reel>>.value(<Reel>[r1, r2]));
-      when(() => repo.fetchLikedReelIds(reelIds: any(named: 'reelIds')))
-          .thenAnswer(
-              (_) async => const Right<Failure, Set<String>>(<String>{'r1'}));
+      when(
+        () => repo.watchReels(limit: any(named: 'limit')),
+      ).thenAnswer((_) => Stream<List<Reel>>.value(<Reel>[r1, r2]));
+      when(
+        () => repo.fetchLikedReelIds(reelIds: any(named: 'reelIds')),
+      ).thenAnswer(
+        (_) async => const Right<Failure, Set<String>>(<String>{'r1'}),
+      );
       return ReelsCubit(repo);
     },
     expect: () => <ReelsState>[
@@ -70,20 +73,22 @@ void main() {
   blocTest<ReelsCubit, ReelsState>(
     'liked-hydration failure keeps stale likedIds',
     build: () {
-      final List<Either<Failure, Set<String>>> answers = <
-          Either<Failure, Set<String>>>[
-        const Right<Failure, Set<String>>(<String>{'r1'}),
-        const Left<Failure, Set<String>>(Failure.serverError(message: 'boom')),
-      ];
-      when(() => repo.watchReels(limit: any(named: 'limit')))
-          .thenAnswer((_) => Stream<List<Reel>>.fromIterable(
-                <List<Reel>>[
-                  <Reel>[r1, r2],
-                  <Reel>[r1],
-                ],
-              ));
-      when(() => repo.fetchLikedReelIds(reelIds: any(named: 'reelIds')))
-          .thenAnswer((_) async => answers.removeAt(0));
+      final List<Either<Failure, Set<String>>> answers =
+          <Either<Failure, Set<String>>>[
+            const Right<Failure, Set<String>>(<String>{'r1'}),
+            const Left<Failure, Set<String>>(
+              Failure.serverError(message: 'boom'),
+            ),
+          ];
+      when(() => repo.watchReels(limit: any(named: 'limit'))).thenAnswer(
+        (_) => Stream<List<Reel>>.fromIterable(<List<Reel>>[
+          <Reel>[r1, r2],
+          <Reel>[r1],
+        ]),
+      );
+      when(
+        () => repo.fetchLikedReelIds(reelIds: any(named: 'reelIds')),
+      ).thenAnswer((_) async => answers.removeAt(0));
       return ReelsCubit(repo);
     },
     expect: () => <ReelsState>[
@@ -108,21 +113,21 @@ void main() {
       final StreamController<List<Reel>> controller =
           StreamController<List<Reel>>();
       addTearDown(controller.close);
-      when(() => repo.watchReels(limit: any(named: 'limit')))
-          .thenAnswer((_) => controller.stream);
+      when(
+        () => repo.watchReels(limit: any(named: 'limit')),
+      ).thenAnswer((_) => controller.stream);
       controller.addError(Exception('db down'));
       return ReelsCubit(repo);
     },
-    expect: () => <ReelsState>[
-      ReelsState(error: 'Failed to load reels'),
-    ],
+    expect: () => <ReelsState>[ReelsState(error: 'Failed to load reels')],
   );
 
   blocTest<ReelsCubit, ReelsState>(
     'toggleReelLike optimistic flip on success',
     build: () {
-      when(() => repo.watchReels(limit: any(named: 'limit')))
-          .thenAnswer((_) => const Stream<List<Reel>>.empty());
+      when(
+        () => repo.watchReels(limit: any(named: 'limit')),
+      ).thenAnswer((_) => const Stream<List<Reel>>.empty());
       when(
         () => repo.toggleReelLike(
           reelId: any(named: 'reelId'),
@@ -131,15 +136,13 @@ void main() {
       ).thenAnswer((_) async => const Right<Failure, void>(null));
       return ReelsCubit(repo);
     },
-    seed: () => ReelsState(
-      status: ReelsStatus.ready,
-      reels: <Reel>[r1],
-      hasMore: true,
-    ),
+    seed: () =>
+        ReelsState(status: ReelsStatus.ready, reels: <Reel>[r1], hasMore: true),
     act: (ReelsCubit cubit) => cubit.toggleReelLike(r1),
     verify: (ReelsCubit cubit) {
-      verify(() => repo.toggleReelLike(reelId: 'r1', currentlyLiked: false))
-          .called(1);
+      verify(
+        () => repo.toggleReelLike(reelId: 'r1', currentlyLiked: false),
+      ).called(1);
     },
     expect: () => <ReelsState>[
       ReelsState(
@@ -154,8 +157,9 @@ void main() {
   blocTest<ReelsCubit, ReelsState>(
     'toggleReelLike rolls back on failure',
     build: () {
-      when(() => repo.watchReels(limit: any(named: 'limit')))
-          .thenAnswer((_) => const Stream<List<Reel>>.empty());
+      when(
+        () => repo.watchReels(limit: any(named: 'limit')),
+      ).thenAnswer((_) => const Stream<List<Reel>>.empty());
       when(
         () => repo.toggleReelLike(
           reelId: any(named: 'reelId'),
@@ -167,11 +171,8 @@ void main() {
       );
       return ReelsCubit(repo);
     },
-    seed: () => ReelsState(
-      status: ReelsStatus.ready,
-      reels: <Reel>[r1],
-      hasMore: true,
-    ),
+    seed: () =>
+        ReelsState(status: ReelsStatus.ready, reels: <Reel>[r1], hasMore: true),
     act: (ReelsCubit cubit) => cubit.toggleReelLike(r1),
     expect: () => <ReelsState>[
       ReelsState(
@@ -192,11 +193,12 @@ void main() {
   blocTest<ReelsCubit, ReelsState>(
     'loadMore re-subscribes with grown limit',
     build: () {
-      when(() => repo.watchReels(limit: any(named: 'limit')))
-          .thenAnswer((_) => Stream<List<Reel>>.value(manyReels));
-      when(() => repo.fetchLikedReelIds(reelIds: any(named: 'reelIds')))
-          .thenAnswer(
-              (_) async => const Right<Failure, Set<String>>(<String>{}));
+      when(
+        () => repo.watchReels(limit: any(named: 'limit')),
+      ).thenAnswer((_) => Stream<List<Reel>>.value(manyReels));
+      when(
+        () => repo.fetchLikedReelIds(reelIds: any(named: 'reelIds')),
+      ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
       return ReelsCubit(repo);
     },
     act: (ReelsCubit cubit) async {
@@ -218,8 +220,9 @@ void main() {
   blocTest<ReelsCubit, ReelsState>(
     'loadMore blocked when hasMore false',
     build: () {
-      when(() => repo.watchReels(limit: any(named: 'limit')))
-          .thenAnswer((_) => const Stream<List<Reel>>.empty());
+      when(
+        () => repo.watchReels(limit: any(named: 'limit')),
+      ).thenAnswer((_) => const Stream<List<Reel>>.empty());
       return ReelsCubit(repo);
     },
     seed: () => ReelsState(status: ReelsStatus.ready, hasMore: false),

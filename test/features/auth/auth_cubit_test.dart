@@ -12,8 +12,7 @@ import 'package:flutter_instagram_clone/features/auth/presentation/bloc/auth_sta
 class MockAuthRepository extends Mock implements IAuthRepository {}
 
 const AppUser user = AppUser(uid: 'u1', email: 'a@b.c');
-const AppUser profile =
-    AppUser(uid: 'u1', email: 'a@b.c', username: 'yo');
+const AppUser profile = AppUser(uid: 'u1', email: 'a@b.c', username: 'yo');
 
 void main() {
   late MockAuthRepository repo;
@@ -26,8 +25,9 @@ void main() {
   blocTest<AuthCubit, AuthState>(
     'null auth event → unauthenticated',
     build: () {
-      when(() => repo.authStateChanges)
-          .thenAnswer((_) => Stream<AppUser?>.value(null));
+      when(
+        () => repo.authStateChanges,
+      ).thenAnswer((_) => Stream<AppUser?>.value(null));
       return AuthCubit(repo);
     },
     expect: () => const <AuthState>[
@@ -38,10 +38,12 @@ void main() {
   blocTest<AuthCubit, AuthState>(
     'user without profile doc → needsProfile',
     build: () {
-      when(() => repo.authStateChanges)
-          .thenAnswer((_) => Stream<AppUser?>.value(user));
-      when(() => repo.findProfile(uid: 'u1', email: 'a@b.c'))
-          .thenAnswer((_) async => const Right<Failure, AppUser?>(null));
+      when(
+        () => repo.authStateChanges,
+      ).thenAnswer((_) => Stream<AppUser?>.value(user));
+      when(
+        () => repo.findProfile(uid: 'u1', email: 'a@b.c'),
+      ).thenAnswer((_) async => const Right<Failure, AppUser?>(null));
       return AuthCubit(repo);
     },
     expect: () => const <AuthState>[
@@ -52,10 +54,12 @@ void main() {
   blocTest<AuthCubit, AuthState>(
     'user with profile → authenticated',
     build: () {
-      when(() => repo.authStateChanges)
-          .thenAnswer((_) => Stream<AppUser?>.value(user));
-      when(() => repo.findProfile(uid: 'u1', email: 'a@b.c'))
-          .thenAnswer((_) async => const Right<Failure, AppUser?>(profile));
+      when(
+        () => repo.authStateChanges,
+      ).thenAnswer((_) => Stream<AppUser?>.value(user));
+      when(
+        () => repo.findProfile(uid: 'u1', email: 'a@b.c'),
+      ).thenAnswer((_) async => const Right<Failure, AppUser?>(profile));
       return AuthCubit(repo);
     },
     expect: () => const <AuthState>[
@@ -66,8 +70,9 @@ void main() {
   blocTest<AuthCubit, AuthState>(
     'profile-check failure → still authenticated (fallback)',
     build: () {
-      when(() => repo.authStateChanges)
-          .thenAnswer((_) => Stream<AppUser?>.value(user));
+      when(
+        () => repo.authStateChanges,
+      ).thenAnswer((_) => Stream<AppUser?>.value(user));
       when(() => repo.findProfile(uid: 'u1', email: 'a@b.c')).thenAnswer(
         (_) async =>
             const Left<Failure, AppUser?>(Failure.serverError(message: 'x')),
@@ -82,11 +87,13 @@ void main() {
   blocTest<AuthCubit, AuthState>(
     'signIn failure → error set, submitting reset',
     build: () {
-      when(() => repo.authStateChanges)
-          .thenAnswer((_) => const Stream<AppUser?>.empty());
+      when(
+        () => repo.authStateChanges,
+      ).thenAnswer((_) => const Stream<AppUser?>.empty());
       when(() => repo.signIn(email: 'a@b.c', password: 'bad')).thenAnswer(
         (_) async => const Left<Failure, AppUser>(
-            Failure.serverError(message: 'Invalid email or password')),
+          Failure.serverError(message: 'Invalid email or password'),
+        ),
       );
       return AuthCubit(repo);
     },
@@ -100,8 +107,9 @@ void main() {
   blocTest<AuthCubit, AuthState>(
     'google cancel (typed failure) → no error shown',
     build: () {
-      when(() => repo.authStateChanges)
-          .thenAnswer((_) => const Stream<AppUser?>.empty());
+      when(
+        () => repo.authStateChanges,
+      ).thenAnswer((_) => const Stream<AppUser?>.empty());
       when(() => repo.signInWithGoogle()).thenAnswer(
         (_) async => const Left<Failure, AppUser>(Failure.cancelled()),
       );
@@ -117,12 +125,15 @@ void main() {
   blocTest<AuthCubit, AuthState>(
     'completeProfile uploads avatar, saves, authenticates',
     build: () {
-      when(() => repo.authStateChanges)
-          .thenAnswer((_) => const Stream<AppUser?>.empty());
-      when(() => repo.uploadAvatar(uid: 'u1', filePath: '/tmp/p.jpg'))
-          .thenAnswer((_) async => const Right<Failure, String>('http://avatar'));
-      when(() => repo.saveProfile(user: any(named: 'user')))
-          .thenAnswer((_) async => const Right<Failure, void>(null));
+      when(
+        () => repo.authStateChanges,
+      ).thenAnswer((_) => const Stream<AppUser?>.empty());
+      when(
+        () => repo.uploadAvatar(uid: 'u1', filePath: '/tmp/p.jpg'),
+      ).thenAnswer((_) async => const Right<Failure, String>('http://avatar'));
+      when(
+        () => repo.saveProfile(user: any(named: 'user')),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
       return AuthCubit(repo);
     },
     seed: () => const AuthState(status: AuthStatus.needsProfile, user: user),
@@ -164,12 +175,15 @@ void main() {
   blocTest<AuthCubit, AuthState>(
     'avatar upload failure → error, saveProfile never called',
     build: () {
-      when(() => repo.authStateChanges)
-          .thenAnswer((_) => const Stream<AppUser?>.empty());
-      when(() => repo.uploadAvatar(uid: 'u1', filePath: '/tmp/p.jpg'))
-          .thenAnswer(
-        (_) async =>
-            const Left<Failure, String>(Failure.serverError(message: 'upload failed')),
+      when(
+        () => repo.authStateChanges,
+      ).thenAnswer((_) => const Stream<AppUser?>.empty());
+      when(
+        () => repo.uploadAvatar(uid: 'u1', filePath: '/tmp/p.jpg'),
+      ).thenAnswer(
+        (_) async => const Left<Failure, String>(
+          Failure.serverError(message: 'upload failed'),
+        ),
       );
       return AuthCubit(repo);
     },
@@ -195,20 +209,24 @@ void main() {
   blocTest<AuthCubit, AuthState>(
     'completeProfile without avatar skips upload',
     build: () {
-      when(() => repo.authStateChanges)
-          .thenAnswer((_) => const Stream<AppUser?>.empty());
-      when(() => repo.saveProfile(user: any(named: 'user')))
-          .thenAnswer((_) async => const Right<Failure, void>(null));
+      when(
+        () => repo.authStateChanges,
+      ).thenAnswer((_) => const Stream<AppUser?>.empty());
+      when(
+        () => repo.saveProfile(user: any(named: 'user')),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
       return AuthCubit(repo);
     },
     seed: () => const AuthState(status: AuthStatus.needsProfile, user: user),
     act: (AuthCubit cubit) =>
         cubit.completeProfile(username: 'yo2', bio: null, avatarPath: null),
     verify: (AuthCubit cubit) {
-      verifyNever(() => repo.uploadAvatar(
-            uid: any(named: 'uid'),
-            filePath: any(named: 'filePath'),
-          ));
+      verifyNever(
+        () => repo.uploadAvatar(
+          uid: any(named: 'uid'),
+          filePath: any(named: 'filePath'),
+        ),
+      );
       final List<dynamic> captured = verify(
         () => repo.saveProfile(user: captureAny(named: 'user')),
       ).captured;

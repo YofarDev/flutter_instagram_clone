@@ -37,8 +37,11 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final String myUid = context.watch<AuthCubit>().state.user!.uid;
-    final AppUser otherUser =
-        context.read<ChatCubit>().state.conversation.otherUser;
+    final AppUser otherUser = context
+        .read<ChatCubit>()
+        .state
+        .conversation
+        .otherUser;
     final String username = otherUser.username ?? '';
     return Scaffold(
       appBar: AppBar(
@@ -87,10 +90,9 @@ class _ChatScreenState extends State<ChatScreen> {
                           child: Text(
                             l10n.chatEmpty,
                             style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withValues(alpha: 0.5),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.5),
                             ),
                           ),
                         )
@@ -99,8 +101,8 @@ class _ChatScreenState extends State<ChatScreen> {
                           padding: const EdgeInsets.all(8),
                           itemCount: state.messages.length,
                           itemBuilder: (BuildContext context, int index) {
-                            final ChatMessage message = state.messages[
-                                state.messages.length - 1 - index];
+                            final ChatMessage message = state
+                                .messages[state.messages.length - 1 - index];
                             final bool mine = message.senderId == myUid;
                             return Align(
                               alignment: mine
@@ -118,12 +120,12 @@ class _ChatScreenState extends State<ChatScreen> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: mine
-                                      ? Theme.of(context)
-                                          .colorScheme
-                                          .primaryContainer
-                                      : Theme.of(context)
-                                          .colorScheme
-                                          .surfaceContainerHighest,
+                                      ? Theme.of(
+                                          context,
+                                        ).colorScheme.primaryContainer
+                                      : Theme.of(
+                                          context,
+                                        ).colorScheme.surfaceContainerHighest,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(message.text),
@@ -132,8 +134,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           },
                         ),
                 ),
-                if (state.sending)
-                  const LinearProgressIndicator(minHeight: 2),
+                if (state.sending) const LinearProgressIndicator(minHeight: 2),
                 SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),

@@ -21,17 +21,20 @@ class ChatCubit extends Cubit<ChatState> {
     this._repository, {
     required Conversation conversation,
     required this._myUid,
-  })  : _conversation = conversation,
-        super(ChatState(conversation: conversation)) {
+  }) : _conversation = conversation,
+       super(ChatState(conversation: conversation)) {
     _sub = _repository
         .watchMessages(conversationId: conversation.id)
-        .listen((List<ChatMessage> messages) {
-      if (isClosed) return;
-      emit(state.copyWith(messages: messages));
-    }, onError: (Object e) {
-      if (isClosed) return;
-      emit(state.copyWith(error: 'Failed to load messages'));
-    });
+        .listen(
+          (List<ChatMessage> messages) {
+            if (isClosed) return;
+            emit(state.copyWith(messages: messages));
+          },
+          onError: (Object e) {
+            if (isClosed) return;
+            emit(state.copyWith(error: 'Failed to load messages'));
+          },
+        );
   }
 
   final IChatRepository _repository;

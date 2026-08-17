@@ -74,14 +74,14 @@ class _NotificationRow extends StatelessWidget {
     final ColorScheme colors = Theme.of(context).colorScheme;
     final String message = switch (item.type) {
       NotificationType.like => l10n.notifLikedPost(item.actorUsername),
-      NotificationType.comment =>
-        l10n.notifCommentedPost(item.actorUsername, item.commentText ?? ''),
+      NotificationType.comment => l10n.notifCommentedPost(
+        item.actorUsername,
+        item.commentText ?? '',
+      ),
       NotificationType.follow => l10n.notifStartedFollowing(item.actorUsername),
     };
     return Material(
-      color: item.read
-          ? null
-          : colors.primaryContainer.withValues(alpha: 0.15),
+      color: item.read ? null : colors.primaryContainer.withValues(alpha: 0.15),
       child: InkWell(
         onTap: () => context.push(Routes.userPath(item.actorId)),
         child: Padding(
@@ -93,9 +93,11 @@ class _NotificationRow extends StatelessWidget {
                     ? NetworkImage(item.actorAvatarUrl!)
                     : null,
                 child: item.actorAvatarUrl == null
-                    ? Text(item.actorUsername.isNotEmpty
-                        ? item.actorUsername[0].toUpperCase()
-                        : '?')
+                    ? Text(
+                        item.actorUsername.isNotEmpty
+                            ? item.actorUsername[0].toUpperCase()
+                            : '?',
+                      )
                     : null,
               ),
               const SizedBox(width: 12),
@@ -125,12 +127,12 @@ class _NotificationRow extends StatelessWidget {
                     child: Image.network(
                       item.postImageUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (
-                        BuildContext context,
-                        Object error,
-                        StackTrace? stackTrace,
-                      ) =>
-                          Container(color: colors.surfaceContainerHighest),
+                      errorBuilder:
+                          (
+                            BuildContext context,
+                            Object error,
+                            StackTrace? stackTrace,
+                          ) => Container(color: colors.surfaceContainerHighest),
                     ),
                   ),
                 ),

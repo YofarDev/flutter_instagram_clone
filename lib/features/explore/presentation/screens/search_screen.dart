@@ -36,8 +36,7 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Column(
           children: <Widget>[
             BlocBuilder<SearchCubit, SearchState>(
-              buildWhen: (SearchState p, SearchState c) =>
-                  p.query != c.query,
+              buildWhen: (SearchState p, SearchState c) => p.query != c.query,
               builder: (BuildContext context, SearchState state) {
                 return Padding(
                   padding: const EdgeInsets.all(8),
@@ -78,128 +77,126 @@ class _SearchScreenState extends State<SearchScreen> {
                     );
                 },
                 child: BlocBuilder<SearchCubit, SearchState>(
-                buildWhen: (SearchState p, SearchState c) =>
-                    p.query != c.query ||
-                    p.users != c.users ||
-                    p.searching != c.searching,
-                builder: (BuildContext context, SearchState state) {
-                  if (state.query.trim().isEmpty) {
-                    return BlocListener<ExploreCubit, ExploreState>(
-                      listenWhen: (ExploreState p, ExploreState c) =>
-                          p.error != c.error,
-                      listener: (BuildContext context, ExploreState state) {
-                        if (state.error != null) {
-                          ScaffoldMessenger.of(context)
-                            ..hideCurrentSnackBar()
-                            ..showSnackBar(
-                              SnackBar(content: Text(state.error!)),
-                            );
-                          context.read<ExploreCubit>().clearError();
-                        }
-                      },
-                      child: BlocBuilder<ExploreCubit, ExploreState>(
-                        builder: (BuildContext context, ExploreState state) {
-                          if (state.status == ExploreStatus.loading) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
+                  buildWhen: (SearchState p, SearchState c) =>
+                      p.query != c.query ||
+                      p.users != c.users ||
+                      p.searching != c.searching,
+                  builder: (BuildContext context, SearchState state) {
+                    if (state.query.trim().isEmpty) {
+                      return BlocListener<ExploreCubit, ExploreState>(
+                        listenWhen: (ExploreState p, ExploreState c) =>
+                            p.error != c.error,
+                        listener: (BuildContext context, ExploreState state) {
+                          if (state.error != null) {
+                            ScaffoldMessenger.of(context)
+                              ..hideCurrentSnackBar()
+                              ..showSnackBar(
+                                SnackBar(content: Text(state.error!)),
+                              );
+                            context.read<ExploreCubit>().clearError();
                           }
-                          if (state.posts.isEmpty) {
-                            return const SizedBox.shrink();
-                          }
-                          return NotificationListener<ScrollNotification>(
-                            onNotification: (ScrollNotification n) {
-                              if (n.metrics.pixels >
-                                  n.metrics.maxScrollExtent - 300) {
-                                context.read<ExploreCubit>().loadMore();
-                              }
-                              return false;
-                            },
-                            child: GridView.builder(
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                childAspectRatio: 1,
-                                mainAxisSpacing: 2,
-                                crossAxisSpacing: 2,
-                              ),
-                              itemCount: state.posts.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                final Post post = state.posts[index];
-                                return InkWell(
-                                  onTap: () => context.push(
-                                    Routes.postDetailPath(post.id),
-                                    extra: post,
-                                  ),
-                                  child: Image.network(
-                                    post.imageUrl,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, _, _) =>
-                                        Container(color: Colors.grey),
-                                  ),
-                                );
-                              },
-                            ),
-                          );
                         },
-                      ),
-                    );
-                  }
-                  final String tag = normalizeTag(state.query);
-                  final List<AppUser> users = state.users;
-                  return ListView(
-                    children: <Widget>[
-                      if (state.searching)
-                        const LinearProgressIndicator(minHeight: 2),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                        child: Text(
-                          l10n.searchAccounts,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        child: BlocBuilder<ExploreCubit, ExploreState>(
+                          builder: (BuildContext context, ExploreState state) {
+                            if (state.status == ExploreStatus.loading) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            if (state.posts.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+                            return NotificationListener<ScrollNotification>(
+                              onNotification: (ScrollNotification n) {
+                                if (n.metrics.pixels >
+                                    n.metrics.maxScrollExtent - 300) {
+                                  context.read<ExploreCubit>().loadMore();
+                                }
+                                return false;
+                              },
+                              child: GridView.builder(
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 3,
+                                      childAspectRatio: 1,
+                                      mainAxisSpacing: 2,
+                                      crossAxisSpacing: 2,
+                                    ),
+                                itemCount: state.posts.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  final Post post = state.posts[index];
+                                  return InkWell(
+                                    onTap: () => context.push(
+                                      Routes.postDetailPath(post.id),
+                                      extra: post,
+                                    ),
+                                    child: Image.network(
+                                      post.imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, _, _) =>
+                                          Container(color: Colors.grey),
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
                         ),
-                      ),
-                      if (users.isEmpty && !state.searching)
+                      );
+                    }
+                    final String tag = normalizeTag(state.query);
+                    final List<AppUser> users = state.users;
+                    return ListView(
+                      children: <Widget>[
+                        if (state.searching)
+                          const LinearProgressIndicator(minHeight: 2),
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 24),
-                          child: Center(
-                            child: Text(l10n.searchNoResults),
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                          child: Text(
+                            l10n.searchAccounts,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
-                      for (final AppUser user in users)
-                        ListTile(
-                          leading: CircleAvatar(
-                            backgroundImage: user.avatarUrl != null
-                                ? NetworkImage(user.avatarUrl!)
-                                : null,
-                            child: user.avatarUrl == null
-                                ? Text(
-                                    user.username?.isNotEmpty == true
-                                        ? user.username![0].toUpperCase()
-                                        : '?',
-                                  )
-                                : null,
+                        if (users.isEmpty && !state.searching)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24),
+                            child: Center(child: Text(l10n.searchNoResults)),
                           ),
-                          title: Text(user.username ?? ''),
-                          onTap: () =>
-                              context.push(Routes.userPath(user.uid)),
+                        for (final AppUser user in users)
+                          ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage: user.avatarUrl != null
+                                  ? NetworkImage(user.avatarUrl!)
+                                  : null,
+                              child: user.avatarUrl == null
+                                  ? Text(
+                                      user.username?.isNotEmpty == true
+                                          ? user.username![0].toUpperCase()
+                                          : '?',
+                                    )
+                                  : null,
+                            ),
+                            title: Text(user.username ?? ''),
+                            onTap: () =>
+                                context.push(Routes.userPath(user.uid)),
+                          ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                          child: Text(
+                            l10n.searchHashtags,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                        child: Text(
-                          l10n.searchHashtags,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      if (tag.isNotEmpty)
-                        ListTile(
-                          leading: const Icon(Icons.tag),
-                          title: Text('#$tag'),
-                          onTap: () => context.push(Routes.hashtagPath(tag)),
-                        ),
-                    ],
-                  );
-                },
-              ),
+                        if (tag.isNotEmpty)
+                          ListTile(
+                            leading: const Icon(Icons.tag),
+                            title: Text('#$tag'),
+                            onTap: () => context.push(Routes.hashtagPath(tag)),
+                          ),
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
           ],

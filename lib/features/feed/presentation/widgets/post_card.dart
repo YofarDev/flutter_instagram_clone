@@ -31,14 +31,18 @@ class PostCard extends StatelessWidget {
                 ? NetworkImage(post.authorAvatarUrl!)
                 : null,
             child: post.authorAvatarUrl == null
-                ? Text(post.authorUsername.isNotEmpty
-                    ? post.authorUsername[0].toUpperCase()
-                    : '?')
+                ? Text(
+                    post.authorUsername.isNotEmpty
+                        ? post.authorUsername[0].toUpperCase()
+                        : '?',
+                  )
                 : null,
           ),
           title: Text(post.authorUsername),
-          trailing:
-              Text(timeAgo(post.createdAt), style: Theme.of(context).textTheme.bodySmall),
+          trailing: Text(
+            timeAgo(post.createdAt),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         ),
         AspectRatio(
           aspectRatio: 1,
@@ -48,11 +52,11 @@ class PostCard extends StatelessWidget {
             errorBuilder: (_, _, _) => Container(color: Colors.grey),
             loadingBuilder: (_, Widget child, ImageChunkEvent? progress) =>
                 progress == null
-                    ? child
-                    : Container(
-                        color: Colors.grey,
-                        child: const Center(child: CircularProgressIndicator()),
-                      ),
+                ? child
+                : Container(
+                    color: Colors.grey,
+                    child: const Center(child: CircularProgressIndicator()),
+                  ),
           ),
         ),
         Row(
@@ -76,14 +80,18 @@ class PostCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               // TODO(l10n): plural units
-              Text('${post.likeCount} likes',
-                  style: const TextStyle(fontWeight: FontWeight.w600)),
+              Text(
+                '${post.likeCount} likes',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
               const SizedBox(height: 4),
               if (post.caption.isNotEmpty)
                 Text('${post.authorUsername}  ${post.caption}'),
               const SizedBox(height: 4),
-              Text('${post.commentCount} comments',
-                  style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                '${post.commentCount} comments',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ],
           ),
         ),

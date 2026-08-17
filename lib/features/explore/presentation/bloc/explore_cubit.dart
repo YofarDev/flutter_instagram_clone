@@ -8,13 +8,16 @@ import '../../domain/repositories/explore_repository.dart';
 import 'explore_state.dart';
 
 class ExploreCubit extends Cubit<ExploreState> {
-  ExploreCubit(this._repository, this._profileRepository, {required String myUid})
-      : _myUid = myUid,
-        super(const ExploreState()) {
+  ExploreCubit(
+    this._repository,
+    this._profileRepository, {
+    required String myUid,
+  }) : _myUid = myUid,
+       super(const ExploreState()) {
     _subscribe();
-    _followingSub = _profileRepository
-        .watchFollowingIds(uid: myUid)
-        .listen((List<String> ids) {
+    _followingSub = _profileRepository.watchFollowingIds(uid: myUid).listen((
+      List<String> ids,
+    ) {
       _followingIds = ids.toSet();
       // re-filter raw posts on follow changes; skip before first posts emission
       if (_allPosts != null) _emitFiltered(_gen);
@@ -36,14 +39,17 @@ class ExploreCubit extends Cubit<ExploreState> {
   // ponytail: inverse of feed — discovery shows only non-followed strangers;
   // same client-side filter ceiling (Firestore 'in' caps at 10)
   List<Post> get _visiblePosts => _allPosts!
-      .where((Post p) =>
-          p.authorId != _myUid && !_followingIds.contains(p.authorId))
+      .where(
+        (Post p) => p.authorId != _myUid && !_followingIds.contains(p.authorId),
+      )
       .toList();
 
   void _subscribe() {
     _sub?.cancel();
     final int gen = ++_gen;
-    _sub = _repository.watchExplorePosts(limit: _limit).listen(
+    _sub = _repository
+        .watchExplorePosts(limit: _limit)
+        .listen(
           (List<Post> posts) => _onPosts(posts, gen),
           onError: (Object e) {
             if (isClosed) return;
@@ -60,11 +66,13 @@ class ExploreCubit extends Cubit<ExploreState> {
 
   void _emitFiltered(int gen) {
     if (isClosed || gen != _gen) return;
-    emit(state.copyWith(
-      status: ExploreStatus.ready,
-      posts: _visiblePosts,
-      hasMore: _allPosts!.length >= _limit,
-    ));
+    emit(
+      state.copyWith(
+        status: ExploreStatus.ready,
+        posts: _visiblePosts,
+        hasMore: _allPosts!.length >= _limit,
+      ),
+    );
   }
 
   void loadMore() {

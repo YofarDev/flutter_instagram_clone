@@ -83,9 +83,8 @@ class _CreateReelScreenState extends State<CreateReelScreen> {
                   controller: _caption,
                   decoration: InputDecoration(hintText: l10n.reelCaptionHint),
                   maxLines: 2,
-                  onChanged: (String value) => context
-                      .read<CreateReelCubit>()
-                      .captionChanged(value),
+                  onChanged: (String value) =>
+                      context.read<CreateReelCubit>().captionChanged(value),
                 ),
                 const SizedBox(height: 16),
                 FilledButton(
@@ -126,16 +125,19 @@ class _VideoPreviewState extends State<_VideoPreview> {
   void initState() {
     super.initState();
     _controller = VideoPlayerController.file(File(widget.filePath));
-    _controller.initialize().then((_) {
-      if (!mounted) return;
-      _controller
-        ..setLooping(true)
-        ..setVolume(0)
-        ..play();
-      setState(() {});
-    }).catchError((Object _) {
-      if (mounted) setState(() => _failed = true);
-    });
+    _controller
+        .initialize()
+        .then((_) {
+          if (!mounted) return;
+          _controller
+            ..setLooping(true)
+            ..setVolume(0)
+            ..play();
+          setState(() {});
+        })
+        .catchError((Object _) {
+          if (mounted) setState(() => _failed = true);
+        });
   }
 
   @override
@@ -151,9 +153,7 @@ class _VideoPreviewState extends State<_VideoPreview> {
         aspectRatio: 1,
         child: ColoredBox(
           color: Colors.grey,
-          child: Center(
-            child: Icon(Icons.error_outline, color: Colors.white),
-          ),
+          child: Center(child: Icon(Icons.error_outline, color: Colors.white)),
         ),
       );
     }

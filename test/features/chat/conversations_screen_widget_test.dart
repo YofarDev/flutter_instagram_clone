@@ -24,12 +24,12 @@ class MockAuthRepository extends Mock implements IAuthRepository {}
 AppUser _me() => AppUser(uid: 'me', email: 'me@x.com', username: 'me');
 
 Conversation _conversation() => Conversation(
-      id: 'c1',
-      otherUser: AppUser(uid: 'u1', email: 'a@b.c', username: 'alice'),
-      lastMessageText: 'hello',
-      lastMessageSenderId: 'me',
-      lastMessageAt: DateTime.now(),
-    );
+  id: 'c1',
+  otherUser: AppUser(uid: 'u1', email: 'a@b.c', username: 'alice'),
+  lastMessageText: 'hello',
+  lastMessageSenderId: 'me',
+  lastMessageAt: DateTime.now(),
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +41,8 @@ void main() {
     repo = MockChatRepository();
     conversation = _conversation();
     when(() => repo.watchConversations(myUid: 'me')).thenAnswer(
-        (_) => Stream<List<Conversation>>.value(<Conversation>[conversation]));
+      (_) => Stream<List<Conversation>>.value(<Conversation>[conversation]),
+    );
   });
 
   // AuthCubit state must be hydrated before the screen's first build:
@@ -49,12 +50,15 @@ void main() {
   // Drains microtasks only — timers never fire in fake async.
   Future<AuthCubit> authedCubit() async {
     final MockAuthRepository authRepo = MockAuthRepository();
-    when(() => authRepo.authStateChanges)
-        .thenAnswer((_) => Stream<AppUser?>.value(_me()));
-    when(() => authRepo.findProfile(
-          uid: any(named: 'uid'),
-          email: any(named: 'email'),
-        )).thenAnswer((_) async => Right<Failure, AppUser?>(_me()));
+    when(
+      () => authRepo.authStateChanges,
+    ).thenAnswer((_) => Stream<AppUser?>.value(_me()));
+    when(
+      () => authRepo.findProfile(
+        uid: any(named: 'uid'),
+        email: any(named: 'email'),
+      ),
+    ).thenAnswer((_) async => Right<Failure, AppUser?>(_me()));
     final AuthCubit cubit = AuthCubit(authRepo);
     for (int i = 0; i < 20; i++) {
       await Future<void>.value();
@@ -67,7 +71,8 @@ void main() {
       providers: <SingleChildWidget>[
         BlocProvider<AuthCubit>.value(value: authCubit),
         BlocProvider<ConversationsCubit>(
-            create: (_) => ConversationsCubit(repo, myUid: 'me')),
+          create: (_) => ConversationsCubit(repo, myUid: 'me'),
+        ),
       ],
       child: child,
     );
@@ -87,8 +92,9 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('rows render other user, You-prefixed preview, and time',
-      (WidgetTester tester) async {
+  testWidgets('rows render other user, You-prefixed preview, and time', (
+    WidgetTester tester,
+  ) async {
     await pumpSubject(tester);
 
     expect(find.text('alice'), findsOneWidget);
@@ -96,8 +102,9 @@ void main() {
     expect(find.text('now'), findsOneWidget);
   });
 
-  testWidgets('tap row pushes chat route with conversation as extra',
-      (WidgetTester tester) async {
+  testWidgets('tap row pushes chat route with conversation as extra', (
+    WidgetTester tester,
+  ) async {
     final AuthCubit authCubit = await authedCubit();
     final GoRouter router = GoRouter(
       routes: <RouteBase>[

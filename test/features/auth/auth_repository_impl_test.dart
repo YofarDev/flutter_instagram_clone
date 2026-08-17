@@ -29,41 +29,46 @@ void main() {
 
   group('signUp', () {
     test('maps datasource user to Right', () async {
-      when(() => ds.signUp(email: 'a@b.c', password: 'pw'))
-          .thenAnswer((_) async => user);
+      when(
+        () => ds.signUp(email: 'a@b.c', password: 'pw'),
+      ).thenAnswer((_) async => user);
 
-      final Either<Failure, AppUser> result =
-          await repo.signUp(email: 'a@b.c', password: 'pw');
+      final Either<Failure, AppUser> result = await repo.signUp(
+        email: 'a@b.c',
+        password: 'pw',
+      );
 
       expect(result, const Right<Failure, AppUser>(user));
     });
 
     test('maps invalid-credential to friendly failure', () async {
-      when(() => ds.signUp(email: 'a@b.c', password: 'pw')).thenThrow(
-        FirebaseAuthException(code: 'email-already-in-use'),
-      );
+      when(
+        () => ds.signUp(email: 'a@b.c', password: 'pw'),
+      ).thenThrow(FirebaseAuthException(code: 'email-already-in-use'));
 
-      final Either<Failure, AppUser> result =
-          await repo.signUp(email: 'a@b.c', password: 'pw');
+      final Either<Failure, AppUser> result = await repo.signUp(
+        email: 'a@b.c',
+        password: 'pw',
+      );
 
       expect(result.getLeft().toNullable()?.message, 'Email already in use');
     });
 
     test('maps network failure', () async {
-      when(() => ds.signUp(email: 'a@b.c', password: 'pw')).thenThrow(
-        FirebaseAuthException(code: 'network-request-failed'),
-      );
+      when(
+        () => ds.signUp(email: 'a@b.c', password: 'pw'),
+      ).thenThrow(FirebaseAuthException(code: 'network-request-failed'));
 
-      final Either<Failure, AppUser> result =
-          await repo.signUp(email: 'a@b.c', password: 'pw');
+      final Either<Failure, AppUser> result = await repo.signUp(
+        email: 'a@b.c',
+        password: 'pw',
+      );
 
       expect(
         result.getLeft().toNullable(),
         isA<Failure>().having(
-          (Failure f) => f.maybeMap(
-            networkError: (_) => true,
-            orElse: () => false,
-          ),
+          (Failure f) =>
+              f.maybeMap(networkError: (_) => true, orElse: () => false),
           'is network error',
           isTrue,
         ),
@@ -86,10 +91,8 @@ void main() {
       expect(
         result.getLeft().toNullable(),
         isA<Failure>().having(
-          (Failure f) => f.maybeWhen(
-            cancelled: () => true,
-            orElse: () => false,
-          ),
+          (Failure f) =>
+              f.maybeWhen(cancelled: () => true, orElse: () => false),
           'is cancelled',
           isTrue,
         ),
@@ -101,8 +104,10 @@ void main() {
     test('missing doc returns Right(null)', () async {
       when(() => ds.fetchProfileDoc('u1')).thenAnswer((_) async => null);
 
-      final Either<Failure, AppUser?> result =
-          await repo.findProfile(uid: 'u1', email: 'a@b.c');
+      final Either<Failure, AppUser?> result = await repo.findProfile(
+        uid: 'u1',
+        email: 'a@b.c',
+      );
 
       expect(result, const Right<Failure, AppUser?>(null));
     });
@@ -117,8 +122,10 @@ void main() {
         },
       );
 
-      final Either<Failure, AppUser?> result =
-          await repo.findProfile(uid: 'u1', email: 'a@b.c');
+      final Either<Failure, AppUser?> result = await repo.findProfile(
+        uid: 'u1',
+        email: 'a@b.c',
+      );
 
       expect(
         result.getRight().toNullable(),
@@ -134,16 +141,20 @@ void main() {
 
   group('saveProfile username uniqueness', () {
     test('UsernameTakenException maps to friendly failure', () async {
-      when(() => ds.fetchProfileDoc('u1'))
-          .thenAnswer((_) async => <String, dynamic>{'email': 'a@b.c'});
-      when(() => ds.saveProfileDoc(
-            uid: 'u1',
-            data: any(named: 'data'),
-            previousUsername: any(named: 'previousUsername'),
-          )).thenThrow(UsernameTakenException());
+      when(
+        () => ds.fetchProfileDoc('u1'),
+      ).thenAnswer((_) async => <String, dynamic>{'email': 'a@b.c'});
+      when(
+        () => ds.saveProfileDoc(
+          uid: 'u1',
+          data: any(named: 'data'),
+          previousUsername: any(named: 'previousUsername'),
+        ),
+      ).thenThrow(UsernameTakenException());
 
-      final Either<Failure, void> result =
-          await repo.saveProfile(user: profileWithUsername);
+      final Either<Failure, void> result = await repo.saveProfile(
+        user: profileWithUsername,
+      );
 
       expect(result.getLeft().toNullable()?.message, 'Username is taken');
     });
@@ -152,19 +163,23 @@ void main() {
       when(() => ds.fetchProfileDoc('u1')).thenAnswer(
         (_) async => <String, dynamic>{'email': 'a@b.c', 'username': 'old'},
       );
-      when(() => ds.saveProfileDoc(
-            uid: 'u1',
-            data: any(named: 'data'),
-            previousUsername: 'old',
-          )).thenAnswer((_) async {});
+      when(
+        () => ds.saveProfileDoc(
+          uid: 'u1',
+          data: any(named: 'data'),
+          previousUsername: 'old',
+        ),
+      ).thenAnswer((_) async {});
 
       await repo.saveProfile(user: profileWithUsername);
 
-      verify(() => ds.saveProfileDoc(
-            uid: 'u1',
-            data: any(named: 'data'),
-            previousUsername: 'old',
-          )).called(1);
+      verify(
+        () => ds.saveProfileDoc(
+          uid: 'u1',
+          data: any(named: 'data'),
+          previousUsername: 'old',
+        ),
+      ).called(1);
     });
   });
 }

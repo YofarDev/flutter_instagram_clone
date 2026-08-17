@@ -18,8 +18,11 @@ void main() {
 
   late MockAuthRepository repo;
 
-  setUpAll(() => registerFallbackValue(
-      AppUser(uid: 'u1', email: 'yo@x.dev', username: 'yo')));
+  setUpAll(
+    () => registerFallbackValue(
+      AppUser(uid: 'u1', email: 'yo@x.dev', username: 'yo'),
+    ),
+  );
 
   setUp(() {
     repo = MockAuthRepository();
@@ -46,18 +49,23 @@ void main() {
     await tester.tap(find.text('Save'));
     await tester.pump();
 
-    verifyNever(() => repo.uploadAvatar(
-          uid: any(named: 'uid'),
-          filePath: any(named: 'filePath'),
-        ));
+    verifyNever(
+      () => repo.uploadAvatar(
+        uid: any(named: 'uid'),
+        filePath: any(named: 'filePath'),
+      ),
+    );
     verifyNever(() => repo.saveProfile(user: any(named: 'user')));
   });
 
-  testWidgets('taken username surfaces localized snackbar',
-      (WidgetTester tester) async {
+  testWidgets('taken username surfaces localized snackbar', (
+    WidgetTester tester,
+  ) async {
     when(() => repo.saveProfile(user: any(named: 'user'))).thenAnswer(
-        (_) async =>
-            Left<Failure, void>(Failure.serverError(message: 'Username is taken')));
+      (_) async => Left<Failure, void>(
+        Failure.serverError(message: 'Username is taken'),
+      ),
+    );
 
     await tester.pumpWidget(subject());
 

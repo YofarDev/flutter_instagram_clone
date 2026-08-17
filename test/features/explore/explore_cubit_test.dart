@@ -57,19 +57,20 @@ void main() {
     profileRepo = MockIProfileRepository();
     registerFallbackValue(mine);
     registerFallbackValue(<String>[]);
-    when(() => profileRepo.watchFollowingIds(uid: any(named: 'uid')))
-        .thenAnswer((_) => const Stream<List<String>>.empty());
+    when(
+      () => profileRepo.watchFollowingIds(uid: any(named: 'uid')),
+    ).thenAnswer((_) => const Stream<List<String>>.empty());
   });
 
   blocTest<ExploreCubit, ExploreState>(
     'explore hides self and followed, shows strangers',
     build: () {
-      when(() => repo.watchExplorePosts(limit: any(named: 'limit')))
-          .thenAnswer((_) => Stream<List<Post>>.value(
-                <Post>[mine, followedPost, stranger],
-              ));
-      when(() => profileRepo.watchFollowingIds(uid: any(named: 'uid')))
-          .thenAnswer((_) => Stream<List<String>>.value(<String>['u2']));
+      when(() => repo.watchExplorePosts(limit: any(named: 'limit'))).thenAnswer(
+        (_) => Stream<List<Post>>.value(<Post>[mine, followedPost, stranger]),
+      );
+      when(
+        () => profileRepo.watchFollowingIds(uid: any(named: 'uid')),
+      ).thenAnswer((_) => Stream<List<String>>.value(<String>['u2']));
       return ExploreCubit(repo, profileRepo, myUid: 'me');
     },
     expect: () => <ExploreState>[
@@ -95,10 +96,12 @@ void main() {
       addTearDown(postsController.close);
       followingController = StreamController<List<String>>();
       addTearDown(followingController.close);
-      when(() => repo.watchExplorePosts(limit: any(named: 'limit')))
-          .thenAnswer((_) => postsController.stream);
-      when(() => profileRepo.watchFollowingIds(uid: any(named: 'uid')))
-          .thenAnswer((_) => followingController.stream);
+      when(
+        () => repo.watchExplorePosts(limit: any(named: 'limit')),
+      ).thenAnswer((_) => postsController.stream);
+      when(
+        () => profileRepo.watchFollowingIds(uid: any(named: 'uid')),
+      ).thenAnswer((_) => followingController.stream);
       return ExploreCubit(repo, profileRepo, myUid: 'me');
     },
     act: (ExploreCubit cubit) async {
@@ -126,8 +129,9 @@ void main() {
   blocTest<ExploreCubit, ExploreState>(
     'loadMore re-subscribes with grown limit',
     build: () {
-      when(() => repo.watchExplorePosts(limit: any(named: 'limit')))
-          .thenAnswer((_) => Stream<List<Post>>.value(manyPosts));
+      when(
+        () => repo.watchExplorePosts(limit: any(named: 'limit')),
+      ).thenAnswer((_) => Stream<List<Post>>.value(manyPosts));
       return ExploreCubit(repo, profileRepo, myUid: 'me');
     },
     act: (ExploreCubit cubit) async {
@@ -160,31 +164,29 @@ void main() {
       final StreamController<List<Post>> controller =
           StreamController<List<Post>>();
       addTearDown(controller.close);
-      when(() => repo.watchExplorePosts(limit: any(named: 'limit')))
-          .thenAnswer((_) => controller.stream);
+      when(
+        () => repo.watchExplorePosts(limit: any(named: 'limit')),
+      ).thenAnswer((_) => controller.stream);
       controller.addError(Exception('db down'));
       return ExploreCubit(repo, profileRepo, myUid: 'me');
     },
-    expect: () => <ExploreState>[
-      ExploreState(error: 'Failed to load explore'),
-    ],
+    expect: () => <ExploreState>[ExploreState(error: 'Failed to load explore')],
   );
 
   blocTest<ExploreCubit, ExploreState>(
     'loadMore blocked when hasMore false',
     build: () {
-      when(() => repo.watchExplorePosts(limit: any(named: 'limit')))
-          .thenAnswer((_) => const Stream<List<Post>>.empty());
+      when(
+        () => repo.watchExplorePosts(limit: any(named: 'limit')),
+      ).thenAnswer((_) => const Stream<List<Post>>.empty());
       return ExploreCubit(repo, profileRepo, myUid: 'me');
     },
-    seed: () => ExploreState(
-      status: ExploreStatus.ready,
-      hasMore: false,
-    ),
+    seed: () => ExploreState(status: ExploreStatus.ready, hasMore: false),
     act: (ExploreCubit cubit) => cubit.loadMore(),
     verify: (ExploreCubit cubit) {
-      verify(() => repo.watchExplorePosts(limit: any(named: 'limit')))
-          .called(1);
+      verify(
+        () => repo.watchExplorePosts(limit: any(named: 'limit')),
+      ).called(1);
     },
     expect: () => const <ExploreState>[],
   );

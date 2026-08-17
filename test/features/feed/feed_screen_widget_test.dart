@@ -30,14 +30,14 @@ class MockAuthRepository extends Mock implements IAuthRepository {}
 class MockStoriesRepository extends Mock implements IStoriesRepository {}
 
 Post _post() => Post(
-      id: 'p1',
-      authorId: 'u1',
-      authorUsername: 'alice',
-      imageUrl: 'http://x',
-      caption: 'hello world',
-      createdAt: DateTime(2026, 1, 1),
-      likeCount: 3,
-    );
+  id: 'p1',
+  authorId: 'u1',
+  authorUsername: 'alice',
+  imageUrl: 'http://x',
+  caption: 'hello world',
+  createdAt: DateTime(2026, 1, 1),
+  likeCount: 3,
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -54,29 +54,34 @@ void main() {
     profileRepo = MockProfileRepository();
     storiesRepo = MockStoriesRepository();
     toggleGate = Completer<Either<Failure, void>>();
-    when(() => repo.watchFeed(limit: any(named: 'limit')))
-        .thenAnswer((_) => Stream<List<Post>>.value(<Post>[_post()]));
-    when(() => profileRepo.watchFollowingIds(uid: any(named: 'uid')))
-        .thenAnswer((_) => const Stream<List<String>>.empty());
-    when(() => repo.fetchLikedPostIds(postIds: any(named: 'postIds')))
-        .thenAnswer(
-            (_) async => const Right<Failure, Set<String>>(<String>{}));
-    when(() => repo.toggleLike(
-          post: any(named: 'post'),
-          currentlyLiked: any(named: 'currentlyLiked'),
-        )).thenAnswer((_) => toggleGate.future);
-    when(() => storiesRepo.watchStories())
-        .thenAnswer((_) => const Stream<List<Story>>.empty());
-    when(() => storiesRepo.fetchViewedStoryIds(
-          storyIds: any(named: 'storyIds'),
-        )).thenAnswer(
-        (_) async => const Right<Failure, Set<String>>(<String>{}));
+    when(
+      () => repo.watchFeed(limit: any(named: 'limit')),
+    ).thenAnswer((_) => Stream<List<Post>>.value(<Post>[_post()]));
+    when(
+      () => profileRepo.watchFollowingIds(uid: any(named: 'uid')),
+    ).thenAnswer((_) => const Stream<List<String>>.empty());
+    when(
+      () => repo.fetchLikedPostIds(postIds: any(named: 'postIds')),
+    ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
+    when(
+      () => repo.toggleLike(
+        post: any(named: 'post'),
+        currentlyLiked: any(named: 'currentlyLiked'),
+      ),
+    ).thenAnswer((_) => toggleGate.future);
+    when(
+      () => storiesRepo.watchStories(),
+    ).thenAnswer((_) => const Stream<List<Story>>.empty());
+    when(
+      () => storiesRepo.fetchViewedStoryIds(storyIds: any(named: 'storyIds')),
+    ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
   });
 
   Widget subject() {
     final MockAuthRepository authRepo = MockAuthRepository();
-    when(() => authRepo.authStateChanges)
-        .thenAnswer((_) => const Stream<AppUser?>.empty());
+    when(
+      () => authRepo.authStateChanges,
+    ).thenAnswer((_) => const Stream<AppUser?>.empty());
     return MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -84,9 +89,11 @@ void main() {
         providers: <SingleChildWidget>[
           BlocProvider<AuthCubit>(create: (_) => AuthCubit(authRepo)),
           BlocProvider<FeedCubit>(
-              create: (_) => FeedCubit(repo, profileRepo, myUid: 'u1')),
+            create: (_) => FeedCubit(repo, profileRepo, myUid: 'u1'),
+          ),
           BlocProvider<StoriesCubit>(
-              create: (_) => StoriesCubit(storiesRepo, myUid: 'u1')),
+            create: (_) => StoriesCubit(storiesRepo, myUid: 'u1'),
+          ),
         ],
         child: const FeedScreen(),
       ),
@@ -102,8 +109,9 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('like tap on feed rebuilds via likedIds change and fills heart',
-      (WidgetTester tester) async {
+  testWidgets('like tap on feed rebuilds via likedIds change and fills heart', (
+    WidgetTester tester,
+  ) async {
     await pumpSubject(tester);
 
     expect(find.byIcon(Icons.favorite_border), findsOneWidget);
@@ -118,9 +126,8 @@ void main() {
     expect(find.byIcon(Icons.favorite_border), findsNothing);
     expect(find.text('4 likes'), findsOneWidget);
 
-    verify(() => repo.toggleLike(
-          post: any(named: 'post'),
-          currentlyLiked: false,
-        )).called(1);
+    verify(
+      () => repo.toggleLike(post: any(named: 'post'), currentlyLiked: false),
+    ).called(1);
   });
 }

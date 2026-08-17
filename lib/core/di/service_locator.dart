@@ -78,11 +78,8 @@ Future<void> setupServiceLocator() async {
     () => CreatePostCubit(getIt<IFeedRepository>()),
   );
   getIt.registerFactoryParam<PostDetailCubit, Post?, String?>(
-    (Post? post, String? postId) => PostDetailCubit(
-      getIt<IFeedRepository>(),
-      post: post,
-      postId: postId,
-    ),
+    (Post? post, String? postId) =>
+        PostDetailCubit(getIt<IFeedRepository>(), post: post, postId: postId),
   );
 
   // --- Profile feature ---
@@ -100,8 +97,7 @@ Future<void> setupServiceLocator() async {
     ),
   );
   getIt.registerFactoryParam<EditProfileCubit, AppUser, void>(
-    (AppUser user, _) =>
-        EditProfileCubit(getIt<IAuthRepository>(), user: user),
+    (AppUser user, _) => EditProfileCubit(getIt<IAuthRepository>(), user: user),
   );
   getIt.registerFactory<FollowListCubit>(
     () => FollowListCubit(getIt<IProfileRepository>()),
@@ -136,10 +132,7 @@ Future<void> setupServiceLocator() async {
     () => StoriesRepositoryImpl(getIt<IStoriesDataSource>()),
   );
   getIt.registerFactoryParam<StoriesCubit, String, void>(
-    (String uid, _) => StoriesCubit(
-      getIt<IStoriesRepository>(),
-      myUid: uid,
-    ),
+    (String uid, _) => StoriesCubit(getIt<IStoriesRepository>(), myUid: uid),
   );
   getIt.registerFactory<CreateStoryCubit>(
     () => CreateStoryCubit(getIt<IStoriesRepository>()),
@@ -164,17 +157,12 @@ Future<void> setupServiceLocator() async {
   );
 
   // --- Chat feature ---
-  getIt.registerLazySingleton<IChatDataSource>(
-    () => ChatFirebaseDataSource(),
-  );
+  getIt.registerLazySingleton<IChatDataSource>(() => ChatFirebaseDataSource());
   getIt.registerLazySingleton<IChatRepository>(
     () => ChatRepositoryImpl(getIt<IChatDataSource>()),
   );
   getIt.registerFactoryParam<ConversationsCubit, String, void>(
-    (String uid, _) => ConversationsCubit(
-      getIt<IChatRepository>(),
-      myUid: uid,
-    ),
+    (String uid, _) => ConversationsCubit(getIt<IChatRepository>(), myUid: uid),
   );
   getIt.registerFactoryParam<ChatCubit, ChatArgs, void>(
     (ChatArgs args, _) => ChatCubit(

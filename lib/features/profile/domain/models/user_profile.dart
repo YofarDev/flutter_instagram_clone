@@ -22,15 +22,14 @@ sealed class UserProfile with _$UserProfile {
     int followerCount = 0,
     int followingCount = 0,
     int postCount = 0,
-  }) =>
-      UserProfile(
-        uid: user.uid,
-        email: user.email,
-        username: user.username,
-        bio: user.bio,
-        avatarUrl: user.avatarUrl,
-        followerCount: followerCount,
-        followingCount: followingCount,
-        postCount: postCount,
-      );
+  }) => UserProfile(
+    uid: user.uid,
+    email: user.email,
+    username: user.username,
+    bio: user.bio,
+    avatarUrl: user.avatarUrl,
+    followerCount: followerCount,
+    followingCount: followingCount,
+    postCount: postCount,
+  );
 }

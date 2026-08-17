@@ -10,10 +10,7 @@ import '../models/reel_dto.dart';
 
 abstract interface class IReelsDataSource {
   Stream<List<Reel>> watchReels({required int limit});
-  Future<void> createReel({
-    required String caption,
-    required String filePath,
-  });
+  Future<void> createReel({required String caption, required String filePath});
   Future<Set<String>> fetchLikedReelIds({required List<String> reelIds});
   Future<void> toggleReelLike({
     required String reelId,
@@ -32,8 +29,10 @@ class ReelsFirebaseDataSource implements IReelsDataSource {
   // ponytail: users-doc read per write; cache if read costs ever matter
   Future<({String username, String? avatarUrl})> _currentUserProfile() async {
     final User user = FirebaseAuth.instance.currentUser!;
-    final DocumentSnapshot<Object?> profile =
-        await _db.collection('users').doc(user.uid).get();
+    final DocumentSnapshot<Object?> profile = await _db
+        .collection('users')
+        .doc(user.uid)
+        .get();
     final Map<String, dynamic> data =
         profile.data() as Map<String, dynamic>? ?? <String, dynamic>{};
     return (
@@ -48,11 +47,15 @@ class ReelsFirebaseDataSource implements IReelsDataSource {
       .orderBy('createdAt', descending: true)
       .limit(limit)
       .snapshots()
-      .map((QuerySnapshot<Object?> snap) => snap.docs
-          .map((QueryDocumentSnapshot<Object?> doc) => ReelDto.fromMap(
+      .map(
+        (QuerySnapshot<Object?> snap) => snap.docs
+            .map(
+              (QueryDocumentSnapshot<Object?> doc) => ReelDto.fromMap(
                 doc.data() as Map<String, dynamic>,
-              ).toDomain(doc.id))
-          .toList());
+              ).toDomain(doc.id),
+            )
+            .toList(),
+      );
 
   @override
   Future<void> createReel({
@@ -66,15 +69,19 @@ class ReelsFirebaseDataSource implements IReelsDataSource {
     await ref.putFile(File(filePath));
     final String videoUrl = await ref.getDownloadURL();
     try {
-      await _db.collection('reels').add(ReelDto(
-            uid: _uid,
-            authorUsername: profile.username,
-            authorAvatarUrl: profile.avatarUrl,
-            videoUrl: videoUrl,
-            caption: caption,
-            createdAtMillis: millis,
-            likeCount: 0,
-          ).toMap());
+      await _db
+          .collection('reels')
+          .add(
+            ReelDto(
+              uid: _uid,
+              authorUsername: profile.username,
+              authorAvatarUrl: profile.avatarUrl,
+              videoUrl: videoUrl,
+              caption: caption,
+              createdAtMillis: millis,
+              likeCount: 0,
+            ).toMap(),
+          );
     } catch (e) {
       // ponytail: best-effort cleanup, orphan possible if delete fails too
       unawaited(ref.delete().catchError((_) => ref));
@@ -83,13 +90,13 @@ class ReelsFirebaseDataSource implements IReelsDataSource {
   }
 
   @override
-  Future<Set<String>> fetchLikedReelIds({
-    required List<String> reelIds,
-  }) async {
+  Future<Set<String>> fetchLikedReelIds({required List<String> reelIds}) async {
     if (reelIds.isEmpty) return <String>{};
     final List<DocumentReference<Object?>> refs = reelIds
-        .map((String id) =>
-            _db.collection('reels').doc(id).collection('likes').doc(_uid))
+        .map(
+          (String id) =>
+              _db.collection('reels').doc(id).collection('likes').doc(_uid),
+        )
         .toList();
     // ponytail: per-doc gets instead of getAll (not exposed by cloud_firestore
     // 6.x); same N reads, N RPCs — batch if feed size makes it matter
@@ -107,10 +114,14 @@ class ReelsFirebaseDataSource implements IReelsDataSource {
     required String reelId,
     required bool currentlyLiked,
   }) async {
-    final DocumentReference<Object?> likeRef =
-        _db.collection('reels').doc(reelId).collection('likes').doc(_uid);
-    final DocumentReference<Object?> reelRef =
-        _db.collection('reels').doc(reelId);
+    final DocumentReference<Object?> likeRef = _db
+        .collection('reels')
+        .doc(reelId)
+        .collection('likes')
+        .doc(_uid);
+    final DocumentReference<Object?> reelRef = _db
+        .collection('reels')
+        .doc(reelId);
     await _db.runTransaction((Transaction tx) async {
       tx.update(reelRef, <String, dynamic>{
         'likeCount': FieldValue.increment(currentlyLiked ? -1 : 1),

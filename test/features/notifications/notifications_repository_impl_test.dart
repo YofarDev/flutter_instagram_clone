@@ -28,25 +28,28 @@ void main() {
     repo = NotificationsRepositoryImpl(ds);
   });
 
-  test('watchNotifications passes datasource stream through unchanged',
-      () async {
-    when(() => ds.watchNotifications(uid: 'u1'))
-        .thenAnswer((_) => Stream<List<NotificationItem>>.value(
-              <NotificationItem>[item],
-            ));
+  test(
+    'watchNotifications passes datasource stream through unchanged',
+    () async {
+      when(() => ds.watchNotifications(uid: 'u1')).thenAnswer(
+        (_) => Stream<List<NotificationItem>>.value(<NotificationItem>[item]),
+      );
 
-    final List<List<NotificationItem>> emitted =
-        await repo.watchNotifications(uid: 'u1').toList();
+      final List<List<NotificationItem>> emitted = await repo
+          .watchNotifications(uid: 'u1')
+          .toList();
 
-    expect(emitted, <List<NotificationItem>>[
-      <NotificationItem>[item],
-    ]);
-    verify(() => ds.watchNotifications(uid: 'u1')).called(1);
-  });
+      expect(emitted, <List<NotificationItem>>[
+        <NotificationItem>[item],
+      ]);
+      verify(() => ds.watchNotifications(uid: 'u1')).called(1);
+    },
+  );
 
   test('watchNotifications surfaces stream errors via onError', () async {
-    when(() => ds.watchNotifications(uid: 'u1'))
-        .thenAnswer((_) => Stream<List<NotificationItem>>.error(Exception('db down')));
+    when(() => ds.watchNotifications(uid: 'u1')).thenAnswer(
+      (_) => Stream<List<NotificationItem>>.error(Exception('db down')),
+    );
 
     await expectLater(
       repo.watchNotifications(uid: 'u1').toList(),
@@ -63,23 +66,24 @@ void main() {
     verify(() => ds.markAllRead(uid: 'u1')).called(1);
   });
 
-  test('markAllRead returns Left(Failure.serverError) when datasource throws',
-      () async {
-    when(() => ds.markAllRead(uid: 'u1')).thenThrow(Exception('batch boom'));
+  test(
+    'markAllRead returns Left(Failure.serverError) when datasource throws',
+    () async {
+      when(() => ds.markAllRead(uid: 'u1')).thenThrow(Exception('batch boom'));
 
-    final Either<Failure, void> result = await repo.markAllRead(uid: 'u1');
+      final Either<Failure, void> result = await repo.markAllRead(uid: 'u1');
 
-    final Failure? failure = result.fold(
-      (Failure f) => f,
-      (_) => null,
-    );
-    expect(failure, isNotNull);
-    expect(failure!.message, contains('batch boom'));
-  });
+      final Failure? failure = result.fold((Failure f) => f, (_) => null);
+      expect(failure, isNotNull);
+      expect(failure!.message, contains('batch boom'));
+    },
+  );
 
-  test('createNotification returns Right(null) and forwards all params',
-      () async {
-    when(() => ds.createNotificationDoc(
+  test(
+    'createNotification returns Right(null) and forwards all params',
+    () async {
+      when(
+        () => ds.createNotificationDoc(
           ownerUid: 'u1',
           type: NotificationType.comment,
           actorId: 'u2',
@@ -88,21 +92,23 @@ void main() {
           postId: 'p1',
           postImageUrl: 'http://img/p',
           commentText: 'nice',
-        )).thenAnswer((_) async {});
+        ),
+      ).thenAnswer((_) async {});
 
-    final Either<Failure, void> result = await repo.createNotification(
-      ownerUid: 'u1',
-      type: NotificationType.comment,
-      actorId: 'u2',
-      actorUsername: 'yo',
-      actorAvatarUrl: 'http://img/a',
-      postId: 'p1',
-      postImageUrl: 'http://img/p',
-      commentText: 'nice',
-    );
+      final Either<Failure, void> result = await repo.createNotification(
+        ownerUid: 'u1',
+        type: NotificationType.comment,
+        actorId: 'u2',
+        actorUsername: 'yo',
+        actorAvatarUrl: 'http://img/a',
+        postId: 'p1',
+        postImageUrl: 'http://img/p',
+        commentText: 'nice',
+      );
 
-    expect(result, const Right<Failure, void>(null));
-    verify(() => ds.createNotificationDoc(
+      expect(result, const Right<Failure, void>(null));
+      verify(
+        () => ds.createNotificationDoc(
           ownerUid: 'u1',
           type: NotificationType.comment,
           actorId: 'u2',
@@ -111,30 +117,33 @@ void main() {
           postId: 'p1',
           postImageUrl: 'http://img/p',
           commentText: 'nice',
-        )).called(1);
-  });
+        ),
+      ).called(1);
+    },
+  );
 
-  test('createNotification returns Left(Failure.serverError) when datasource throws',
-      () async {
-    when(() => ds.createNotificationDoc(
+  test(
+    'createNotification returns Left(Failure.serverError) when datasource throws',
+    () async {
+      when(
+        () => ds.createNotificationDoc(
           ownerUid: 'u1',
           type: NotificationType.follow,
           actorId: 'u2',
           actorUsername: 'yo',
-        )).thenThrow(Exception('write denied'));
+        ),
+      ).thenThrow(Exception('write denied'));
 
-    final Either<Failure, void> result = await repo.createNotification(
-      ownerUid: 'u1',
-      type: NotificationType.follow,
-      actorId: 'u2',
-      actorUsername: 'yo',
-    );
+      final Either<Failure, void> result = await repo.createNotification(
+        ownerUid: 'u1',
+        type: NotificationType.follow,
+        actorId: 'u2',
+        actorUsername: 'yo',
+      );
 
-    final Failure? failure = result.fold(
-      (Failure f) => f,
-      (_) => null,
-    );
-    expect(failure, isNotNull);
-    expect(failure!.message, contains('write denied'));
-  });
+      final Failure? failure = result.fold((Failure f) => f, (_) => null);
+      expect(failure, isNotNull);
+      expect(failure!.message, contains('write denied'));
+    },
+  );
 }

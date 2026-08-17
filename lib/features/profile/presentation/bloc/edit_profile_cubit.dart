@@ -8,11 +8,13 @@ import 'edit_profile_state.dart';
 
 class EditProfileCubit extends Cubit<EditProfileState> {
   EditProfileCubit(this._auth, {required AppUser user})
-      : super(EditProfileState(
+    : super(
+        EditProfileState(
           initial: user,
           username: user.username ?? '',
           bio: user.bio ?? '',
-        ));
+        ),
+      );
 
   final IAuthRepository _auth;
 

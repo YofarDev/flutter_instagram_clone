@@ -18,8 +18,7 @@ class UserListScreen extends StatelessWidget {
     final AppLocalizations l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text(followersMode ? l10n.followersTitle : l10n.followingTitle),
+        title: Text(followersMode ? l10n.followersTitle : l10n.followingTitle),
       ),
       body: BlocListener<FollowListCubit, FollowListState>(
         listenWhen: (FollowListState p, FollowListState c) =>
@@ -52,9 +51,11 @@ class UserListScreen extends StatelessWidget {
                         ? NetworkImage(user.avatarUrl!)
                         : null,
                     child: user.avatarUrl == null
-                        ? Text(username.isNotEmpty
-                            ? username[0].toUpperCase()
-                            : '?')
+                        ? Text(
+                            username.isNotEmpty
+                                ? username[0].toUpperCase()
+                                : '?',
+                          )
                         : null,
                   ),
                   title: Text(username),

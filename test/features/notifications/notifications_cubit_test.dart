@@ -15,14 +15,14 @@ class MockNotificationsRepository extends Mock
     implements INotificationsRepository {}
 
 NotificationItem item(String id, {bool read = false}) => NotificationItem(
-      id: id,
-      type: NotificationType.like,
-      ownerUid: 'u1',
-      actorId: 'actor-$id',
-      actorUsername: 'actor',
-      createdAt: DateTime(2026, 1, 1),
-      read: read,
-    );
+  id: id,
+  type: NotificationType.like,
+  ownerUid: 'u1',
+  actorId: 'actor-$id',
+  actorUsername: 'actor',
+  createdAt: DateTime(2026, 1, 1),
+  read: read,
+);
 
 void main() {
   late MockNotificationsRepository repo;
@@ -35,13 +35,11 @@ void main() {
     'init → ready with items and unreadCount (2 of 3 unread)',
     build: () {
       when(() => repo.watchNotifications(uid: 'u1')).thenAnswer(
-        (_) => Stream<List<NotificationItem>>.value(
-          <NotificationItem>[
-            item('1'),
-            item('2', read: true),
-            item('3'),
-          ],
-        ),
+        (_) => Stream<List<NotificationItem>>.value(<NotificationItem>[
+          item('1'),
+          item('2', read: true),
+          item('3'),
+        ]),
       );
       return NotificationsCubit(repo);
     },
@@ -49,11 +47,7 @@ void main() {
     expect: () => <NotificationsState>[
       NotificationsState(
         status: NotificationsStatus.ready,
-        items: <NotificationItem>[
-          item('1'),
-          item('2', read: true),
-          item('3'),
-        ],
+        items: <NotificationItem>[item('1'), item('2', read: true), item('3')],
         unreadCount: 2,
       ),
     ],
@@ -64,8 +58,9 @@ void main() {
     build: () {
       final StreamController<List<NotificationItem>> controller =
           StreamController<List<NotificationItem>>();
-      when(() => repo.watchNotifications(uid: 'u1'))
-          .thenAnswer((_) => controller.stream);
+      when(
+        () => repo.watchNotifications(uid: 'u1'),
+      ).thenAnswer((_) => controller.stream);
       when(() => repo.markAllRead(uid: 'u1')).thenAnswer((_) async {
         controller.add(<NotificationItem>[
           item('1', read: true),
@@ -108,8 +103,9 @@ void main() {
   blocTest<NotificationsCubit, NotificationsState>(
     'double init same uid → single subscription',
     build: () {
-      when(() => repo.watchNotifications(uid: 'u1'))
-          .thenAnswer((_) => const Stream<List<NotificationItem>>.empty());
+      when(
+        () => repo.watchNotifications(uid: 'u1'),
+      ).thenAnswer((_) => const Stream<List<NotificationItem>>.empty());
       return NotificationsCubit(repo);
     },
     act: (NotificationsCubit cubit) {

@@ -33,15 +33,13 @@ class _SignupScreenState extends State<SignupScreen> {
       final AppLocalizations l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(content: Text(l10n.authPasswordsDontMatch)),
-        );
+        ..showSnackBar(SnackBar(content: Text(l10n.authPasswordsDontMatch)));
       return;
     }
     context.read<AuthCubit>().signUp(
-          email: _email.text.trim(),
-          password: _password.text,
-        );
+      email: _email.text.trim(),
+      password: _password.text,
+    );
   }
 
   @override
@@ -98,15 +96,14 @@ class _SignupScreenState extends State<SignupScreen> {
                         onPressed: state.submitting
                             ? null
                             : () =>
-                                context.read<AuthCubit>().signInWithGoogle(),
+                                  context.read<AuthCubit>().signInWithGoogle(),
                         icon: const Icon(Icons.login),
                         label: Text(l10n.authGoogleButton),
                       ),
                       const SizedBox(height: 24),
                       TextButton(
                         onPressed: () => context.go(Routes.login),
-                        child:
-                            Text('${l10n.authHasAccount} ${l10n.authLogin}'),
+                        child: Text('${l10n.authHasAccount} ${l10n.authLogin}'),
                       ),
                     ],
                   );

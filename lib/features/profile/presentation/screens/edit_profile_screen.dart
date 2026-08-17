@@ -63,7 +63,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   context.pop();
                 } else if (state.error != null) {
                   // ponytail: string match on failure message; typed Failure when more cases appear
-                  final String message = state.error!.contains('Username is taken')
+                  final String message =
+                      state.error!.contains('Username is taken')
                       ? l10n.usernameTaken
                       : state.error!;
                   ScaffoldMessenger.of(context)
@@ -85,8 +86,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         backgroundImage: state.avatarPath != null
                             ? FileImage(File(state.avatarPath!))
                             : url != null
-                                ? NetworkImage(url)
-                                : null,
+                            ? NetworkImage(url)
+                            : null,
                         child: state.avatarPath == null && url == null
                             ? const Icon(Icons.person)
                             : null,
@@ -97,8 +98,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                       TextField(
                         controller: _username,
-                        onChanged:
-                            context.read<EditProfileCubit>().usernameChanged,
+                        onChanged: context
+                            .read<EditProfileCubit>()
+                            .usernameChanged,
                         decoration: InputDecoration(
                           labelText: l10n.onboardingUsername,
                           border: const OutlineInputBorder(),
@@ -118,8 +120,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       FilledButton(
                         onPressed: state.submitting
                             ? null
-                            : () =>
-                                context.read<EditProfileCubit>().submit(),
+                            : () => context.read<EditProfileCubit>().submit(),
                         child: Text(l10n.profileSave),
                       ),
                     ],

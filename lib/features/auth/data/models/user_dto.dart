@@ -14,16 +14,16 @@ sealed class UserDto with _$UserDto {
   const UserDto._();
 
   factory UserDto.fromMap(Map<String, dynamic> map) => UserDto(
-        email: map['email'] as String,
-        username: map['username'] as String?,
-        bio: map['bio'] as String?,
-        avatarUrl: map['avatarUrl'] as String?,
-      );
+    email: map['email'] as String,
+    username: map['username'] as String?,
+    bio: map['bio'] as String?,
+    avatarUrl: map['avatarUrl'] as String?,
+  );
 
   Map<String, dynamic> toMap() => <String, dynamic>{
-        'email': email,
-        'username': username,
-        'bio': bio,
-        'avatarUrl': avatarUrl,
-      };
+    'email': email,
+    'username': username,
+    'bio': bio,
+    'avatarUrl': avatarUrl,
+  };
 }

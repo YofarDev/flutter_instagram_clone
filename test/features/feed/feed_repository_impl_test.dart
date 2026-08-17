@@ -38,11 +38,11 @@ void main() {
 
   group('watchFeed', () {
     test('passes datasource stream through unchanged', () async {
-      when(() => ds.watchFeed(limit: 10))
-          .thenAnswer((_) => Stream<List<Post>>.value(<Post>[post]));
+      when(
+        () => ds.watchFeed(limit: 10),
+      ).thenAnswer((_) => Stream<List<Post>>.value(<Post>[post]));
 
-      final List<List<Post>> emitted =
-          await repo.watchFeed(limit: 10).toList();
+      final List<List<Post>> emitted = await repo.watchFeed(limit: 10).toList();
 
       expect(emitted, <List<Post>>[
         <Post>[post],
@@ -53,8 +53,9 @@ void main() {
 
   group('createPost', () {
     test('returns Right(null) on success', () async {
-      when(() => ds.createPost(caption: 'cap', filePath: '/tmp/f.jpg'))
-          .thenAnswer((_) async {});
+      when(
+        () => ds.createPost(caption: 'cap', filePath: '/tmp/f.jpg'),
+      ).thenAnswer((_) async {});
 
       final Either<Failure, void> result = await repo.createPost(
         caption: 'cap',
@@ -65,18 +66,16 @@ void main() {
     });
 
     test('returns Left(Failure.serverError) when datasource throws', () async {
-      when(() => ds.createPost(caption: 'cap', filePath: '/tmp/f.jpg'))
-          .thenThrow(Exception('boom'));
+      when(
+        () => ds.createPost(caption: 'cap', filePath: '/tmp/f.jpg'),
+      ).thenThrow(Exception('boom'));
 
       final Either<Failure, void> result = await repo.createPost(
         caption: 'cap',
         filePath: '/tmp/f.jpg',
       );
 
-      final Failure? failure = result.fold(
-        (Failure f) => f,
-        (_) => null,
-      );
+      final Failure? failure = result.fold((Failure f) => f, (_) => null);
       expect(failure, isNotNull);
       expect(failure!.message, contains('boom'));
     });
@@ -84,25 +83,26 @@ void main() {
 
   group('fetchLikedPostIds', () {
     test('returns Right with the liked ids from datasource', () async {
-      when(() => ds.fetchLikedPostIds(postIds: <String>['p1', 'p2']))
-          .thenAnswer((_) async => <String>{'p1'});
+      when(
+        () => ds.fetchLikedPostIds(postIds: <String>['p1', 'p2']),
+      ).thenAnswer((_) async => <String>{'p1'});
 
-      final Either<Failure, Set<String>> result = await repo
-          .fetchLikedPostIds(postIds: <String>['p1', 'p2']);
-
-      final Set<String>? ids = result.fold(
-        (_) => null,
-        (Set<String> s) => s,
+      final Either<Failure, Set<String>> result = await repo.fetchLikedPostIds(
+        postIds: <String>['p1', 'p2'],
       );
+
+      final Set<String>? ids = result.fold((_) => null, (Set<String> s) => s);
       expect(ids, <String>{'p1'});
     });
 
     test('returns Left when datasource throws', () async {
-      when(() => ds.fetchLikedPostIds(postIds: <String>['p1']))
-          .thenThrow(Exception('reads failed'));
+      when(
+        () => ds.fetchLikedPostIds(postIds: <String>['p1']),
+      ).thenThrow(Exception('reads failed'));
 
-      final Either<Failure, Set<String>> result = await repo
-          .fetchLikedPostIds(postIds: <String>['p1']);
+      final Either<Failure, Set<String>> result = await repo.fetchLikedPostIds(
+        postIds: <String>['p1'],
+      );
 
       expect(result.isLeft(), true);
     });
@@ -110,12 +110,14 @@ void main() {
 
   group('toggleLike', () {
     test('returns Right(null) and passes post.id + currentlyLiked', () async {
-      when(() => ds.toggleLike(
-            postId: 'p1',
-            postOwnerId: 'u1',
-            postImageUrl: 'http://img',
-            currentlyLiked: false,
-          )).thenAnswer((_) async {});
+      when(
+        () => ds.toggleLike(
+          postId: 'p1',
+          postOwnerId: 'u1',
+          postImageUrl: 'http://img',
+          currentlyLiked: false,
+        ),
+      ).thenAnswer((_) async {});
 
       final Either<Failure, void> result = await repo.toggleLike(
         post: post,
@@ -123,31 +125,32 @@ void main() {
       );
 
       expect(result, const Right<Failure, void>(null));
-      verify(() => ds.toggleLike(
-            postId: 'p1',
-            postOwnerId: 'u1',
-            postImageUrl: 'http://img',
-            currentlyLiked: false,
-          )).called(1);
+      verify(
+        () => ds.toggleLike(
+          postId: 'p1',
+          postOwnerId: 'u1',
+          postImageUrl: 'http://img',
+          currentlyLiked: false,
+        ),
+      ).called(1);
     });
 
     test('returns Left when datasource throws', () async {
-      when(() => ds.toggleLike(
-            postId: 'p1',
-            postOwnerId: 'u1',
-            postImageUrl: 'http://img',
-            currentlyLiked: true,
-          )).thenThrow(Exception('tx failed'));
+      when(
+        () => ds.toggleLike(
+          postId: 'p1',
+          postOwnerId: 'u1',
+          postImageUrl: 'http://img',
+          currentlyLiked: true,
+        ),
+      ).thenThrow(Exception('tx failed'));
 
       final Either<Failure, void> result = await repo.toggleLike(
         post: post,
         currentlyLiked: true,
       );
 
-      final Failure? failure = result.fold(
-        (Failure f) => f,
-        (_) => null,
-      );
+      final Failure? failure = result.fold((Failure f) => f, (_) => null);
       expect(failure, isNotNull);
       expect(failure!.message, contains('tx failed'));
     });
@@ -163,15 +166,13 @@ void main() {
     });
 
     test('returns Left with clean message when post missing', () async {
-      when(() => ds.getPostById(postId: 'p1'))
-          .thenThrow(StateError('Post not found'));
+      when(
+        () => ds.getPostById(postId: 'p1'),
+      ).thenThrow(StateError('Post not found'));
 
       final Either<Failure, Post> result = await repo.getPostById(postId: 'p1');
 
-      final Failure? failure = result.fold(
-        (Failure f) => f,
-        (_) => null,
-      );
+      final Failure? failure = result.fold((Failure f) => f, (_) => null);
       expect(failure, isNotNull);
       expect(failure!.message, 'Post not found');
     });
@@ -179,8 +180,9 @@ void main() {
 
   group('watchComments', () {
     test('passes datasource stream through unchanged', () async {
-      when(() => ds.watchComments(postId: 'p1'))
-          .thenAnswer((_) => Stream<List<Comment>>.value(<Comment>[comment]));
+      when(
+        () => ds.watchComments(postId: 'p1'),
+      ).thenAnswer((_) => Stream<List<Comment>>.value(<Comment>[comment]));
 
       final List<List<Comment>> emitted = await repo
           .watchComments(postId: 'p1')
@@ -195,8 +197,9 @@ void main() {
 
   group('addComment', () {
     test('returns Right(null) on success', () async {
-      when(() => ds.addComment(postId: 'p1', postOwnerId: 'u1', text: 'nice'))
-          .thenAnswer((_) async {});
+      when(
+        () => ds.addComment(postId: 'p1', postOwnerId: 'u1', text: 'nice'),
+      ).thenAnswer((_) async {});
 
       final Either<Failure, void> result = await repo.addComment(
         postId: 'p1',
@@ -208,8 +211,9 @@ void main() {
     });
 
     test('returns Left when datasource throws', () async {
-      when(() => ds.addComment(postId: 'p1', postOwnerId: 'u1', text: 'nice'))
-          .thenThrow(Exception('nope'));
+      when(
+        () => ds.addComment(postId: 'p1', postOwnerId: 'u1', text: 'nice'),
+      ).thenThrow(Exception('nope'));
 
       final Either<Failure, void> result = await repo.addComment(
         postId: 'p1',

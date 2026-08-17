@@ -63,13 +63,19 @@ void main() {
     'groups by user: own tray first, others by recency, stories asc',
     build: () {
       when(() => repo.watchStories()).thenAnswer(
-        (_) => Stream<List<Story>>.value(
-          <Story>[mineNew, mineOld, aliceNew, aliceOld, bobStory],
-        ),
+        (_) => Stream<List<Story>>.value(<Story>[
+          mineNew,
+          mineOld,
+          aliceNew,
+          aliceOld,
+          bobStory,
+        ]),
       );
-      when(() => repo.fetchViewedStoryIds(storyIds: any(named: 'storyIds')))
-          .thenAnswer(
-              (_) async => const Right<Failure, Set<String>>(<String>{'sm1'}));
+      when(
+        () => repo.fetchViewedStoryIds(storyIds: any(named: 'storyIds')),
+      ).thenAnswer(
+        (_) async => const Right<Failure, Set<String>>(<String>{'sm1'}),
+      );
       return StoriesCubit(repo, myUid: 'me');
     },
     expect: () => <StoriesState>[
@@ -82,7 +88,11 @@ void main() {
             avatarUrl: 'http://img/av-me',
             stories: <Story>[mineOld, mineNew],
           ),
-          StoryTray(uid: 'u1', username: 'alice', stories: <Story>[aliceOld, aliceNew]),
+          StoryTray(
+            uid: 'u1',
+            username: 'alice',
+            stories: <Story>[aliceOld, aliceNew],
+          ),
           StoryTray(uid: 'u2', username: 'bob', stories: <Story>[bobStory]),
         ],
         viewedIds: const <String>{'sm1'},
@@ -96,8 +106,9 @@ void main() {
       when(() => repo.watchStories()).thenAnswer(
         (_) => Stream<List<Story>>.value(<Story>[aliceNew, bobStory]),
       );
-      when(() => repo.fetchViewedStoryIds(storyIds: any(named: 'storyIds')))
-          .thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
+      when(
+        () => repo.fetchViewedStoryIds(storyIds: any(named: 'storyIds')),
+      ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
       return StoriesCubit(repo, myUid: 'me');
     },
     expect: () => <StoriesState>[
@@ -117,14 +128,17 @@ void main() {
       final StreamController<List<Story>> controller =
           StreamController<List<Story>>();
       addTearDown(controller.close);
-      final List<Either<Failure, Set<String>>> answers = <
-          Either<Failure, Set<String>>>[
-        const Right<Failure, Set<String>>(<String>{'sm1'}),
-        const Left<Failure, Set<String>>(Failure.serverError(message: 'boom')),
-      ];
+      final List<Either<Failure, Set<String>>> answers =
+          <Either<Failure, Set<String>>>[
+            const Right<Failure, Set<String>>(<String>{'sm1'}),
+            const Left<Failure, Set<String>>(
+              Failure.serverError(message: 'boom'),
+            ),
+          ];
       when(() => repo.watchStories()).thenAnswer((_) => controller.stream);
-      when(() => repo.fetchViewedStoryIds(storyIds: any(named: 'storyIds')))
-          .thenAnswer((_) async => answers.removeAt(0));
+      when(
+        () => repo.fetchViewedStoryIds(storyIds: any(named: 'storyIds')),
+      ).thenAnswer((_) async => answers.removeAt(0));
       controller
         ..add(<Story>[mineNew, mineOld, bobStory])
         ..add(<Story>[bobStory]);
@@ -146,7 +160,9 @@ void main() {
       ),
       StoriesState(
         status: StoriesStatus.ready,
-        trays: <StoryTray>[StoryTray(uid: 'u2', username: 'bob', stories: <Story>[bobStory])],
+        trays: <StoryTray>[
+          StoryTray(uid: 'u2', username: 'bob', stories: <Story>[bobStory]),
+        ],
         viewedIds: const <String>{'sm1'},
       ),
     ],
@@ -162,9 +178,7 @@ void main() {
       controller.addError(Exception('db down'));
       return StoriesCubit(repo, myUid: 'me');
     },
-    expect: () => <StoriesState>[
-      StoriesState(error: 'Failed to load stories'),
-    ],
+    expect: () => <StoriesState>[StoriesState(error: 'Failed to load stories')],
   );
 
   test('close cancels stream subscription', () async {
@@ -177,6 +191,7 @@ void main() {
     controller.add(<Story>[mineNew]);
     await Future<void>.delayed(Duration.zero);
     verifyNever(
-        () => repo.fetchViewedStoryIds(storyIds: any(named: 'storyIds')));
+      () => repo.fetchViewedStoryIds(storyIds: any(named: 'storyIds')),
+    );
   });
 }

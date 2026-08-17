@@ -25,8 +25,9 @@ void main() {
   blocTest<FollowListCubit, FollowListState>(
     'followers mode maps to fetchFollowers and toggles loading',
     build: () {
-      when(() => repo.fetchFollowers(uid: 'me'))
-          .thenAnswer((_) async => Right<Failure, List<AppUser>>(users));
+      when(
+        () => repo.fetchFollowers(uid: 'me'),
+      ).thenAnswer((_) async => Right<Failure, List<AppUser>>(users));
       return FollowListCubit(repo);
     },
     act: (FollowListCubit cubit) => cubit.load(uid: 'me', followersMode: true),
@@ -43,8 +44,9 @@ void main() {
   blocTest<FollowListCubit, FollowListState>(
     'following mode maps to fetchFollowing',
     build: () {
-      when(() => repo.fetchFollowing(uid: 'me'))
-          .thenAnswer((_) async => Right<Failure, List<AppUser>>(users));
+      when(
+        () => repo.fetchFollowing(uid: 'me'),
+      ).thenAnswer((_) async => Right<Failure, List<AppUser>>(users));
       return FollowListCubit(repo);
     },
     act: (FollowListCubit cubit) => cubit.load(uid: 'me', followersMode: false),
@@ -62,8 +64,9 @@ void main() {
     'failure sets error',
     build: () {
       when(() => repo.fetchFollowers(uid: 'me')).thenAnswer(
-        (_) async =>
-            const Left<Failure, List<AppUser>>(Failure.serverError(message: 'boom')),
+        (_) async => const Left<Failure, List<AppUser>>(
+          Failure.serverError(message: 'boom'),
+        ),
       );
       return FollowListCubit(repo);
     },

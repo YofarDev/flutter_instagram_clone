@@ -21,35 +21,32 @@ class AuthCubit extends Cubit<AuthState> {
       emit(state.copyWith(user: null, status: AuthStatus.unauthenticated));
       return;
     }
-    final Either<Failure, AppUser?> result =
-        await _repository.findProfile(uid: user.uid, email: user.email);
+    final Either<Failure, AppUser?> result = await _repository.findProfile(
+      uid: user.uid,
+      email: user.email,
+    );
     result.fold(
-      (_) => emit(state.copyWith(
-        user: user,
-        status: AuthStatus.authenticated,
-      )), // ponytail: profile-check failure lets user in; revisit when profiles gate content
-      (AppUser? profile) => emit(state.copyWith(
-        user: profile ?? user,
-        status: profile == null
-            ? AuthStatus.needsProfile
-            : AuthStatus.authenticated,
-      )),
+      (_) => emit(
+        state.copyWith(user: user, status: AuthStatus.authenticated),
+      ), // ponytail: profile-check failure lets user in; revisit when profiles gate content
+      (AppUser? profile) => emit(
+        state.copyWith(
+          user: profile ?? user,
+          status: profile == null
+              ? AuthStatus.needsProfile
+              : AuthStatus.authenticated,
+        ),
+      ),
     );
   }
 
-  Future<void> signIn({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> signIn({required String email, required String password}) async {
     await _runAction(
       () => _repository.signIn(email: email, password: password),
     );
   }
 
-  Future<void> signUp({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> signUp({required String email, required String password}) async {
     await _runAction(
       () => _repository.signUp(email: email, password: password),
     );
@@ -74,31 +71,35 @@ class AuthCubit extends Cubit<AuthState> {
         filePath: avatarPath,
       );
       upload.fold(
-        (Failure f) => emit(state.copyWith(submitting: false, error: f.message)),
+        (Failure f) =>
+            emit(state.copyWith(submitting: false, error: f.message)),
         (String url) => avatarUrl = url,
       );
       if (avatarUrl == null) return;
     }
-    final AppUser saved =
-        user.copyWith(username: username, bio: bio, avatarUrl: avatarUrl);
-    final Either<Failure, void> result =
-        await _repository.saveProfile(user: saved);
+    final AppUser saved = user.copyWith(
+      username: username,
+      bio: bio,
+      avatarUrl: avatarUrl,
+    );
+    final Either<Failure, void> result = await _repository.saveProfile(
+      user: saved,
+    );
     result.fold(
       (Failure f) => emit(state.copyWith(submitting: false, error: f.message)),
-      (_) => emit(state.copyWith(
-        user: saved,
-        submitting: false,
-        status: AuthStatus.authenticated,
-      )),
+      (_) => emit(
+        state.copyWith(
+          user: saved,
+          submitting: false,
+          status: AuthStatus.authenticated,
+        ),
+      ),
     );
   }
 
   Future<void> signOut() async {
     final Either<Failure, void> result = await _repository.signOut();
-    result.fold(
-      (Failure f) => emit(state.copyWith(error: f.message)),
-      (_) {},
-    );
+    result.fold((Failure f) => emit(state.copyWith(error: f.message)), (_) {});
   }
 
   Future<void> _runAction(
@@ -107,14 +108,13 @@ class AuthCubit extends Cubit<AuthState> {
     emit(state.copyWith(submitting: true, error: null));
     final Either<Failure, Object?> result = await action();
     result.fold(
-      (Failure f) => emit(state.copyWith(
-        submitting: false,
-        // ponytail: typed cancel, stay quiet
-        error: f.maybeWhen(
-          cancelled: () => null,
-          orElse: () => f.message,
+      (Failure f) => emit(
+        state.copyWith(
+          submitting: false,
+          // ponytail: typed cancel, stay quiet
+          error: f.maybeWhen(cancelled: () => null, orElse: () => f.message),
         ),
-      )),
+      ),
       (_) => emit(state.copyWith(submitting: false)),
     );
   }

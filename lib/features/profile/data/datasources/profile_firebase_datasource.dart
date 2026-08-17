@@ -29,15 +29,19 @@ class ProfileFirebaseDataSource implements IProfileDataSource {
   String get _uid => FirebaseAuth.instance.currentUser!.uid;
 
   Future<Map<String, dynamic>> _userDoc(String uid) async {
-    final DocumentSnapshot<Object?> snap =
-        await _db.collection('users').doc(uid).get();
+    final DocumentSnapshot<Object?> snap = await _db
+        .collection('users')
+        .doc(uid)
+        .get();
     return snap.data() as Map<String, dynamic>? ?? <String, dynamic>{};
   }
 
   @override
   Future<UserProfile> getProfile({required String uid}) async {
-    final DocumentSnapshot<Object?> snap =
-        await _db.collection('users').doc(uid).get();
+    final DocumentSnapshot<Object?> snap = await _db
+        .collection('users')
+        .doc(uid)
+        .get();
     if (!snap.exists) throw StateError('Profile not found');
     final Map<String, dynamic> data = snap.data() as Map<String, dynamic>;
     return UserProfile(
@@ -66,17 +70,25 @@ class ProfileFirebaseDataSource implements IProfileDataSource {
     final Map<String, dynamic> theirs = docs[1];
     final int since = DateTime.now().millisecondsSinceEpoch;
     final WriteBatch batch = _db.batch();
-    final DocumentReference<Object?> followingEdge =
-        _db.collection('users').doc(_uid).collection('following').doc(uid);
-    final DocumentReference<Object?> followerEdge =
-        _db.collection('users').doc(uid).collection('followers').doc(_uid);
+    final DocumentReference<Object?> followingEdge = _db
+        .collection('users')
+        .doc(_uid)
+        .collection('following')
+        .doc(uid);
+    final DocumentReference<Object?> followerEdge = _db
+        .collection('users')
+        .doc(uid)
+        .collection('followers')
+        .doc(_uid);
     if (currentlyFollowing) {
       batch.delete(followingEdge);
       batch.delete(followerEdge);
-      batch.update(_db.collection('users').doc(_uid),
-          <String, dynamic>{'followingCount': FieldValue.increment(-1)});
-      batch.update(_db.collection('users').doc(uid),
-          <String, dynamic>{'followerCount': FieldValue.increment(-1)});
+      batch.update(_db.collection('users').doc(_uid), <String, dynamic>{
+        'followingCount': FieldValue.increment(-1),
+      });
+      batch.update(_db.collection('users').doc(uid), <String, dynamic>{
+        'followerCount': FieldValue.increment(-1),
+      });
     } else {
       batch.set(followingEdge, <String, dynamic>{
         'uid': uid,
@@ -90,10 +102,12 @@ class ProfileFirebaseDataSource implements IProfileDataSource {
         'avatarUrl': mine['avatarUrl'],
         'since': since,
       });
-      batch.update(_db.collection('users').doc(_uid),
-          <String, dynamic>{'followingCount': FieldValue.increment(1)});
-      batch.update(_db.collection('users').doc(uid),
-          <String, dynamic>{'followerCount': FieldValue.increment(1)});
+      batch.update(_db.collection('users').doc(_uid), <String, dynamic>{
+        'followingCount': FieldValue.increment(1),
+      });
+      batch.update(_db.collection('users').doc(uid), <String, dynamic>{
+        'followerCount': FieldValue.increment(1),
+      });
     }
     await batch.commit();
     if (!currentlyFollowing && uid != _uid) {
@@ -159,9 +173,11 @@ class ProfileFirebaseDataSource implements IProfileDataSource {
       .doc(uid)
       .collection('following')
       .snapshots()
-      .map((QuerySnapshot<Object?> snap) => snap.docs
-          .map((QueryDocumentSnapshot<Object?> doc) => doc.id)
-          .toList());
+      .map(
+        (QuerySnapshot<Object?> snap) => snap.docs
+            .map((QueryDocumentSnapshot<Object?> doc) => doc.id)
+            .toList(),
+      );
 
   @override
   Stream<bool> watchIsFollowing({required String uid}) => _db
@@ -173,16 +189,23 @@ class ProfileFirebaseDataSource implements IProfileDataSource {
       .map((DocumentSnapshot<Object?> snap) => snap.exists);
 
   @override
-  Stream<List<Post>> watchUserPosts({required String uid, required int limit}) =>
-      _db
-          .collection('posts')
-          .where('authorId', isEqualTo: uid)
-          .orderBy('createdAt', descending: true)
-          .limit(limit)
-          .snapshots()
-          .map((QuerySnapshot<Object?> snap) => snap.docs
-              .map((QueryDocumentSnapshot<Object?> doc) =>
-                  PostDto.fromMap(doc.id, doc.data() as Map<String, dynamic>)
-                      .toDomain(doc.id))
-              .toList());
+  Stream<List<Post>> watchUserPosts({
+    required String uid,
+    required int limit,
+  }) => _db
+      .collection('posts')
+      .where('authorId', isEqualTo: uid)
+      .orderBy('createdAt', descending: true)
+      .limit(limit)
+      .snapshots()
+      .map(
+        (QuerySnapshot<Object?> snap) => snap.docs
+            .map(
+              (QueryDocumentSnapshot<Object?> doc) => PostDto.fromMap(
+                doc.id,
+                doc.data() as Map<String, dynamic>,
+              ).toDomain(doc.id),
+            )
+            .toList(),
+      );
 }

@@ -39,8 +39,9 @@ void main() {
         (_) => Stream<List<Conversation>>.value(<Conversation>[conversation]),
       );
 
-      final List<List<Conversation>> emitted =
-          await repo.watchConversations(myUid: 'u1').toList();
+      final List<List<Conversation>> emitted = await repo
+          .watchConversations(myUid: 'u1')
+          .toList();
 
       expect(emitted, <List<Conversation>>[
         <Conversation>[conversation],
@@ -55,8 +56,9 @@ void main() {
         (_) => Stream<List<ChatMessage>>.value(<ChatMessage>[message]),
       );
 
-      final List<List<ChatMessage>> emitted =
-          await repo.watchMessages(conversationId: 'u1_u2').toList();
+      final List<List<ChatMessage>> emitted = await repo
+          .watchMessages(conversationId: 'u1_u2')
+          .toList();
 
       expect(emitted, <List<ChatMessage>>[
         <ChatMessage>[message],
@@ -67,11 +69,12 @@ void main() {
 
   group('getOrCreateConversation', () {
     test('returns Right with conversation from datasource', () async {
-      when(() => ds.getOrCreateConversation(myUid: 'u1', otherUid: 'u2'))
-          .thenAnswer((_) async => conversation);
+      when(
+        () => ds.getOrCreateConversation(myUid: 'u1', otherUid: 'u2'),
+      ).thenAnswer((_) async => conversation);
 
-      final Either<Failure, Conversation> result =
-          await repo.getOrCreateConversation(myUid: 'u1', otherUid: 'u2');
+      final Either<Failure, Conversation> result = await repo
+          .getOrCreateConversation(myUid: 'u1', otherUid: 'u2');
 
       final Conversation? resolved = result.fold(
         (_) => null,
@@ -81,26 +84,26 @@ void main() {
     });
 
     test('forwards myUid and otherUid to datasource', () async {
-      when(() => ds.getOrCreateConversation(myUid: 'u1', otherUid: 'u2'))
-          .thenAnswer((_) async => conversation);
+      when(
+        () => ds.getOrCreateConversation(myUid: 'u1', otherUid: 'u2'),
+      ).thenAnswer((_) async => conversation);
 
       await repo.getOrCreateConversation(myUid: 'u1', otherUid: 'u2');
 
-      verify(() => ds.getOrCreateConversation(myUid: 'u1', otherUid: 'u2'))
-          .called(1);
+      verify(
+        () => ds.getOrCreateConversation(myUid: 'u1', otherUid: 'u2'),
+      ).called(1);
     });
 
     test('returns Left(Failure.serverError) when datasource throws', () async {
-      when(() => ds.getOrCreateConversation(myUid: 'u1', otherUid: 'u2'))
-          .thenThrow(Exception('nope'));
+      when(
+        () => ds.getOrCreateConversation(myUid: 'u1', otherUid: 'u2'),
+      ).thenThrow(Exception('nope'));
 
-      final Either<Failure, Conversation> result =
-          await repo.getOrCreateConversation(myUid: 'u1', otherUid: 'u2');
+      final Either<Failure, Conversation> result = await repo
+          .getOrCreateConversation(myUid: 'u1', otherUid: 'u2');
 
-      final Failure? failure = result.fold(
-        (Failure f) => f,
-        (_) => null,
-      );
+      final Failure? failure = result.fold((Failure f) => f, (_) => null);
       expect(failure, isNotNull);
       expect(failure!.message, contains('nope'));
     });
@@ -108,12 +111,14 @@ void main() {
 
   group('sendMessage', () {
     test('returns Right(null) on success', () async {
-      when(() => ds.sendMessage(
-            conversationId: 'u1_u2',
-            myUid: 'u1',
-            otherUid: 'u2',
-            text: 'hi',
-          )).thenAnswer((_) async {});
+      when(
+        () => ds.sendMessage(
+          conversationId: 'u1_u2',
+          myUid: 'u1',
+          otherUid: 'u2',
+          text: 'hi',
+        ),
+      ).thenAnswer((_) async {});
 
       final Either<Failure, void> result = await repo.sendMessage(
         conversationId: 'u1_u2',
@@ -126,12 +131,14 @@ void main() {
     });
 
     test('forwards all params to datasource', () async {
-      when(() => ds.sendMessage(
-            conversationId: 'u1_u2',
-            myUid: 'u1',
-            otherUid: 'u2',
-            text: 'hi',
-          )).thenAnswer((_) async {});
+      when(
+        () => ds.sendMessage(
+          conversationId: 'u1_u2',
+          myUid: 'u1',
+          otherUid: 'u2',
+          text: 'hi',
+        ),
+      ).thenAnswer((_) async {});
 
       await repo.sendMessage(
         conversationId: 'u1_u2',
@@ -140,21 +147,25 @@ void main() {
         text: 'hi',
       );
 
-      verify(() => ds.sendMessage(
-            conversationId: 'u1_u2',
-            myUid: 'u1',
-            otherUid: 'u2',
-            text: 'hi',
-          )).called(1);
+      verify(
+        () => ds.sendMessage(
+          conversationId: 'u1_u2',
+          myUid: 'u1',
+          otherUid: 'u2',
+          text: 'hi',
+        ),
+      ).called(1);
     });
 
     test('returns Left when datasource throws', () async {
-      when(() => ds.sendMessage(
-            conversationId: 'u1_u2',
-            myUid: 'u1',
-            otherUid: 'u2',
-            text: 'hi',
-          )).thenThrow(Exception('send failed'));
+      when(
+        () => ds.sendMessage(
+          conversationId: 'u1_u2',
+          myUid: 'u1',
+          otherUid: 'u2',
+          text: 'hi',
+        ),
+      ).thenThrow(Exception('send failed'));
 
       final Either<Failure, void> result = await repo.sendMessage(
         conversationId: 'u1_u2',

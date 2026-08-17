@@ -35,16 +35,19 @@ class _ReelItemState extends State<ReelItem> {
     _controller = VideoPlayerController.networkUrl(
       Uri.parse(widget.reel.videoUrl),
     );
-    _controller.initialize().then((_) {
-      if (!mounted) return;
-      _controller
-        ..setLooping(true)
-        ..setVolume(0);
-      _syncPlayback();
-      setState(() {});
-    }).catchError((Object _) {
-      if (mounted) setState(() => _failed = true);
-    });
+    _controller
+        .initialize()
+        .then((_) {
+          if (!mounted) return;
+          _controller
+            ..setLooping(true)
+            ..setVolume(0);
+          _syncPlayback();
+          setState(() {});
+        })
+        .catchError((Object _) {
+          if (mounted) setState(() => _failed = true);
+        });
   }
 
   void _syncPlayback() {
@@ -82,9 +85,7 @@ class _ReelItemState extends State<ReelItem> {
     if (_failed) {
       return const ColoredBox(
         color: Colors.black,
-        child: Center(
-          child: Icon(Icons.error_outline, color: Colors.white),
-        ),
+        child: Center(child: Icon(Icons.error_outline, color: Colors.white)),
       );
     }
     if (!_controller.value.isInitialized) {
@@ -118,8 +119,7 @@ class _ReelItemState extends State<ReelItem> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   GestureDetector(
-                    onTap: () =>
-                        context.push(Routes.userPath(widget.reel.uid)),
+                    onTap: () => context.push(Routes.userPath(widget.reel.uid)),
                     child: Text(
                       widget.reel.authorUsername,
                       style: const TextStyle(

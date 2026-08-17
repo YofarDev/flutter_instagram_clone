@@ -11,9 +11,11 @@ import 'post_detail_state.dart';
 
 class PostDetailCubit extends Cubit<PostDetailState> {
   PostDetailCubit(this._repository, {Post? post, String? postId})
-      : super(post != null
+    : super(
+        post != null
             ? PostDetailState(post: post, status: PostDetailStatus.ready)
-            : const PostDetailState()) {
+            : const PostDetailState(),
+      ) {
     if (post != null) {
       _onPostReady(post);
     } else if (postId != null) {
@@ -26,12 +28,14 @@ class PostDetailCubit extends Cubit<PostDetailState> {
   bool _toggled = false;
 
   Future<void> _fetchPost(String postId) async {
-    final Either<Failure, Post> either =
-        await _repository.getPostById(postId: postId);
+    final Either<Failure, Post> either = await _repository.getPostById(
+      postId: postId,
+    );
     if (isClosed) return;
     either.fold(
-      (Failure f) =>
-          emit(state.copyWith(status: PostDetailStatus.failed, error: f.message)),
+      (Failure f) => emit(
+        state.copyWith(status: PostDetailStatus.failed, error: f.message),
+      ),
       (Post post) {
         emit(state.copyWith(post: post, status: PostDetailStatus.ready));
         _onPostReady(post);
@@ -42,22 +46,24 @@ class PostDetailCubit extends Cubit<PostDetailState> {
   void _onPostReady(Post post) {
     _commentsSub = _repository
         .watchComments(postId: post.id)
-        .listen(_onComments, onError: (Object e) {
-      if (isClosed) return;
-      emit(state.copyWith(error: 'Failed to load comments'));
-    });
+        .listen(
+          _onComments,
+          onError: (Object e) {
+            if (isClosed) return;
+            emit(state.copyWith(error: 'Failed to load comments'));
+          },
+        );
     _hydrateLike();
   }
 
   Future<void> _hydrateLike() async {
     final String postId = state.post!.id;
-    final Either<Failure, Set<String>> either =
-        await _repository.fetchLikedPostIds(postIds: <String>[postId]);
+    final Either<Failure, Set<String>> either = await _repository
+        .fetchLikedPostIds(postIds: <String>[postId]);
     if (isClosed || _toggled) return;
     either.fold(
       (_) {}, // ponytail: default unliked on hydration failure
-      (Set<String> ids) =>
-          emit(state.copyWith(isLiked: ids.contains(postId))),
+      (Set<String> ids) => emit(state.copyWith(isLiked: ids.contains(postId))),
     );
   }
 
@@ -67,24 +73,29 @@ class PostDetailCubit extends Cubit<PostDetailState> {
   Future<void> toggleLike() async {
     final bool wasLiked = state.isLiked;
     _toggled = true;
-    emit(state.copyWith(
-      isLiked: !wasLiked,
-      post: state.post!
-          .copyWith(likeCount: state.post!.likeCount + (wasLiked ? -1 : 1)),
-    ));
+    emit(
+      state.copyWith(
+        isLiked: !wasLiked,
+        post: state.post!.copyWith(
+          likeCount: state.post!.likeCount + (wasLiked ? -1 : 1),
+        ),
+      ),
+    );
     final Either<Failure, void> either = await _repository.toggleLike(
       post: state.post!,
       currentlyLiked: wasLiked,
     );
     if (isClosed) return;
     either.fold(
-      (Failure f) => emit(state.copyWith(
-        error: f.message,
-        isLiked: wasLiked,
-        post: state.post!.copyWith(
-          likeCount: state.post!.likeCount + (wasLiked ? 1 : -1),
+      (Failure f) => emit(
+        state.copyWith(
+          error: f.message,
+          isLiked: wasLiked,
+          post: state.post!.copyWith(
+            likeCount: state.post!.likeCount + (wasLiked ? 1 : -1),
+          ),
         ),
-      )),
+      ),
       (_) {},
     );
   }
@@ -101,11 +112,14 @@ class PostDetailCubit extends Cubit<PostDetailState> {
     if (isClosed) return;
     either.fold(
       (Failure f) => emit(state.copyWith(sending: false, error: f.message)),
-      (_) => emit(state.copyWith(
-        sending: false,
-        post: state.post!
-            .copyWith(commentCount: state.post!.commentCount + 1),
-      )),
+      (_) => emit(
+        state.copyWith(
+          sending: false,
+          post: state.post!.copyWith(
+            commentCount: state.post!.commentCount + 1,
+          ),
+        ),
+      ),
     );
   }
 

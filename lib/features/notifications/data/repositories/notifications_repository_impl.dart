@@ -35,21 +35,24 @@ class NotificationsRepositoryImpl implements INotificationsRepository {
     String? commentText,
   }) async {
     try {
-      return Right<Failure, void>(await _ds.createNotificationDoc(
-        ownerUid: ownerUid,
-        type: type,
-        actorId: actorId,
-        actorUsername: actorUsername,
-        actorAvatarUrl: actorAvatarUrl,
-        postId: postId,
-        postImageUrl: postImageUrl,
-        commentText: commentText,
-      ));
+      return Right<Failure, void>(
+        await _ds.createNotificationDoc(
+          ownerUid: ownerUid,
+          type: type,
+          actorId: actorId,
+          actorUsername: actorUsername,
+          actorAvatarUrl: actorAvatarUrl,
+          postId: postId,
+          postImageUrl: postImageUrl,
+          commentText: commentText,
+        ),
+      );
     } catch (e) {
       return Left<Failure, void>(_mapError(e));
     }
   }
 
-  Failure _mapError(Object e) =>
-      Failure.serverError(message: e.toString()); // ponytail: firestore errors are descriptive strings
+  Failure _mapError(Object e) => Failure.serverError(
+    message: e.toString(),
+  ); // ponytail: firestore errors are descriptive strings
 }

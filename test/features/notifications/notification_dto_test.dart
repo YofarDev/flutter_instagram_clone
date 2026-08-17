@@ -4,13 +4,13 @@ import 'package:flutter_instagram_clone/features/notifications/data/models/notif
 import 'package:flutter_instagram_clone/features/notifications/domain/models/notification_item.dart';
 
 Map<String, dynamic> _map(String type) => <String, dynamic>{
-      'ownerUid': 'owner',
-      'type': type,
-      'actorId': 'actor',
-      'actorUsername': 'yo',
-      'createdAt': 1000,
-      'read': true,
-    };
+  'ownerUid': 'owner',
+  'type': type,
+  'actorId': 'actor',
+  'actorUsername': 'yo',
+  'createdAt': 1000,
+  'read': true,
+};
 
 void main() {
   test('roundtrips item through toMap/fromMap/toDomain', () {
@@ -40,8 +40,10 @@ void main() {
       read: item.read,
     );
 
-    final NotificationItem result =
-        NotificationDto.fromMap('n1', dto.toMap()).toDomain('n1');
+    final NotificationItem result = NotificationDto.fromMap(
+      'n1',
+      dto.toMap(),
+    ).toDomain('n1');
 
     expect(result, item);
   });

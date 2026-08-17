@@ -112,56 +112,61 @@ class AppRouter {
                   body: navigationShell,
                   bottomNavigationBar:
                       BlocBuilder<NotificationsCubit, NotificationsState>(
-                    buildWhen: (NotificationsState previous,
-                            NotificationsState current) =>
-                        previous.unreadCount != current.unreadCount,
-                    builder: (BuildContext context, NotificationsState state) =>
-                        NavigationBar(
-                      selectedIndex: navigationShell.currentIndex,
-                      onDestinationSelected: (int i) => navigationShell.goBranch(
-                        i,
-                        initialLocation: i == navigationShell.currentIndex,
+                        buildWhen:
+                            (
+                              NotificationsState previous,
+                              NotificationsState current,
+                            ) => previous.unreadCount != current.unreadCount,
+                        builder:
+                            (BuildContext context, NotificationsState state) =>
+                                NavigationBar(
+                                  selectedIndex: navigationShell.currentIndex,
+                                  onDestinationSelected: (int i) =>
+                                      navigationShell.goBranch(
+                                        i,
+                                        initialLocation:
+                                            i == navigationShell.currentIndex,
+                                      ),
+                                  destinations: <NavigationDestination>[
+                                    const NavigationDestination(
+                                      icon: Icon(Icons.home_outlined),
+                                      selectedIcon: Icon(Icons.home),
+                                      label: 'Feed',
+                                    ),
+                                    const NavigationDestination(
+                                      icon: Icon(Icons.search),
+                                      selectedIcon: Icon(Icons.search),
+                                      label: 'Search',
+                                    ),
+                                    const NavigationDestination(
+                                      icon: Icon(Icons.add_box_outlined),
+                                      selectedIcon: Icon(Icons.add_box),
+                                      label: 'Create',
+                                    ),
+                                    const NavigationDestination(
+                                      icon: Icon(Icons.movie_outlined),
+                                      selectedIcon: Icon(Icons.movie),
+                                      label: 'Reels',
+                                    ),
+                                    NavigationDestination(
+                                      icon: BadgeIcon(
+                                        icon: Icons.favorite_outline,
+                                        count: state.unreadCount,
+                                      ),
+                                      selectedIcon: BadgeIcon(
+                                        icon: Icons.favorite,
+                                        count: state.unreadCount,
+                                      ),
+                                      label: 'Activity',
+                                    ),
+                                    const NavigationDestination(
+                                      icon: Icon(Icons.person_outline),
+                                      selectedIcon: Icon(Icons.person),
+                                      label: 'Profile',
+                                    ),
+                                  ],
+                                ),
                       ),
-                      destinations: <NavigationDestination>[
-                        const NavigationDestination(
-                          icon: Icon(Icons.home_outlined),
-                          selectedIcon: Icon(Icons.home),
-                          label: 'Feed',
-                        ),
-                        const NavigationDestination(
-                          icon: Icon(Icons.search),
-                          selectedIcon: Icon(Icons.search),
-                          label: 'Search',
-                        ),
-                        const NavigationDestination(
-                          icon: Icon(Icons.add_box_outlined),
-                          selectedIcon: Icon(Icons.add_box),
-                          label: 'Create',
-                        ),
-                        const NavigationDestination(
-                          icon: Icon(Icons.movie_outlined),
-                          selectedIcon: Icon(Icons.movie),
-                          label: 'Reels',
-                        ),
-                        NavigationDestination(
-                          icon: BadgeIcon(
-                            icon: Icons.favorite_outline,
-                            count: state.unreadCount,
-                          ),
-                          selectedIcon: BadgeIcon(
-                            icon: Icons.favorite,
-                            count: state.unreadCount,
-                          ),
-                          label: 'Activity',
-                        ),
-                        const NavigationDestination(
-                          icon: Icon(Icons.person_outline),
-                          selectedIcon: Icon(Icons.person),
-                          label: 'Profile',
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
               );
             },
@@ -202,18 +207,18 @@ class AppRouter {
                 name: 'Search',
                 builder: (BuildContext context, GoRouterState state) =>
                     MultiBlocProvider(
-                  providers: <BlocProvider<dynamic>>[
-                    BlocProvider<ExploreCubit>(
-                      create: (_) => getIt<ExploreCubit>(
-                        param1: getIt<AuthCubit>().state.user!.uid,
-                      ),
+                      providers: <BlocProvider<dynamic>>[
+                        BlocProvider<ExploreCubit>(
+                          create: (_) => getIt<ExploreCubit>(
+                            param1: getIt<AuthCubit>().state.user!.uid,
+                          ),
+                        ),
+                        BlocProvider<SearchCubit>(
+                          create: (_) => getIt<SearchCubit>(),
+                        ),
+                      ],
+                      child: const SearchScreen(),
                     ),
-                    BlocProvider<SearchCubit>(
-                      create: (_) => getIt<SearchCubit>(),
-                    ),
-                  ],
-                  child: const SearchScreen(),
-                ),
               ),
             ],
           ),
@@ -239,9 +244,9 @@ class AppRouter {
                 name: 'Reels',
                 builder: (BuildContext context, GoRouterState state) =>
                     BlocProvider<ReelsCubit>(
-                  create: (_) => getIt<ReelsCubit>(),
-                  child: const ReelsScreen(),
-                ),
+                      create: (_) => getIt<ReelsCubit>(),
+                      child: const ReelsScreen(),
+                    ),
               ),
             ],
           ),
@@ -253,9 +258,9 @@ class AppRouter {
                 name: 'Activity',
                 builder: (BuildContext context, GoRouterState state) =>
                     BlocProvider<NotificationsCubit>.value(
-                  value: getIt<NotificationsCubit>(),
-                  child: const ActivityScreen(),
-                ),
+                      value: getIt<NotificationsCubit>(),
+                      child: const ActivityScreen(),
+                    ),
               ),
             ],
           ),
@@ -371,9 +376,9 @@ class AppRouter {
         parentNavigatorKey: rootNavigatorKey,
         builder: (BuildContext context, GoRouterState state) =>
             BlocProvider<CreateReelCubit>(
-          create: (_) => getIt<CreateReelCubit>(),
-          child: const CreateReelScreen(),
-        ),
+              create: (_) => getIt<CreateReelCubit>(),
+              child: const CreateReelScreen(),
+            ),
       ),
       GoRoute(
         path: Routes.createStory,
@@ -408,16 +413,16 @@ class AppRouter {
         parentNavigatorKey: rootNavigatorKey,
         builder: (BuildContext context, GoRouterState state) =>
             MultiBlocProvider(
-          providers: <BlocProvider<dynamic>>[
-            BlocProvider<AuthCubit>.value(value: getIt<AuthCubit>()),
-            BlocProvider<ConversationsCubit>(
-              create: (_) => getIt<ConversationsCubit>(
-                param1: getIt<AuthCubit>().state.user!.uid,
-              ),
+              providers: <BlocProvider<dynamic>>[
+                BlocProvider<AuthCubit>.value(value: getIt<AuthCubit>()),
+                BlocProvider<ConversationsCubit>(
+                  create: (_) => getIt<ConversationsCubit>(
+                    param1: getIt<AuthCubit>().state.user!.uid,
+                  ),
+                ),
+              ],
+              child: const ConversationsScreen(),
             ),
-          ],
-          child: const ConversationsScreen(),
-        ),
       ),
       GoRoute(
         path: Routes.chat,
@@ -451,11 +456,11 @@ class AppRouter {
         parentNavigatorKey: rootNavigatorKey,
         builder: (BuildContext context, GoRouterState state) =>
             BlocProvider<NewChatCubit>(
-          create: (_) => getIt<NewChatCubit>(
-            param1: getIt<AuthCubit>().state.user!.uid,
-          ),
-          child: const NewChatScreen(),
-        ),
+              create: (_) => getIt<NewChatCubit>(
+                param1: getIt<AuthCubit>().state.user!.uid,
+              ),
+              child: const NewChatScreen(),
+            ),
       ),
       GoRoute(
         path: Routes.splash,

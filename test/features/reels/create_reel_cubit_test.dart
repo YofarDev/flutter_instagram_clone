@@ -21,9 +21,7 @@ void main() {
     'captionChanged updates caption',
     build: () => CreateReelCubit(repo),
     act: (CreateReelCubit cubit) => cubit.captionChanged('hello'),
-    expect: () => const <CreateReelState>[
-      CreateReelState(caption: 'hello'),
-    ],
+    expect: () => const <CreateReelState>[CreateReelState(caption: 'hello')],
   );
 
   blocTest<CreateReelCubit, CreateReelState>(
@@ -53,14 +51,20 @@ void main() {
       ).thenAnswer((_) async => const Right<Failure, void>(null));
       return CreateReelCubit(repo);
     },
-    seed: () => const CreateReelState(pickedPath: '/tmp/vid.mp4', caption: 'hi'),
+    seed: () =>
+        const CreateReelState(pickedPath: '/tmp/vid.mp4', caption: 'hi'),
     act: (CreateReelCubit cubit) => cubit.submit(),
     verify: (_) {
-      verify(() => repo.createReel(caption: 'hi', filePath: '/tmp/vid.mp4'))
-          .called(1);
+      verify(
+        () => repo.createReel(caption: 'hi', filePath: '/tmp/vid.mp4'),
+      ).called(1);
     },
     expect: () => const <CreateReelState>[
-      CreateReelState(pickedPath: '/tmp/vid.mp4', caption: 'hi', submitting: true),
+      CreateReelState(
+        pickedPath: '/tmp/vid.mp4',
+        caption: 'hi',
+        submitting: true,
+      ),
       CreateReelState(
         pickedPath: '/tmp/vid.mp4',
         caption: 'hi',
@@ -79,7 +83,8 @@ void main() {
           filePath: any(named: 'filePath'),
         ),
       ).thenAnswer(
-        (_) async => const Left<Failure, void>(Failure.serverError(message: 'boom')),
+        (_) async =>
+            const Left<Failure, void>(Failure.serverError(message: 'boom')),
       );
       return CreateReelCubit(repo);
     },

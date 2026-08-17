@@ -75,17 +75,22 @@ void main() {
     registerFallbackValue(p1);
     registerFallbackValue(<String>[]);
     // existing fixtures are authored by 'u1' — keep them visible via myUid
-    when(() => profileRepo.watchFollowingIds(uid: any(named: 'uid')))
-        .thenAnswer((_) => const Stream<List<String>>.empty());
+    when(
+      () => profileRepo.watchFollowingIds(uid: any(named: 'uid')),
+    ).thenAnswer((_) => const Stream<List<String>>.empty());
   });
 
   blocTest<FeedCubit, FeedState>(
     'initial load hydrates liked ids',
     build: () {
-      when(() => repo.watchFeed(limit: any(named: 'limit')))
-          .thenAnswer((_) => Stream<List<Post>>.value(<Post>[p1, p2]));
-      when(() => repo.fetchLikedPostIds(postIds: any(named: 'postIds')))
-          .thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{'p1'}));
+      when(
+        () => repo.watchFeed(limit: any(named: 'limit')),
+      ).thenAnswer((_) => Stream<List<Post>>.value(<Post>[p1, p2]));
+      when(
+        () => repo.fetchLikedPostIds(postIds: any(named: 'postIds')),
+      ).thenAnswer(
+        (_) async => const Right<Failure, Set<String>>(<String>{'p1'}),
+      );
       return FeedCubit(repo, profileRepo, myUid: 'u1');
     },
     expect: () => <FeedState>[
@@ -104,15 +109,19 @@ void main() {
       final StreamController<List<Post>> controller =
           StreamController<List<Post>>();
       addTearDown(controller.close);
-      final List<Either<Failure, Set<String>>> answers = <
-          Either<Failure, Set<String>>>[
-        const Right<Failure, Set<String>>(<String>{'p1'}),
-        const Left<Failure, Set<String>>(Failure.serverError(message: 'boom')),
-      ];
-      when(() => repo.watchFeed(limit: any(named: 'limit')))
-          .thenAnswer((_) => controller.stream);
-      when(() => repo.fetchLikedPostIds(postIds: any(named: 'postIds')))
-          .thenAnswer((_) async => answers.removeAt(0));
+      final List<Either<Failure, Set<String>>> answers =
+          <Either<Failure, Set<String>>>[
+            const Right<Failure, Set<String>>(<String>{'p1'}),
+            const Left<Failure, Set<String>>(
+              Failure.serverError(message: 'boom'),
+            ),
+          ];
+      when(
+        () => repo.watchFeed(limit: any(named: 'limit')),
+      ).thenAnswer((_) => controller.stream);
+      when(
+        () => repo.fetchLikedPostIds(postIds: any(named: 'postIds')),
+      ).thenAnswer((_) async => answers.removeAt(0));
       controller
         ..add(<Post>[p1, p2])
         ..add(<Post>[p1]);
@@ -140,21 +149,21 @@ void main() {
       final StreamController<List<Post>> controller =
           StreamController<List<Post>>();
       addTearDown(controller.close);
-      when(() => repo.watchFeed(limit: any(named: 'limit')))
-          .thenAnswer((_) => controller.stream);
+      when(
+        () => repo.watchFeed(limit: any(named: 'limit')),
+      ).thenAnswer((_) => controller.stream);
       controller.addError(Exception('db down'));
       return FeedCubit(repo, profileRepo, myUid: 'u1');
     },
-    expect: () => <FeedState>[
-      FeedState(error: 'Failed to load feed'),
-    ],
+    expect: () => <FeedState>[FeedState(error: 'Failed to load feed')],
   );
 
   blocTest<FeedCubit, FeedState>(
     'toggleLike optimistic flip on success',
     build: () {
-      when(() => repo.watchFeed(limit: any(named: 'limit')))
-          .thenAnswer((_) => const Stream<List<Post>>.empty());
+      when(
+        () => repo.watchFeed(limit: any(named: 'limit')),
+      ).thenAnswer((_) => const Stream<List<Post>>.empty());
       when(
         () => repo.toggleLike(
           post: any(named: 'post'),
@@ -163,7 +172,8 @@ void main() {
       ).thenAnswer((_) async => const Right<Failure, void>(null));
       return FeedCubit(repo, profileRepo, myUid: 'u1');
     },
-    seed: () => FeedState(status: FeedStatus.ready, posts: <Post>[p1], hasMore: true),
+    seed: () =>
+        FeedState(status: FeedStatus.ready, posts: <Post>[p1], hasMore: true),
     act: (FeedCubit cubit) => cubit.toggleLike(p1),
     verify: (FeedCubit cubit) {
       verify(() => repo.toggleLike(post: p1, currentlyLiked: false)).called(1);
@@ -181,8 +191,9 @@ void main() {
   blocTest<FeedCubit, FeedState>(
     'toggleLike rolls back on failure',
     build: () {
-      when(() => repo.watchFeed(limit: any(named: 'limit')))
-          .thenAnswer((_) => const Stream<List<Post>>.empty());
+      when(
+        () => repo.watchFeed(limit: any(named: 'limit')),
+      ).thenAnswer((_) => const Stream<List<Post>>.empty());
       when(
         () => repo.toggleLike(
           post: any(named: 'post'),
@@ -194,7 +205,8 @@ void main() {
       );
       return FeedCubit(repo, profileRepo, myUid: 'u1');
     },
-    seed: () => FeedState(status: FeedStatus.ready, posts: <Post>[p1], hasMore: true),
+    seed: () =>
+        FeedState(status: FeedStatus.ready, posts: <Post>[p1], hasMore: true),
     act: (FeedCubit cubit) => cubit.toggleLike(p1),
     expect: () => <FeedState>[
       FeedState(
@@ -215,10 +227,12 @@ void main() {
   blocTest<FeedCubit, FeedState>(
     'loadMore re-subscribes with grown limit',
     build: () {
-      when(() => repo.watchFeed(limit: any(named: 'limit')))
-          .thenAnswer((_) => Stream<List<Post>>.value(manyPosts));
-      when(() => repo.fetchLikedPostIds(postIds: any(named: 'postIds')))
-          .thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
+      when(
+        () => repo.watchFeed(limit: any(named: 'limit')),
+      ).thenAnswer((_) => Stream<List<Post>>.value(manyPosts));
+      when(
+        () => repo.fetchLikedPostIds(postIds: any(named: 'postIds')),
+      ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
       return FeedCubit(repo, profileRepo, myUid: 'u1');
     },
     act: (FeedCubit cubit) async {
@@ -240,8 +254,9 @@ void main() {
   blocTest<FeedCubit, FeedState>(
     'loadMore blocked when hasMore false',
     build: () {
-      when(() => repo.watchFeed(limit: any(named: 'limit')))
-          .thenAnswer((_) => const Stream<List<Post>>.empty());
+      when(
+        () => repo.watchFeed(limit: any(named: 'limit')),
+      ).thenAnswer((_) => const Stream<List<Post>>.empty());
       return FeedCubit(repo, profileRepo, myUid: 'u1');
     },
     seed: () => FeedState(status: FeedStatus.ready, hasMore: false),
@@ -255,14 +270,15 @@ void main() {
   blocTest<FeedCubit, FeedState>(
     'feed filters to self + followed',
     build: () {
-      when(() => repo.watchFeed(limit: any(named: 'limit')))
-          .thenAnswer((_) => Stream<List<Post>>.value(
-                <Post>[mine, followedPost, stranger],
-              ));
-      when(() => repo.fetchLikedPostIds(postIds: any(named: 'postIds')))
-          .thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
-      when(() => profileRepo.watchFollowingIds(uid: any(named: 'uid')))
-          .thenAnswer((_) => Stream<List<String>>.value(<String>['u2']));
+      when(() => repo.watchFeed(limit: any(named: 'limit'))).thenAnswer(
+        (_) => Stream<List<Post>>.value(<Post>[mine, followedPost, stranger]),
+      );
+      when(
+        () => repo.fetchLikedPostIds(postIds: any(named: 'postIds')),
+      ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
+      when(
+        () => profileRepo.watchFollowingIds(uid: any(named: 'uid')),
+      ).thenAnswer((_) => Stream<List<String>>.value(<String>['u2']));
       return FeedCubit(repo, profileRepo, myUid: 'me');
     },
     expect: () => <FeedState>[
@@ -290,17 +306,23 @@ void main() {
       addTearDown(postsController.close);
       followingController = StreamController<List<String>>();
       addTearDown(followingController.close);
-      when(() => repo.watchFeed(limit: any(named: 'limit')))
-          .thenAnswer((_) => postsController.stream);
-      when(() => repo.fetchLikedPostIds(postIds: any(named: 'postIds')))
-          .thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
-      when(() => profileRepo.watchFollowingIds(uid: any(named: 'uid')))
-          .thenAnswer((_) => followingController.stream);
+      when(
+        () => repo.watchFeed(limit: any(named: 'limit')),
+      ).thenAnswer((_) => postsController.stream);
+      when(
+        () => repo.fetchLikedPostIds(postIds: any(named: 'postIds')),
+      ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
+      when(
+        () => profileRepo.watchFollowingIds(uid: any(named: 'uid')),
+      ).thenAnswer((_) => followingController.stream);
       return FeedCubit(repo, profileRepo, myUid: 'me');
     },
     act: (FeedCubit cubit) async {
       await Future<void>.delayed(Duration.zero);
-      postsController.add(<Post>[mine, followedPost]); // following empty -> only mine
+      postsController.add(<Post>[
+        mine,
+        followedPost,
+      ]); // following empty -> only mine
       await Future<void>.delayed(Duration.zero);
       followingController.add(<String>['u2']); // widen -> mine + followed
       await Future<void>.delayed(Duration.zero);

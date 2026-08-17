@@ -51,26 +51,29 @@ void main() {
     repo = MockIExploreRepository();
     profileRepo = MockIProfileRepository();
     when(() => repo.watchExplorePosts(limit: any(named: 'limit'))).thenAnswer(
-        (_) => Stream<List<Post>>.value(<Post>[mine, followedPost, stranger]));
-    when(() => profileRepo.watchFollowingIds(uid: any(named: 'uid')))
-        .thenAnswer((_) => Stream<List<String>>.value(<String>['u2']));
-    when(() => repo.searchUsers(query: any(named: 'query'))).thenAnswer(
-        (_) async => const Right<Failure, List<AppUser>>(<AppUser>[]));
+      (_) => Stream<List<Post>>.value(<Post>[mine, followedPost, stranger]),
+    );
+    when(
+      () => profileRepo.watchFollowingIds(uid: any(named: 'uid')),
+    ).thenAnswer((_) => Stream<List<String>>.value(<String>['u2']));
+    when(
+      () => repo.searchUsers(query: any(named: 'query')),
+    ).thenAnswer((_) async => const Right<Failure, List<AppUser>>(<AppUser>[]));
   });
 
   Widget subject() => MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: MultiBlocProvider(
-          providers: <SingleChildWidget>[
-            BlocProvider<ExploreCubit>(
-              create: (_) => ExploreCubit(repo, profileRepo, myUid: 'me'),
-            ),
-            BlocProvider<SearchCubit>(create: (_) => SearchCubit(repo)),
-          ],
-          child: const SearchScreen(),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: MultiBlocProvider(
+      providers: <SingleChildWidget>[
+        BlocProvider<ExploreCubit>(
+          create: (_) => ExploreCubit(repo, profileRepo, myUid: 'me'),
         ),
-      );
+        BlocProvider<SearchCubit>(create: (_) => SearchCubit(repo)),
+      ],
+      child: const SearchScreen(),
+    ),
+  );
 
   Future<void> pumpSubject(WidgetTester tester) async {
     await tester.pumpWidget(subject());
@@ -78,25 +81,31 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('explore grid excludes self and followed, shows only stranger',
-      (WidgetTester tester) async {
+  testWidgets('explore grid excludes self and followed, shows only stranger', (
+    WidgetTester tester,
+  ) async {
     await pumpSubject(tester);
 
     expect(find.byType(Image), findsOneWidget);
     final Image image = tester.widget<Image>(find.byType(Image));
     expect(
       image.image,
-      isA<NetworkImage>()
-          .having((NetworkImage n) => n.url, 'url', 'http://img/ps'),
+      isA<NetworkImage>().having(
+        (NetworkImage n) => n.url,
+        'url',
+        'http://img/ps',
+      ),
     );
   });
 
-  testWidgets('typing shows accounts and hashtag row, hides explore grid',
-      (WidgetTester tester) async {
-    when(() => repo.searchUsers(query: 'al')).thenAnswer((_) async =>
-        Right<Failure, List<AppUser>>(<AppUser>[
-          const AppUser(uid: 'u1', email: 'alice@x.com', username: 'alice'),
-        ]));
+  testWidgets('typing shows accounts and hashtag row, hides explore grid', (
+    WidgetTester tester,
+  ) async {
+    when(() => repo.searchUsers(query: 'al')).thenAnswer(
+      (_) async => Right<Failure, List<AppUser>>(<AppUser>[
+        const AppUser(uid: 'u1', email: 'alice@x.com', username: 'alice'),
+      ]),
+    );
 
     await pumpSubject(tester);
     expect(find.byType(Image), findsOneWidget);
@@ -110,12 +119,14 @@ void main() {
     expect(find.byType(Image), findsNothing);
   });
 
-  testWidgets('typing with no matches shows searchNoResults',
-      (WidgetTester tester) async {
+  testWidgets('typing with no matches shows searchNoResults', (
+    WidgetTester tester,
+  ) async {
     await pumpSubject(tester);
 
-    final AppLocalizations l10n =
-        AppLocalizations.of(tester.element(find.byType(SearchScreen)));
+    final AppLocalizations l10n = AppLocalizations.of(
+      tester.element(find.byType(SearchScreen)),
+    );
 
     await tester.enterText(find.byType(TextField), 'zz');
     await tester.pump(const Duration(milliseconds: 400));

@@ -13,10 +13,7 @@ void main() {
     });
 
     test('allows underscores and digits', () {
-      expect(
-        extractTags('#under_score1 ok'),
-        <String>['under_score1'],
-      );
+      expect(extractTags('#under_score1 ok'), <String>['under_score1']);
     });
 
     test('stops at punctuation boundary', () {

@@ -8,8 +8,10 @@ import 'hashtag_state.dart';
 
 class HashtagCubit extends Cubit<HashtagState> {
   HashtagCubit(IExploreRepository repository, {required String tag})
-      : super(const HashtagState()) {
-    _sub = repository.watchPostsByTag(tag: tag).listen(
+    : super(const HashtagState()) {
+    _sub = repository
+        .watchPostsByTag(tag: tag)
+        .listen(
           (List<Post> posts) {
             if (isClosed) return;
             emit(state.copyWith(status: HashtagStatus.ready, posts: posts));

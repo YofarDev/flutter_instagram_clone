@@ -129,7 +129,9 @@ class AuthRepositoryImpl implements IAuthRepository {
         // ponytail: typed cancel sentinel, cubit ignores it
         return const Failure.cancelled();
       }
-      return Failure.serverError(message: e.description ?? 'Google sign-in failed');
+      return Failure.serverError(
+        message: e.description ?? 'Google sign-in failed',
+      );
     }
     if (e is FirebaseAuthException) {
       return switch (e.code) {
@@ -138,12 +140,15 @@ class AuthRepositoryImpl implements IAuthRepository {
         'wrong-password' ||
         'user-not-found' ||
         'invalid-credential-password' ||
-        'invalid-credential-email' =>
-          const Failure.serverError(message: 'Invalid email or password'),
-        'email-already-in-use' =>
-          const Failure.serverError(message: 'Email already in use'),
-        'weak-password' =>
-          const Failure.serverError(message: 'Password is too weak'),
+        'invalid-credential-email' => const Failure.serverError(
+          message: 'Invalid email or password',
+        ),
+        'email-already-in-use' => const Failure.serverError(
+          message: 'Email already in use',
+        ),
+        'weak-password' => const Failure.serverError(
+          message: 'Password is too weak',
+        ),
         _ => Failure.serverError(message: e.message ?? 'Authentication error'),
       };
     }

@@ -57,9 +57,11 @@ class ProfileScreen extends StatelessWidget {
                                     ? NetworkImage(profile.avatarUrl!)
                                     : null,
                                 child: profile.avatarUrl == null
-                                    ? Text(profile.username?.isNotEmpty == true
-                                        ? profile.username![0].toUpperCase()
-                                        : '?')
+                                    ? Text(
+                                        profile.username?.isNotEmpty == true
+                                            ? profile.username![0].toUpperCase()
+                                            : '?',
+                                      )
                                     : null,
                               ),
                               const SizedBox(width: 24),
@@ -74,8 +76,8 @@ class ProfileScreen extends StatelessWidget {
                                     ),
                                     InkWell(
                                       onTap: () => context.push(
-                                          Routes.userFollowersPath(
-                                              profile.uid)),
+                                        Routes.userFollowersPath(profile.uid),
+                                      ),
                                       child: _CountColumn(
                                         count: profile.followerCount,
                                         label: l10n.profileFollowers,
@@ -83,8 +85,8 @@ class ProfileScreen extends StatelessWidget {
                                     ),
                                     InkWell(
                                       onTap: () => context.push(
-                                          Routes.userFollowingPath(
-                                              profile.uid)),
+                                        Routes.userFollowingPath(profile.uid),
+                                      ),
                                       child: _CountColumn(
                                         count: profile.followingCount,
                                         label: l10n.profileFollowing,
@@ -104,7 +106,8 @@ class ProfileScreen extends StatelessWidget {
                               Text(
                                 profile.username ?? '',
                                 style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               if (profile.bio?.isNotEmpty == true)
                                 Text(profile.bio!),
@@ -113,37 +116,39 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
                           child: Row(
                             children: <Widget>[
                               Expanded(
                                 child: state.isMe
                                     ? OutlinedButton(
                                         onPressed: () => context.push(
-                                              Routes.profileEdit,
-                                              extra: AppUser(
-                                                uid: profile.uid,
-                                                email: profile.email,
-                                                username: profile.username,
-                                                bio: profile.bio,
-                                                avatarUrl: profile.avatarUrl,
-                                              ),
-                                            ),
+                                          Routes.profileEdit,
+                                          extra: AppUser(
+                                            uid: profile.uid,
+                                            email: profile.email,
+                                            username: profile.username,
+                                            bio: profile.bio,
+                                            avatarUrl: profile.avatarUrl,
+                                          ),
+                                        ),
                                         child: Text(l10n.profileEdit),
                                       )
                                     : (state.isFollowing
-                                        ? OutlinedButton(
-                                            onPressed: () => context
-                                                .read<ProfileCubit>()
-                                                .toggleFollow(),
-                                            child: Text(l10n.profileUnfollow),
-                                          )
-                                        : FilledButton(
-                                            onPressed: () => context
-                                                .read<ProfileCubit>()
-                                                .toggleFollow(),
-                                            child: Text(l10n.profileFollow),
-                                          )),
+                                          ? OutlinedButton(
+                                              onPressed: () => context
+                                                  .read<ProfileCubit>()
+                                                  .toggleFollow(),
+                                              child: Text(l10n.profileUnfollow),
+                                            )
+                                          : FilledButton(
+                                              onPressed: () => context
+                                                  .read<ProfileCubit>()
+                                                  .toggleFollow(),
+                                              child: Text(l10n.profileFollow),
+                                            )),
                               ),
                             ],
                           ),
@@ -154,18 +159,19 @@ class ProfileScreen extends StatelessWidget {
                             physics: const NeverScrollableScrollPhysics(),
                             gridDelegate:
                                 const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              childAspectRatio: 1,
-                              mainAxisSpacing: 2,
-                              crossAxisSpacing: 2,
-                            ),
+                                  crossAxisCount: 3,
+                                  childAspectRatio: 1,
+                                  mainAxisSpacing: 2,
+                                  crossAxisSpacing: 2,
+                                ),
                             itemCount: state.posts.length,
                             itemBuilder: (BuildContext context, int index) {
                               final Post post = state.posts[index];
                               return InkWell(
                                 onTap: () => context.push(
-                                    Routes.postDetailPath(post.id),
-                                    extra: post),
+                                  Routes.postDetailPath(post.id),
+                                  extra: post,
+                                ),
                                 child: Image.network(
                                   post.imageUrl,
                                   fit: BoxFit.cover,
@@ -196,8 +202,7 @@ class _CountColumn extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text('$count',
-            style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text('$count', style: const TextStyle(fontWeight: FontWeight.bold)),
         Text(label),
       ],
     );

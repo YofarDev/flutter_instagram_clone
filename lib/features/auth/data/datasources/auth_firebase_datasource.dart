@@ -108,16 +108,16 @@ class AuthFirebaseDataSource implements IAuthDataSource {
     final String? newUsername = data['username'] as String?;
     return _db.runTransaction((Transaction tx) async {
       if (newUsername != null && newUsername != previousUsername) {
-        final DocumentSnapshot<Object?> lock =
-            await tx.get(_db.collection('usernames').doc(newUsername));
+        final DocumentSnapshot<Object?> lock = await tx.get(
+          _db.collection('usernames').doc(newUsername),
+        );
         if (lock.exists &&
             (lock.data() as Map<String, dynamic>?)?['uid'] != uid) {
           throw UsernameTakenException();
         }
-        tx.set(
-          _db.collection('usernames').doc(newUsername),
-          <String, dynamic>{'uid': uid},
-        );
+        tx.set(_db.collection('usernames').doc(newUsername), <String, dynamic>{
+          'uid': uid,
+        });
         if (previousUsername != null && previousUsername != newUsername) {
           tx.delete(_db.collection('usernames').doc(previousUsername));
         }

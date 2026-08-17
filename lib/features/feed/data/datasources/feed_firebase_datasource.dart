@@ -17,12 +17,12 @@ const String _folded = 'aaaaeeeeiiiioooouuuucnAAAAEEEEIIIIOOOOUUUUCN';
 
 // ponytail: Latin-1 accent fold, full ICU fold if other scripts matter
 String _foldAccents(String s) => String.fromCharCodes(
-      s.runes.map(
-        (int r) => _accents.contains(String.fromCharCode(r))
-            ? _folded.codeUnitAt(_accents.indexOf(String.fromCharCode(r)))
-            : r,
-      ),
-    );
+  s.runes.map(
+    (int r) => _accents.contains(String.fromCharCode(r))
+        ? _folded.codeUnitAt(_accents.indexOf(String.fromCharCode(r)))
+        : r,
+  ),
+);
 
 List<String> extractTags(String caption) {
   final RegExp re = RegExp(r'#([\p{L}\p{N}_]+)', unicode: true);
@@ -35,10 +35,7 @@ List<String> extractTags(String caption) {
 
 abstract interface class IFeedDataSource {
   Stream<List<Post>> watchFeed({required int limit});
-  Future<void> createPost({
-    required String caption,
-    required String filePath,
-  });
+  Future<void> createPost({required String caption, required String filePath});
   Future<Set<String>> fetchLikedPostIds({required List<String> postIds});
   Future<Post> getPostById({required String postId});
   Future<void> toggleLike({
@@ -66,8 +63,10 @@ class FeedFirebaseDataSource implements IFeedDataSource {
   // ponytail: users-doc read per write; cache if read costs ever matter
   Future<({String username, String? avatarUrl})> _currentUserProfile() async {
     final User user = FirebaseAuth.instance.currentUser!;
-    final DocumentSnapshot<Object?> profile =
-        await _db.collection('users').doc(user.uid).get();
+    final DocumentSnapshot<Object?> profile = await _db
+        .collection('users')
+        .doc(user.uid)
+        .get();
     final Map<String, dynamic> data =
         profile.data() as Map<String, dynamic>? ?? <String, dynamic>{};
     return (
@@ -82,11 +81,16 @@ class FeedFirebaseDataSource implements IFeedDataSource {
       .orderBy('createdAt', descending: true)
       .limit(limit)
       .snapshots()
-      .map((QuerySnapshot<Object?> snap) => snap.docs
-          .map((QueryDocumentSnapshot<Object?> doc) =>
-              PostDto.fromMap(doc.id, doc.data() as Map<String, dynamic>)
-                  .toDomain(doc.id))
-          .toList());
+      .map(
+        (QuerySnapshot<Object?> snap) => snap.docs
+            .map(
+              (QueryDocumentSnapshot<Object?> doc) => PostDto.fromMap(
+                doc.id,
+                doc.data() as Map<String, dynamic>,
+              ).toDomain(doc.id),
+            )
+            .toList(),
+      );
 
   @override
   Future<void> createPost({
@@ -101,38 +105,41 @@ class FeedFirebaseDataSource implements IFeedDataSource {
     final String imageUrl = await ref.getDownloadURL();
     // ponytail: client timestamp + denormalized author fields
     try {
-      await _db.collection('posts').add(PostDto(
-            authorId: _uid,
-            authorUsername: profile.username,
-            authorAvatarUrl: profile.avatarUrl,
-            imageUrl: imageUrl,
-            caption: caption,
-            createdAtMillis: millis,
-            tags: extractTags(caption),
-          ).toMap());
+      await _db
+          .collection('posts')
+          .add(
+            PostDto(
+              authorId: _uid,
+              authorUsername: profile.username,
+              authorAvatarUrl: profile.avatarUrl,
+              imageUrl: imageUrl,
+              caption: caption,
+              createdAtMillis: millis,
+              tags: extractTags(caption),
+            ).toMap(),
+          );
     } catch (e) {
       // ponytail: best-effort cleanup, orphan possible if delete fails too
       unawaited(ref.delete().catchError((_) => ref));
       rethrow;
     }
     try {
-      await _db
-          .collection('users')
-          .doc(_uid)
-          .update(<String, dynamic>{'postCount': FieldValue.increment(1)});
+      await _db.collection('users').doc(_uid).update(<String, dynamic>{
+        'postCount': FieldValue.increment(1),
+      });
     } catch (_) {
       // ponytail: count drift acceptable; profile grid is source of truth
     }
   }
 
   @override
-  Future<Set<String>> fetchLikedPostIds({
-    required List<String> postIds,
-  }) async {
+  Future<Set<String>> fetchLikedPostIds({required List<String> postIds}) async {
     if (postIds.isEmpty) return <String>{};
     final List<DocumentReference<Object?>> refs = postIds
-        .map((String id) =>
-            _db.collection('posts').doc(id).collection('likes').doc(_uid))
+        .map(
+          (String id) =>
+              _db.collection('posts').doc(id).collection('likes').doc(_uid),
+        )
         .toList();
     // ponytail: per-doc gets instead of getAll (not exposed by cloud_firestore
     // 6.x); same N reads, N RPCs — batch if feed size makes it matter
@@ -147,13 +154,17 @@ class FeedFirebaseDataSource implements IFeedDataSource {
 
   @override
   Future<Post> getPostById({required String postId}) async {
-    final DocumentSnapshot<Object?> snap =
-        await _db.collection('posts').doc(postId).get();
+    final DocumentSnapshot<Object?> snap = await _db
+        .collection('posts')
+        .doc(postId)
+        .get();
     if (!snap.exists) {
       throw StateError('Post not found');
     }
-    return PostDto.fromMap(postId, snap.data() as Map<String, dynamic>)
-        .toDomain(postId);
+    return PostDto.fromMap(
+      postId,
+      snap.data() as Map<String, dynamic>,
+    ).toDomain(postId);
   }
 
   @override
@@ -163,10 +174,14 @@ class FeedFirebaseDataSource implements IFeedDataSource {
     required String postImageUrl,
     required bool currentlyLiked,
   }) async {
-    final DocumentReference<Object?> likeRef =
-        _db.collection('posts').doc(postId).collection('likes').doc(_uid);
-    final DocumentReference<Object?> postRef =
-        _db.collection('posts').doc(postId);
+    final DocumentReference<Object?> likeRef = _db
+        .collection('posts')
+        .doc(postId)
+        .collection('likes')
+        .doc(_uid);
+    final DocumentReference<Object?> postRef = _db
+        .collection('posts')
+        .doc(postId);
     await _db.runTransaction((Transaction tx) async {
       tx.update(postRef, <String, dynamic>{
         'likeCount': FieldValue.increment(currentlyLiked ? -1 : 1),
@@ -178,11 +193,13 @@ class FeedFirebaseDataSource implements IFeedDataSource {
       }
     });
     if (!currentlyLiked && postOwnerId != _uid) {
-      unawaited(_notifyLike(
-        ownerUid: postOwnerId,
-        postId: postId,
-        postImageUrl: postImageUrl,
-      ));
+      unawaited(
+        _notifyLike(
+          ownerUid: postOwnerId,
+          postId: postId,
+          postImageUrl: postImageUrl,
+        ),
+      );
     }
   }
 
@@ -218,11 +235,16 @@ class FeedFirebaseDataSource implements IFeedDataSource {
       .collection('comments')
       .orderBy('createdAt')
       .snapshots()
-      .map((QuerySnapshot<Object?> snap) => snap.docs
-          .map((QueryDocumentSnapshot<Object?> doc) =>
-              CommentDto.fromMap(doc.id, doc.data() as Map<String, dynamic>)
-                  .toDomain(doc.id, postId))
-          .toList());
+      .map(
+        (QuerySnapshot<Object?> snap) => snap.docs
+            .map(
+              (QueryDocumentSnapshot<Object?> doc) => CommentDto.fromMap(
+                doc.id,
+                doc.data() as Map<String, dynamic>,
+              ).toDomain(doc.id, postId),
+            )
+            .toList(),
+      );
 
   @override
   Future<void> addComment({
@@ -232,8 +254,9 @@ class FeedFirebaseDataSource implements IFeedDataSource {
   }) async {
     final ({String username, String? avatarUrl}) profile =
         await _currentUserProfile();
-    final DocumentReference<Object?> postRef =
-        _db.collection('posts').doc(postId);
+    final DocumentReference<Object?> postRef = _db
+        .collection('posts')
+        .doc(postId);
     await _db.runTransaction((Transaction tx) async {
       tx.update(postRef, <String, dynamic>{
         'commentCount': FieldValue.increment(1),
@@ -249,11 +272,13 @@ class FeedFirebaseDataSource implements IFeedDataSource {
       );
     });
     if (postOwnerId != _uid) {
-      unawaited(_notifyComment(
-        ownerUid: postOwnerId,
-        postId: postId,
-        commentText: text,
-      ));
+      unawaited(
+        _notifyComment(
+          ownerUid: postOwnerId,
+          postId: postId,
+          commentText: text,
+        ),
+      );
     }
   }
 

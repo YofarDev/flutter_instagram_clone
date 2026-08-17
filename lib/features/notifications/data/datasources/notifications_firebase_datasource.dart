@@ -31,12 +31,17 @@ class NotificationsFirebaseDataSource implements INotificationsDataSource {
           .orderBy('createdAt', descending: true)
           .limit(50)
           .snapshots()
-          .map((QuerySnapshot<Object?> snap) => snap.docs
-              .map((QueryDocumentSnapshot<Object?> doc) =>
-                  NotificationDto.fromMap(
-                          doc.id, doc.data() as Map<String, dynamic>)
-                      .toDomain(doc.id))
-              .toList());
+          .map(
+            (QuerySnapshot<Object?> snap) => snap.docs
+                .map(
+                  (QueryDocumentSnapshot<Object?> doc) =>
+                      NotificationDto.fromMap(
+                        doc.id,
+                        doc.data() as Map<String, dynamic>,
+                      ).toDomain(doc.id),
+                )
+                .toList(),
+          );
 
   // ponytail: unread capped at 50 per pass; badge drift above that
   @override
@@ -64,17 +69,20 @@ class NotificationsFirebaseDataSource implements INotificationsDataSource {
     String? postId,
     String? postImageUrl,
     String? commentText,
-  }) =>
-      _db.collection('notifications').add(NotificationDto(
-            ownerUid: ownerUid,
-            type: type,
-            actorId: actorId,
-            actorUsername: actorUsername,
-            actorAvatarUrl: actorAvatarUrl,
-            postId: postId,
-            postImageUrl: postImageUrl,
-            commentText: commentText,
-            createdAtMillis: DateTime.now().millisecondsSinceEpoch,
-            read: false,
-          ).toMap());
+  }) => _db
+      .collection('notifications')
+      .add(
+        NotificationDto(
+          ownerUid: ownerUid,
+          type: type,
+          actorId: actorId,
+          actorUsername: actorUsername,
+          actorAvatarUrl: actorAvatarUrl,
+          postId: postId,
+          postImageUrl: postImageUrl,
+          commentText: commentText,
+          createdAtMillis: DateTime.now().millisecondsSinceEpoch,
+          read: false,
+        ).toMap(),
+      );
 }

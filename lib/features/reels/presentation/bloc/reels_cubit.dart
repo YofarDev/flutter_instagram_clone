@@ -24,7 +24,9 @@ class ReelsCubit extends Cubit<ReelsState> {
   void _subscribe() {
     _sub?.cancel();
     final int gen = ++_gen;
-    _sub = _repository.watchReels(limit: _limit).listen(
+    _sub = _repository
+        .watchReels(limit: _limit)
+        .listen(
           (List<Reel> reels) => _onReels(reels, gen),
           onError: (Object e) {
             if (isClosed) return;
@@ -35,23 +37,25 @@ class ReelsCubit extends Cubit<ReelsState> {
 
   Future<void> _onReels(List<Reel> reels, int gen) async {
     if (isClosed || gen != _gen) return;
-    final Either<Failure, Set<String>> either =
-        await _repository.fetchLikedReelIds(
-      reelIds: reels.map((Reel r) => r.id).toList(),
-    );
+    final Either<Failure, Set<String>> either = await _repository
+        .fetchLikedReelIds(reelIds: reels.map((Reel r) => r.id).toList());
     if (isClosed || gen != _gen) return;
     either.fold(
-      (_) => emit(state.copyWith(
-        status: ReelsStatus.ready,
-        reels: reels,
-        hasMore: reels.length >= _limit,
-      )), // ponytail: keep stale likedIds on hydration failure
-      (Set<String> ids) => emit(state.copyWith(
-        status: ReelsStatus.ready,
-        reels: reels,
-        likedIds: ids,
-        hasMore: reels.length >= _limit,
-      )),
+      (_) => emit(
+        state.copyWith(
+          status: ReelsStatus.ready,
+          reels: reels,
+          hasMore: reels.length >= _limit,
+        ),
+      ), // ponytail: keep stale likedIds on hydration failure
+      (Set<String> ids) => emit(
+        state.copyWith(
+          status: ReelsStatus.ready,
+          reels: reels,
+          likedIds: ids,
+          hasMore: reels.length >= _limit,
+        ),
+      ),
     );
   }
 
@@ -64,33 +68,41 @@ class ReelsCubit extends Cubit<ReelsState> {
   Future<void> toggleReelLike(Reel reel) async {
     final bool wasLiked = state.likedIds.contains(reel.id);
     // optimistic flip
-    emit(state.copyWith(
-      reels: state.reels
-          .map((Reel r) => r.id == reel.id
-              ? r.copyWith(likeCount: r.likeCount + (wasLiked ? -1 : 1))
-              : r)
-          .toList(),
-      likedIds: wasLiked
-          ? (<String>{...state.likedIds}..remove(reel.id))
-          : <String>{...state.likedIds, reel.id},
-    ));
+    emit(
+      state.copyWith(
+        reels: state.reels
+            .map(
+              (Reel r) => r.id == reel.id
+                  ? r.copyWith(likeCount: r.likeCount + (wasLiked ? -1 : 1))
+                  : r,
+            )
+            .toList(),
+        likedIds: wasLiked
+            ? (<String>{...state.likedIds}..remove(reel.id))
+            : <String>{...state.likedIds, reel.id},
+      ),
+    );
     final Either<Failure, void> either = await _repository.toggleReelLike(
       reelId: reel.id,
       currentlyLiked: wasLiked,
     );
     if (isClosed) return;
     either.fold(
-      (Failure f) => emit(state.copyWith(
-        error: f.message,
-        reels: state.reels
-            .map((Reel r) => r.id == reel.id
-                ? r.copyWith(likeCount: r.likeCount + (wasLiked ? 1 : -1))
-                : r)
-            .toList(),
-        likedIds: wasLiked
-            ? <String>{...state.likedIds, reel.id}
-            : (<String>{...state.likedIds}..remove(reel.id)),
-      )),
+      (Failure f) => emit(
+        state.copyWith(
+          error: f.message,
+          reels: state.reels
+              .map(
+                (Reel r) => r.id == reel.id
+                    ? r.copyWith(likeCount: r.likeCount + (wasLiked ? 1 : -1))
+                    : r,
+              )
+              .toList(),
+          likedIds: wasLiked
+              ? <String>{...state.likedIds, reel.id}
+              : (<String>{...state.likedIds}..remove(reel.id)),
+        ),
+      ),
       (_) {},
     );
   }

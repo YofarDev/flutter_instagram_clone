@@ -20,7 +20,9 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     if (_uid == uid && _sub != null) return;
     _uid = uid;
     _sub?.cancel();
-    _sub = _repository.watchNotifications(uid: uid).listen(
+    _sub = _repository
+        .watchNotifications(uid: uid)
+        .listen(
           _onItems,
           onError: (Object e) {
             if (isClosed) return;
@@ -31,17 +33,21 @@ class NotificationsCubit extends Cubit<NotificationsState> {
 
   void _onItems(List<NotificationItem> items) {
     if (isClosed) return;
-    emit(state.copyWith(
-      status: NotificationsStatus.ready,
-      items: items,
-      unreadCount: items.where((NotificationItem n) => !n.read).length,
-    ));
+    emit(
+      state.copyWith(
+        status: NotificationsStatus.ready,
+        items: items,
+        unreadCount: items.where((NotificationItem n) => !n.read).length,
+      ),
+    );
   }
 
   Future<void> markAllRead() async {
     final String? uid = _uid;
     if (uid == null) return;
-    final Either<Failure, void> either = await _repository.markAllRead(uid: uid);
+    final Either<Failure, void> either = await _repository.markAllRead(
+      uid: uid,
+    );
     if (isClosed) return;
     either.fold(
       (Failure f) => emit(state.copyWith(error: f.message)),

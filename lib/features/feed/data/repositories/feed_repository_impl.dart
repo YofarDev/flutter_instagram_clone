@@ -57,12 +57,14 @@ class FeedRepositoryImpl implements IFeedRepository {
     required bool currentlyLiked,
   }) async {
     try {
-      return Right<Failure, void>(await _ds.toggleLike(
-        postId: post.id,
-        postOwnerId: post.authorId,
-        postImageUrl: post.imageUrl,
-        currentlyLiked: currentlyLiked,
-      ));
+      return Right<Failure, void>(
+        await _ds.toggleLike(
+          postId: post.id,
+          postOwnerId: post.authorId,
+          postImageUrl: post.imageUrl,
+          currentlyLiked: currentlyLiked,
+        ),
+      );
     } catch (e) {
       return Left<Failure, void>(_mapError(e));
     }

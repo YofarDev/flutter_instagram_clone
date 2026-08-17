@@ -11,7 +11,7 @@ import 'stories_state.dart';
 
 class StoriesCubit extends Cubit<StoriesState> {
   StoriesCubit(this._repository, {required this._myUid})
-      : super(const StoriesState()) {
+    : super(const StoriesState()) {
     _subscribe();
   }
 
@@ -24,30 +24,31 @@ class StoriesCubit extends Cubit<StoriesState> {
     _sub?.cancel();
     final int gen = ++_gen;
     _sub = _repository.watchStories().listen(
-          (List<Story> stories) => _onStories(stories, gen),
-          onError: (Object e) {
-            if (isClosed) return;
-            emit(state.copyWith(error: 'Failed to load stories'));
-          },
-        );
+      (List<Story> stories) => _onStories(stories, gen),
+      onError: (Object e) {
+        if (isClosed) return;
+        emit(state.copyWith(error: 'Failed to load stories'));
+      },
+    );
   }
 
   Future<void> _onStories(List<Story> stories, int gen) async {
     if (isClosed || gen != _gen) return;
     final List<StoryTray> trays = _group(stories);
-    final Either<Failure, Set<String>> either =
-        await _repository.fetchViewedStoryIds(
-      storyIds: stories.map((Story s) => s.id).toList(),
-    );
+    final Either<Failure, Set<String>> either = await _repository
+        .fetchViewedStoryIds(storyIds: stories.map((Story s) => s.id).toList());
     if (isClosed || gen != _gen) return;
     either.fold(
       (_) => emit(
-          state.copyWith(status: StoriesStatus.ready, trays: trays)), // ponytail: keep stale viewedIds on hydration failure
-      (Set<String> ids) => emit(state.copyWith(
-        status: StoriesStatus.ready,
-        trays: trays,
-        viewedIds: ids,
-      )),
+        state.copyWith(status: StoriesStatus.ready, trays: trays),
+      ), // ponytail: keep stale viewedIds on hydration failure
+      (Set<String> ids) => emit(
+        state.copyWith(
+          status: StoriesStatus.ready,
+          trays: trays,
+          viewedIds: ids,
+        ),
+      ),
     );
   }
 
@@ -56,20 +57,19 @@ class StoriesCubit extends Cubit<StoriesState> {
     for (final Story s in stories) {
       byUid.putIfAbsent(s.uid, () => <Story>[]).add(s);
     }
-    final List<StoryTray> trays = byUid.entries
-        .map((MapEntry<String, List<Story>> e) {
-          final List<Story> asc = e.value
-            ..sort(
-                (Story a, Story b) => a.createdAt.compareTo(b.createdAt));
-          final Story latest = asc.last;
-          return StoryTray(
-            uid: e.key,
-            username: latest.authorUsername,
-            avatarUrl: latest.authorAvatarUrl,
-            stories: asc,
-          );
-        })
-        .toList();
+    final List<StoryTray> trays = byUid.entries.map((
+      MapEntry<String, List<Story>> e,
+    ) {
+      final List<Story> asc = e.value
+        ..sort((Story a, Story b) => a.createdAt.compareTo(b.createdAt));
+      final Story latest = asc.last;
+      return StoryTray(
+        uid: e.key,
+        username: latest.authorUsername,
+        avatarUrl: latest.authorAvatarUrl,
+        stories: asc,
+      );
+    }).toList();
     trays.sort((StoryTray a, StoryTray b) {
       if (a.uid == _myUid) return b.uid == _myUid ? 0 : -1;
       if (b.uid == _myUid) return 1;

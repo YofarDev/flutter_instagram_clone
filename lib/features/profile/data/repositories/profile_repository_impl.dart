@@ -30,8 +30,10 @@ class ProfileRepositoryImpl implements IProfileRepository {
       _ds.watchIsFollowing(uid: uid);
 
   @override
-  Stream<List<Post>> watchUserPosts({required String uid, required int limit}) =>
-      _ds.watchUserPosts(uid: uid, limit: limit);
+  Stream<List<Post>> watchUserPosts({
+    required String uid,
+    required int limit,
+  }) => _ds.watchUserPosts(uid: uid, limit: limit);
 
   @override
   Future<Either<Failure, void>> toggleFollow({
@@ -40,7 +42,10 @@ class ProfileRepositoryImpl implements IProfileRepository {
   }) async {
     try {
       return Right<Failure, void>(
-        await _ds.toggleFollow(uid: uid, currentlyFollowing: currentlyFollowing),
+        await _ds.toggleFollow(
+          uid: uid,
+          currentlyFollowing: currentlyFollowing,
+        ),
       );
     } catch (e) {
       return Left<Failure, void>(_mapError(e));
@@ -48,24 +53,22 @@ class ProfileRepositoryImpl implements IProfileRepository {
   }
 
   @override
-  Future<Either<Failure, List<AppUser>>> fetchFollowers(
-      {required String uid}) async {
+  Future<Either<Failure, List<AppUser>>> fetchFollowers({
+    required String uid,
+  }) async {
     try {
-      return Right<Failure, List<AppUser>>(
-        await _ds.fetchFollowers(uid: uid),
-      );
+      return Right<Failure, List<AppUser>>(await _ds.fetchFollowers(uid: uid));
     } catch (e) {
       return Left<Failure, List<AppUser>>(_mapError(e));
     }
   }
 
   @override
-  Future<Either<Failure, List<AppUser>>> fetchFollowing(
-      {required String uid}) async {
+  Future<Either<Failure, List<AppUser>>> fetchFollowing({
+    required String uid,
+  }) async {
     try {
-      return Right<Failure, List<AppUser>>(
-        await _ds.fetchFollowing(uid: uid),
-      );
+      return Right<Failure, List<AppUser>>(await _ds.fetchFollowing(uid: uid));
     } catch (e) {
       return Left<Failure, List<AppUser>>(_mapError(e));
     }

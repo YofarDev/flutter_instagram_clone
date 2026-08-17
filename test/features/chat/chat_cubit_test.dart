@@ -35,8 +35,9 @@ final ChatMessage m2 = ChatMessage(
 );
 
 ChatCubit buildCubit(MockIChatRepository repo) {
-  when(() => repo.watchMessages(conversationId: 'c1'))
-      .thenAnswer((_) => const Stream<List<ChatMessage>>.empty());
+  when(
+    () => repo.watchMessages(conversationId: 'c1'),
+  ).thenAnswer((_) => const Stream<List<ChatMessage>>.empty());
   return ChatCubit(repo, conversation: convo, myUid: 'me');
 }
 
@@ -65,12 +66,14 @@ void main() {
     build: () => buildCubit(repo),
     act: (ChatCubit cubit) => cubit.send('   '),
     verify: (_) {
-      verifyNever(() => repo.sendMessage(
-            conversationId: any(named: 'conversationId'),
-            myUid: any(named: 'myUid'),
-            otherUid: any(named: 'otherUid'),
-            text: any(named: 'text'),
-          ));
+      verifyNever(
+        () => repo.sendMessage(
+          conversationId: any(named: 'conversationId'),
+          myUid: any(named: 'myUid'),
+          otherUid: any(named: 'otherUid'),
+          text: any(named: 'text'),
+        ),
+      );
     },
     expect: () => <ChatState>[],
   );
@@ -78,14 +81,17 @@ void main() {
   blocTest<ChatCubit, ChatState>(
     'send success toggles sending, no optimistic append',
     build: () {
-      when(() => repo.watchMessages(conversationId: 'c1'))
-          .thenAnswer((_) => const Stream<List<ChatMessage>>.empty());
-      when(() => repo.sendMessage(
-            conversationId: 'c1',
-            myUid: 'me',
-            otherUid: 'u2',
-            text: 'hello',
-          )).thenAnswer((_) async => const Right<Failure, void>(null));
+      when(
+        () => repo.watchMessages(conversationId: 'c1'),
+      ).thenAnswer((_) => const Stream<List<ChatMessage>>.empty());
+      when(
+        () => repo.sendMessage(
+          conversationId: 'c1',
+          myUid: 'me',
+          otherUid: 'u2',
+          text: 'hello',
+        ),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
       return ChatCubit(repo, conversation: convo, myUid: 'me');
     },
     act: (ChatCubit cubit) => cubit.send(' hello '),
@@ -98,17 +104,19 @@ void main() {
   blocTest<ChatCubit, ChatState>(
     'send failure sets error and stops sending',
     build: () {
-      when(() => repo.watchMessages(conversationId: 'c1'))
-          .thenAnswer((_) => const Stream<List<ChatMessage>>.empty());
-      when(() => repo.sendMessage(
-            conversationId: 'c1',
-            myUid: 'me',
-            otherUid: 'u2',
-            text: 'hello',
-          )).thenAnswer(
-        (_) async => const Left<Failure, void>(
-          Failure.serverError(message: 'boom'),
+      when(
+        () => repo.watchMessages(conversationId: 'c1'),
+      ).thenAnswer((_) => const Stream<List<ChatMessage>>.empty());
+      when(
+        () => repo.sendMessage(
+          conversationId: 'c1',
+          myUid: 'me',
+          otherUid: 'u2',
+          text: 'hello',
         ),
+      ).thenAnswer(
+        (_) async =>
+            const Left<Failure, void>(Failure.serverError(message: 'boom')),
       );
       return ChatCubit(repo, conversation: convo, myUid: 'me');
     },
