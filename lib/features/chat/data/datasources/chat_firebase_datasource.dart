@@ -47,19 +47,21 @@ class ChatFirebaseDataSource implements IChatDataSource {
 
   @override
   Stream<List<ChatMessage>> watchMessages({required String conversationId}) {
-    // ponytail: first 100 messages, not latest; flip ordering when history
-    // length matters
+    // ponytail: latest 50 then reversed for chronological order; load-older
+    // pagination deferred until history length matters
     return _db
         .collection('conversations')
         .doc(conversationId)
         .collection('messages')
-        .orderBy('createdAt')
-        .limit(100)
+        .orderBy('createdAt', descending: true)
+        .limit(50)
         .snapshots()
         .map((QuerySnapshot<Object?> snap) => snap.docs
             .map((QueryDocumentSnapshot<Object?> doc) =>
                 ChatMessageDto.fromMap(doc.data() as Map<String, dynamic>)
                     .toDomain(doc.id, conversationId))
+            .toList()
+            .reversed
             .toList());
   }
 
