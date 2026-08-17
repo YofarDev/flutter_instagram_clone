@@ -28,6 +28,16 @@ class _ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
     return AnimatedBuilder(
       animation: _controller,
       builder: (BuildContext context, Widget? child) {
+        final Color base = Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest;
+        final Color highlight = Color.lerp(
+          base,
+          Theme.of(context).brightness == Brightness.dark
+              ? const Color.fromARGB(255, 255, 255, 255)
+              : const Color.fromARGB(255, 0, 0, 0),
+          0.10,
+        )!;
         return ShaderMask(
           blendMode: BlendMode.srcATop,
           shaderCallback: (Rect bounds) {
@@ -36,13 +46,7 @@ class _ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
             final Gradient gradient = LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
-              colors: <Color>[
-                Theme.of(context).colorScheme.surfaceContainerHighest,
-                Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
-                Theme.of(context).colorScheme.surfaceContainerHighest,
-              ],
+              colors: <Color>[base, highlight, base],
               stops: const <double>[0.35, 0.5, 0.65],
             );
             return gradient.createShader(bounds.translate(dx, 0));
