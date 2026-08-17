@@ -85,5 +85,27 @@ service cloud.firestore {
       allow create: if signedIn();
       allow update, delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
     }
+
+    match /conversations/{convId} {
+      allow read: if signedIn() && request.auth.uid in resource.data.participants;
+      allow create: if signedIn() &&
+          request.auth.uid in request.resource.data.participants;
+      // participants may only bump lastMessage/updatedAt
+      allow update: if signedIn() &&
+          request.auth.uid in resource.data.participants &&
+          request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['lastMessage', 'updatedAt']);
+      allow delete: if false;
+
+      match /messages/{mid} {
+        allow read: if signedIn() && request.auth.uid in
+            get(/databases/$(database)/documents/conversations/$(convId)).data.participants;
+        allow create: if signedIn() &&
+            request.resource.data.senderId == request.auth.uid &&
+            request.auth.uid in
+                get(/databases/$(database)/documents/conversations/$(convId)).data.participants;
+        allow update, delete: if false;
+      }
+    }
   }
 }
