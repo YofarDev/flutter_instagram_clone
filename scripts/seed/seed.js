@@ -38,12 +38,12 @@ if (!fs.existsSync(keyPath)) {
 const serviceAccount = require(keyPath);
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  // Default bucket for pre-2024 projects; newer projects use
-  // <projectId>.firebasestorage.app — pass --bucket=<name> for those.
+  // Newer (post-2024) projects use <projectId>.firebasestorage.app;
+  // older ones use <projectId>.appspot.com. Override with --bucket=<name>.
   storageBucket:
     (typeof args.bucket === 'string' && args.bucket) ||
     process.env.STORAGE_BUCKET ||
-    `${serviceAccount.project_id}.appspot.com`,
+    `${serviceAccount.project_id}.firebasestorage.app`,
 });
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;

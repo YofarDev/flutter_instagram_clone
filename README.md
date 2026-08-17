@@ -2,6 +2,18 @@
 
 A fully vibe-coded clone of the Instagram mobile app, built as a proof of concept with [opencode](https://opencode.ai) (GLM 5.3). No hand-written code — everything is AI-generated, piece by piece.
 
+## Screenshots
+
+Captured from the Android emulator with seeded demo data:
+
+| | |
+|---|---|
+| ![Login](assets/screenshots/01-login.png) | ![Feed](assets/screenshots/02-feed.png) |
+| ![Story viewer](assets/screenshots/03-stories-viewer.png) | ![Search](assets/screenshots/04-search.png) |
+| ![Explore results](assets/screenshots/05-explore.png) | ![Reels](assets/screenshots/06-reels.png) |
+| ![Activity](assets/screenshots/07-activity.png) | ![Profile](assets/screenshots/08-profile.png) |
+| ![Post detail](assets/screenshots/09-post-detail.png) | ![Chat](assets/screenshots/10-chat.png) |
+
 ## Stack
 
 | Layer | Technology |
