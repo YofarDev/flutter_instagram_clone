@@ -74,7 +74,10 @@ class _CreateReelScreenState extends State<CreateReelScreen> {
             return ListView(
               padding: const EdgeInsets.all(16),
               children: <Widget>[
-                _VideoPreview(filePath: state.pickedPath!),
+                _VideoPreview(
+                  key: ValueKey<String?>(state.pickedPath),
+                  filePath: state.pickedPath!,
+                ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _caption,
@@ -107,7 +110,7 @@ class _CreateReelScreenState extends State<CreateReelScreen> {
 }
 
 class _VideoPreview extends StatefulWidget {
-  const _VideoPreview({required this.filePath});
+  const _VideoPreview({required this.filePath, super.key});
 
   final String filePath;
 
@@ -117,6 +120,7 @@ class _VideoPreview extends StatefulWidget {
 
 class _VideoPreviewState extends State<_VideoPreview> {
   late final VideoPlayerController _controller;
+  bool _failed = false;
 
   @override
   void initState() {
@@ -129,6 +133,8 @@ class _VideoPreviewState extends State<_VideoPreview> {
         ..setVolume(0)
         ..play();
       setState(() {});
+    }).catchError((Object _) {
+      if (mounted) setState(() => _failed = true);
     });
   }
 
@@ -140,6 +146,17 @@ class _VideoPreviewState extends State<_VideoPreview> {
 
   @override
   Widget build(BuildContext context) {
+    if (_failed) {
+      return const AspectRatio(
+        aspectRatio: 1,
+        child: ColoredBox(
+          color: Colors.grey,
+          child: Center(
+            child: Icon(Icons.error_outline, color: Colors.white),
+          ),
+        ),
+      );
+    }
     if (!_controller.value.isInitialized) {
       return const AspectRatio(
         aspectRatio: 1,

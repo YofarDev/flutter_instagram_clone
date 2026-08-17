@@ -11,7 +11,7 @@ class ReelDto {
     required this.likeCount,
   });
 
-  factory ReelDto.fromMap(String id, Map<String, dynamic> map) => ReelDto(
+  factory ReelDto.fromMap(Map<String, dynamic> map) => ReelDto(
         uid: map['uid'] as String,
         authorUsername: map['username'] as String,
         authorAvatarUrl: map['avatarUrl'] as String?,

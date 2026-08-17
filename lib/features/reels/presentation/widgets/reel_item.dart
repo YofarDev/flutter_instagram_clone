@@ -11,11 +11,13 @@ class ReelItem extends StatefulWidget {
     required this.isCurrent,
     required this.isLiked,
     required this.onLikeTap,
+    this.forcePause = false,
     super.key,
   });
 
   final Reel reel;
   final bool isCurrent;
+  final bool forcePause;
   final bool isLiked;
   final VoidCallback onLikeTap;
 
@@ -25,6 +27,7 @@ class ReelItem extends StatefulWidget {
 
 class _ReelItemState extends State<ReelItem> {
   late final VideoPlayerController _controller;
+  bool _failed = false;
 
   @override
   void initState() {
@@ -39,12 +42,14 @@ class _ReelItemState extends State<ReelItem> {
         ..setVolume(0);
       _syncPlayback();
       setState(() {});
+    }).catchError((Object _) {
+      if (mounted) setState(() => _failed = true);
     });
   }
 
   void _syncPlayback() {
     if (!_controller.value.isInitialized) return;
-    if (widget.isCurrent) {
+    if (widget.isCurrent && !widget.forcePause) {
       _controller.play();
     } else {
       _controller.pause();
@@ -54,7 +59,10 @@ class _ReelItemState extends State<ReelItem> {
   @override
   void didUpdateWidget(covariant ReelItem oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.isCurrent != widget.isCurrent) _syncPlayback();
+    if (oldWidget.isCurrent != widget.isCurrent ||
+        oldWidget.forcePause != widget.forcePause) {
+      _syncPlayback();
+    }
   }
 
   @override
@@ -71,6 +79,14 @@ class _ReelItemState extends State<ReelItem> {
 
   @override
   Widget build(BuildContext context) {
+    if (_failed) {
+      return const ColoredBox(
+        color: Colors.black,
+        child: Center(
+          child: Icon(Icons.error_outline, color: Colors.white),
+        ),
+      );
+    }
     if (!_controller.value.isInitialized) {
       return const ColoredBox(
         color: Colors.black,

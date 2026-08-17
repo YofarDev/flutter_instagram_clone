@@ -41,6 +41,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Take photos for your posts</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Record audio for your reels</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Choose photos for your posts</string>
 	<key>UIApplicationSceneManifest</key>

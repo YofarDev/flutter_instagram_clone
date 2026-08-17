@@ -16,14 +16,33 @@ class ReelsScreen extends StatefulWidget {
   State<ReelsScreen> createState() => _ReelsScreenState();
 }
 
-class _ReelsScreenState extends State<ReelsScreen> {
+class _ReelsScreenState extends State<ReelsScreen> with WidgetsBindingObserver {
   final PageController _pageController = PageController();
   int _current = 0;
+  bool _appPaused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pageController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setState(() => _appPaused = false);
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.inactive) {
+      setState(() => _appPaused = true);
+    }
   }
 
   @override
@@ -81,6 +100,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
                       key: ValueKey<String>(reel.id),
                       reel: reel,
                       isCurrent: index == _current,
+                      forcePause: _appPaused,
                       isLiked: state.likedIds.contains(reel.id),
                       onLikeTap: () =>
                           context.read<ReelsCubit>().toggleReelLike(reel),

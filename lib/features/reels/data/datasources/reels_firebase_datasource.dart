@@ -50,7 +50,6 @@ class ReelsFirebaseDataSource implements IReelsDataSource {
       .snapshots()
       .map((QuerySnapshot<Object?> snap) => snap.docs
           .map((QueryDocumentSnapshot<Object?> doc) => ReelDto.fromMap(
-                doc.id,
                 doc.data() as Map<String, dynamic>,
               ).toDomain(doc.id))
           .toList());
