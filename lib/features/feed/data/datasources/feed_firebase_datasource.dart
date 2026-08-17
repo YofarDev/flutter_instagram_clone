@@ -42,11 +42,14 @@ abstract interface class IFeedDataSource {
   Future<Set<String>> fetchLikedPostIds({required List<String> postIds});
   Future<void> toggleLike({
     required String postId,
+    required String postOwnerId,
+    required String postImageUrl,
     required bool currentlyLiked,
   });
   Stream<List<Comment>> watchComments({required String postId});
   Future<void> addComment({
     required String postId,
+    required String postOwnerId,
     required String text,
   });
 }
@@ -144,13 +147,15 @@ class FeedFirebaseDataSource implements IFeedDataSource {
   @override
   Future<void> toggleLike({
     required String postId,
+    required String postOwnerId,
+    required String postImageUrl,
     required bool currentlyLiked,
-  }) {
+  }) async {
     final DocumentReference<Object?> likeRef =
         _db.collection('posts').doc(postId).collection('likes').doc(_uid);
     final DocumentReference<Object?> postRef =
         _db.collection('posts').doc(postId);
-    return _db.runTransaction((Transaction tx) async {
+    await _db.runTransaction((Transaction tx) async {
       tx.update(postRef, <String, dynamic>{
         'likeCount': FieldValue.increment(currentlyLiked ? -1 : 1),
       });
@@ -160,6 +165,38 @@ class FeedFirebaseDataSource implements IFeedDataSource {
         tx.set(likeRef, <String, dynamic>{});
       }
     });
+    if (!currentlyLiked && postOwnerId != _uid) {
+      unawaited(_notifyLike(
+        ownerUid: postOwnerId,
+        postId: postId,
+        postImageUrl: postImageUrl,
+      ));
+    }
+  }
+
+  // ponytail: inline notification write, extract on 4th consumer
+  Future<void> _notifyLike({
+    required String ownerUid,
+    required String postId,
+    required String postImageUrl,
+  }) async {
+    try {
+      final ({String username, String? avatarUrl}) profile =
+          await _currentUserProfile();
+      await _db.collection('notifications').add(<String, dynamic>{
+        'ownerUid': ownerUid,
+        'type': 'like',
+        'actorId': _uid,
+        'actorUsername': profile.username,
+        'actorAvatarUrl': profile.avatarUrl,
+        'postId': postId,
+        'postImageUrl': postImageUrl,
+        'createdAt': DateTime.now().millisecondsSinceEpoch,
+        'read': false,
+      });
+    } catch (_) {
+      // notification drop must not fail the like
+    }
   }
 
   @override
@@ -178,13 +215,14 @@ class FeedFirebaseDataSource implements IFeedDataSource {
   @override
   Future<void> addComment({
     required String postId,
+    required String postOwnerId,
     required String text,
   }) async {
     final ({String username, String? avatarUrl}) profile =
         await _currentUserProfile();
     final DocumentReference<Object?> postRef =
         _db.collection('posts').doc(postId);
-    return _db.runTransaction((Transaction tx) async {
+    await _db.runTransaction((Transaction tx) async {
       tx.update(postRef, <String, dynamic>{
         'commentCount': FieldValue.increment(1),
       });
@@ -198,5 +236,37 @@ class FeedFirebaseDataSource implements IFeedDataSource {
         ).toMap(),
       );
     });
+    if (postOwnerId != _uid) {
+      unawaited(_notifyComment(
+        ownerUid: postOwnerId,
+        postId: postId,
+        commentText: text,
+      ));
+    }
+  }
+
+  // ponytail: inline notification write, extract on 4th consumer
+  Future<void> _notifyComment({
+    required String ownerUid,
+    required String postId,
+    required String commentText,
+  }) async {
+    try {
+      final ({String username, String? avatarUrl}) profile =
+          await _currentUserProfile();
+      await _db.collection('notifications').add(<String, dynamic>{
+        'ownerUid': ownerUid,
+        'type': 'comment',
+        'actorId': _uid,
+        'actorUsername': profile.username,
+        'actorAvatarUrl': profile.avatarUrl,
+        'postId': postId,
+        'commentText': commentText,
+        'createdAt': DateTime.now().millisecondsSinceEpoch,
+        'read': false,
+      });
+    } catch (_) {
+      // notification drop must not fail the comment
+    }
   }
 }

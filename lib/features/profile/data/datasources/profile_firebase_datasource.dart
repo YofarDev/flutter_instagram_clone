@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -94,6 +96,29 @@ class ProfileFirebaseDataSource implements IProfileDataSource {
           <String, dynamic>{'followerCount': FieldValue.increment(1)});
     }
     await batch.commit();
+    if (!currentlyFollowing && uid != _uid) {
+      unawaited(_notifyFollow(ownerUid: uid, mine: mine));
+    }
+  }
+
+  // ponytail: inline notification write, extract on 4th consumer
+  Future<void> _notifyFollow({
+    required String ownerUid,
+    required Map<String, dynamic> mine,
+  }) async {
+    try {
+      await _db.collection('notifications').add(<String, dynamic>{
+        'ownerUid': ownerUid,
+        'type': 'follow',
+        'actorId': _uid,
+        'actorUsername': mine['username'] as String? ?? '?',
+        'actorAvatarUrl': mine['avatarUrl'],
+        'createdAt': DateTime.now().millisecondsSinceEpoch,
+        'read': false,
+      });
+    } catch (_) {
+      // notification drop must not fail the follow
+    }
   }
 
   // ponytail: edge docs carry no email — '' placeholder, screens show

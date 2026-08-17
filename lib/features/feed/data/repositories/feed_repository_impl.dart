@@ -48,9 +48,12 @@ class FeedRepositoryImpl implements IFeedRepository {
     required bool currentlyLiked,
   }) async {
     try {
-      return Right<Failure, void>(
-        await _ds.toggleLike(postId: post.id, currentlyLiked: currentlyLiked),
-      );
+      return Right<Failure, void>(await _ds.toggleLike(
+        postId: post.id,
+        postOwnerId: post.authorId,
+        postImageUrl: post.imageUrl,
+        currentlyLiked: currentlyLiked,
+      ));
     } catch (e) {
       return Left<Failure, void>(_mapError(e));
     }
@@ -63,11 +66,16 @@ class FeedRepositoryImpl implements IFeedRepository {
   @override
   Future<Either<Failure, void>> addComment({
     required String postId,
+    required String postOwnerId,
     required String text,
   }) async {
     try {
       return Right<Failure, void>(
-        await _ds.addComment(postId: postId, text: text),
+        await _ds.addComment(
+          postId: postId,
+          postOwnerId: postOwnerId,
+          text: text,
+        ),
       );
     } catch (e) {
       return Left<Failure, void>(_mapError(e));

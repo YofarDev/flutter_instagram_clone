@@ -142,6 +142,7 @@ void main() {
       verifyNever(
         () => repo.addComment(
           postId: any(named: 'postId'),
+          postOwnerId: any(named: 'postOwnerId'),
           text: any(named: 'text'),
         ),
       );
@@ -153,13 +154,16 @@ void main() {
     'addComment success sends trimmed text',
     build: () {
       stubQuietCtor();
-      when(() => repo.addComment(postId: 'p1', text: 'hey'))
+      when(() => repo.addComment(
+              postId: 'p1', postOwnerId: 'u1', text: 'hey'))
           .thenAnswer((_) async => const Right<Failure, void>(null));
       return PostDetailCubit(repo, post: p1);
     },
     act: (PostDetailCubit cubit) => cubit.addComment(' hey '),
     verify: (_) {
-      verify(() => repo.addComment(postId: 'p1', text: 'hey')).called(1);
+      verify(() => repo.addComment(
+              postId: 'p1', postOwnerId: 'u1', text: 'hey'))
+          .called(1);
     },
     expect: () => <PostDetailState>[
       PostDetailState(post: p1, sending: true),
@@ -171,7 +175,9 @@ void main() {
     'addComment failure sets error',
     build: () {
       stubQuietCtor();
-      when(() => repo.addComment(postId: 'p1', text: 'hey')).thenAnswer(
+      when(() => repo.addComment(
+              postId: 'p1', postOwnerId: 'u1', text: 'hey'))
+          .thenAnswer(
         (_) async =>
             const Left<Failure, void>(Failure.serverError(message: 'boom')),
       );

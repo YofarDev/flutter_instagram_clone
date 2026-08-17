@@ -26,6 +26,7 @@ abstract interface class IFeedRepository {
 
   Future<Either<Failure, void>> addComment({
     required String postId,
+    required String postOwnerId,
     required String text,
   });
 }

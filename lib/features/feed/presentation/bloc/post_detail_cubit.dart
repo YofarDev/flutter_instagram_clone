@@ -67,8 +67,11 @@ class PostDetailCubit extends Cubit<PostDetailState> {
     final String trimmed = text.trim();
     if (trimmed.isEmpty || state.sending) return;
     emit(state.copyWith(sending: true, error: null));
-    final Either<Failure, void> either =
-        await _repository.addComment(postId: state.post.id, text: trimmed);
+    final Either<Failure, void> either = await _repository.addComment(
+      postId: state.post.id,
+      postOwnerId: state.post.authorId,
+      text: trimmed,
+    );
     if (isClosed) return;
     either.fold(
       (Failure f) => emit(state.copyWith(sending: false, error: f.message)),

@@ -110,8 +110,12 @@ void main() {
 
   group('toggleLike', () {
     test('returns Right(null) and passes post.id + currentlyLiked', () async {
-      when(() => ds.toggleLike(postId: 'p1', currentlyLiked: false))
-          .thenAnswer((_) async {});
+      when(() => ds.toggleLike(
+            postId: 'p1',
+            postOwnerId: 'u1',
+            postImageUrl: 'http://img',
+            currentlyLiked: false,
+          )).thenAnswer((_) async {});
 
       final Either<Failure, void> result = await repo.toggleLike(
         post: post,
@@ -119,13 +123,21 @@ void main() {
       );
 
       expect(result, const Right<Failure, void>(null));
-      verify(() => ds.toggleLike(postId: 'p1', currentlyLiked: false))
-          .called(1);
+      verify(() => ds.toggleLike(
+            postId: 'p1',
+            postOwnerId: 'u1',
+            postImageUrl: 'http://img',
+            currentlyLiked: false,
+          )).called(1);
     });
 
     test('returns Left when datasource throws', () async {
-      when(() => ds.toggleLike(postId: 'p1', currentlyLiked: true))
-          .thenThrow(Exception('tx failed'));
+      when(() => ds.toggleLike(
+            postId: 'p1',
+            postOwnerId: 'u1',
+            postImageUrl: 'http://img',
+            currentlyLiked: true,
+          )).thenThrow(Exception('tx failed'));
 
       final Either<Failure, void> result = await repo.toggleLike(
         post: post,
@@ -159,11 +171,12 @@ void main() {
 
   group('addComment', () {
     test('returns Right(null) on success', () async {
-      when(() => ds.addComment(postId: 'p1', text: 'nice'))
+      when(() => ds.addComment(postId: 'p1', postOwnerId: 'u1', text: 'nice'))
           .thenAnswer((_) async {});
 
       final Either<Failure, void> result = await repo.addComment(
         postId: 'p1',
+        postOwnerId: 'u1',
         text: 'nice',
       );
 
@@ -171,11 +184,12 @@ void main() {
     });
 
     test('returns Left when datasource throws', () async {
-      when(() => ds.addComment(postId: 'p1', text: 'nice'))
+      when(() => ds.addComment(postId: 'p1', postOwnerId: 'u1', text: 'nice'))
           .thenThrow(Exception('nope'));
 
       final Either<Failure, void> result = await repo.addComment(
         postId: 'p1',
+        postOwnerId: 'u1',
         text: 'nice',
       );
 
