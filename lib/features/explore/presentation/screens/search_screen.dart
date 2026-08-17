@@ -6,6 +6,7 @@ import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/models/app_user.dart';
 import '../../../../core/models/post.dart';
 import '../../../../core/router/route_constants.dart';
+import '../../../../core/utils/normalize_tag.dart';
 import '../bloc/explore_cubit.dart';
 import '../bloc/explore_state.dart';
 import '../bloc/search_cubit.dart';
@@ -25,11 +26,6 @@ class _SearchScreenState extends State<SearchScreen> {
   void dispose() {
     _controller.dispose();
     super.dispose();
-  }
-
-  String _normalizeTag(String query) {
-    final String q = query.trim().toLowerCase();
-    return q.startsWith('#') ? q.substring(1) : q;
   }
 
   @override
@@ -71,7 +67,17 @@ class _SearchScreenState extends State<SearchScreen> {
               },
             ),
             Expanded(
-              child: BlocBuilder<SearchCubit, SearchState>(
+              child: BlocListener<SearchCubit, SearchState>(
+                listenWhen: (SearchState p, SearchState c) =>
+                    p.error != c.error && c.error != null,
+                listener: (BuildContext context, SearchState state) {
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                      SnackBar(content: Text(state.error ?? l10n.errorGeneric)),
+                    );
+                },
+                child: BlocBuilder<SearchCubit, SearchState>(
                 buildWhen: (SearchState p, SearchState c) =>
                     p.query != c.query ||
                     p.users != c.users ||
@@ -101,35 +107,45 @@ class _SearchScreenState extends State<SearchScreen> {
                           if (state.posts.isEmpty) {
                             return const SizedBox.shrink();
                           }
-                          return GridView.builder(
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              childAspectRatio: 1,
-                              mainAxisSpacing: 2,
-                              crossAxisSpacing: 2,
-                            ),
-                            itemCount: state.posts.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              final Post post = state.posts[index];
-                              return InkWell(
-                                onTap: () => context.push(
-                                  Routes.postDetailPath(post.id),
-                                  extra: post,
-                                ),
-                                child: Image.network(
-                                  post.imageUrl,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, _, _) =>
-                                      Container(color: Colors.grey),
-                                ),
-                              );
+                          return NotificationListener<ScrollNotification>(
+                            onNotification: (ScrollNotification n) {
+                              if (n.metrics.pixels >
+                                  n.metrics.maxScrollExtent - 300) {
+                                context.read<ExploreCubit>().loadMore();
+                              }
+                              return false;
                             },
+                            child: GridView.builder(
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                childAspectRatio: 1,
+                                mainAxisSpacing: 2,
+                                crossAxisSpacing: 2,
+                              ),
+                              itemCount: state.posts.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final Post post = state.posts[index];
+                                return InkWell(
+                                  onTap: () => context.push(
+                                    Routes.postDetailPath(post.id),
+                                    extra: post,
+                                  ),
+                                  child: Image.network(
+                                    post.imageUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) =>
+                                        Container(color: Colors.grey),
+                                  ),
+                                );
+                              },
+                            ),
                           );
                         },
                       ),
                     );
                   }
-                  final String tag = _normalizeTag(state.query);
+                  final String tag = normalizeTag(state.query);
                   final List<AppUser> users = state.users;
                   return ListView(
                     children: <Widget>[
@@ -183,6 +199,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     ],
                   );
                 },
+              ),
               ),
             ),
           ],

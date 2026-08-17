@@ -22,5 +22,9 @@ void main() {
     test('stops at punctuation boundary', () {
       expect(extractTags('#foo.'), <String>['foo']);
     });
+
+    test('folds Latin-1 accents', () {
+      expect(extractTags('#café #ÉTÉ'), <String>['cafe', 'ete']);
+    });
   });
 }

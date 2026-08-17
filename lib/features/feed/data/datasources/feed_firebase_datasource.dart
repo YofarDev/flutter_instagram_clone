@@ -10,12 +10,25 @@ import '../../../../core/models/post.dart';
 import '../models/comment_dto.dart';
 import '../../../../core/models/post_dto.dart';
 
-/// #hashtag extraction: lowercase, strip #, [a-z0-9_], deduped.
+/// #hashtag extraction: unicode word chars, Latin-1 accent fold, lowercase,
+/// strip #, deduped.
+const String _accents = 'àáâäèéêëìíîïòóôöùúûüçñÀÁÂÄÈÉÊËÌÍÎÏÒÓÔÖÙÚÛÜÇÑ';
+const String _folded = 'aaaaeeeeiiiioooouuuucnAAAAEEEEIIIIOOOOUUUUCN';
+
+// ponytail: Latin-1 accent fold, full ICU fold if other scripts matter
+String _foldAccents(String s) => String.fromCharCodes(
+      s.runes.map(
+        (int r) => _accents.contains(String.fromCharCode(r))
+            ? _folded.codeUnitAt(_accents.indexOf(String.fromCharCode(r)))
+            : r,
+      ),
+    );
+
 List<String> extractTags(String caption) {
-  final RegExp re = RegExp(r'#([a-zA-Z0-9_]+)');
+  final RegExp re = RegExp(r'#([\p{L}\p{N}_]+)', unicode: true);
   return re
       .allMatches(caption)
-      .map((RegExpMatch m) => m.group(1)!.toLowerCase())
+      .map((RegExpMatch m) => _foldAccents(m.group(1)!).toLowerCase())
       .toSet()
       .toList();
 }

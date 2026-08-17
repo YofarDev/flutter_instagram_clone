@@ -17,7 +17,7 @@ class SearchCubit extends Cubit<SearchState> {
   Timer? _debounce;
 
   void queryChanged(String query) {
-    emit(state.copyWith(query: query));
+    emit(state.copyWith(query: query, error: null));
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 300), _runSearch);
   }
@@ -31,7 +31,7 @@ class SearchCubit extends Cubit<SearchState> {
     emit(state.copyWith(searching: true));
     final Either<Failure, List<AppUser>> either =
         await _repository.searchUsers(query: q);
-    if (isClosed) return;
+    if (isClosed || q != state.query.trim().toLowerCase()) return;
     either.fold(
       (Failure f) => emit(state.copyWith(searching: false, error: f.message)),
       (List<AppUser> users) =>

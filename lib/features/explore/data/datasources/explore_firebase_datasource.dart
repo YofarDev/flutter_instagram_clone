@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/models/app_user.dart';
 import '../../../../core/models/post.dart';
 import '../../../../core/models/post_dto.dart';
+import '../../../../core/utils/normalize_tag.dart';
 
 abstract interface class IExploreDataSource {
   Stream<List<Post>> watchExplorePosts({required int limit});
@@ -31,7 +32,7 @@ class ExploreFirebaseDataSource implements IExploreDataSource {
 
   @override
   Future<List<AppUser>> searchUsers({required String query}) async {
-    final String q = query.trim().toLowerCase().replaceFirst('#', '');
+    final String q = normalizeTag(query);
     if (q.isEmpty) return <AppUser>[];
     final QuerySnapshot<Object?> snap = await _db
         .collection('users')
