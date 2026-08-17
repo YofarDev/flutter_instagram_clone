@@ -13,6 +13,8 @@ abstract final class Routes {
   static const String userFollowing = '/user/:uid/following';
   static const String createStory = '/create-story';
   static const String storyViewer = '/story-viewer';
+  static const String search = '/search';
+  static const String hashtag = '/hashtag/:tag';
 
   static String userPath(String uid) => user.replaceFirst(':uid', uid);
   static String userFollowersPath(String uid) =>
@@ -20,4 +22,6 @@ abstract final class Routes {
   static String userFollowingPath(String uid) =>
       userFollowing.replaceFirst(':uid', uid);
   static String postDetailPath(String id) => postDetail.replaceFirst(':id', id);
+  static String hashtagPath(String tag) =>
+      '/hashtag/${Uri.encodeComponent(tag)}';
 }

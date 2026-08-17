@@ -8,6 +8,11 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
+import '../../features/explore/presentation/bloc/explore_cubit.dart';
+import '../../features/explore/presentation/bloc/hashtag_cubit.dart';
+import '../../features/explore/presentation/bloc/search_cubit.dart';
+import '../../features/explore/presentation/screens/hashtag_screen.dart';
+import '../../features/explore/presentation/screens/search_screen.dart';
 import '../models/app_user.dart';
 import '../models/post.dart';
 import '../../features/feed/presentation/bloc/create_post_cubit.dart';
@@ -37,6 +42,8 @@ class AppRouter {
   static final GlobalKey<NavigatorState> rootNavigatorKey =
       GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> _feedNavigatorKey =
+      GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> _searchNavigatorKey =
       GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> _createNavigatorKey =
       GlobalKey<NavigatorState>();
@@ -85,6 +92,11 @@ class AppRouter {
                       label: 'Feed',
                     ),
                     NavigationDestination(
+                      icon: Icon(Icons.search),
+                      selectedIcon: Icon(Icons.search),
+                      label: 'Search',
+                    ),
+                    NavigationDestination(
                       icon: Icon(Icons.add_box_outlined),
                       selectedIcon: Icon(Icons.add_box),
                       label: 'Create',
@@ -124,6 +136,29 @@ class AppRouter {
                       ],
                       child: const FeedScreen(),
                     ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: _searchNavigatorKey,
+            routes: <RouteBase>[
+              GoRoute(
+                path: Routes.search,
+                name: 'Search',
+                builder: (BuildContext context, GoRouterState state) =>
+                    MultiBlocProvider(
+                  providers: <BlocProvider<dynamic>>[
+                    BlocProvider<ExploreCubit>(
+                      create: (_) => getIt<ExploreCubit>(
+                        param1: getIt<AuthCubit>().state.user!.uid,
+                      ),
+                    ),
+                    BlocProvider<SearchCubit>(
+                      create: (_) => getIt<SearchCubit>(),
+                    ),
+                  ],
+                  child: const SearchScreen(),
+                ),
               ),
             ],
           ),
@@ -174,6 +209,23 @@ class AppRouter {
           return BlocProvider<PostDetailCubit>(
             create: (_) => getIt<PostDetailCubit>(param1: post),
             child: const PostDetailScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: Routes.hashtag,
+        name: 'Hashtag',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (BuildContext context, GoRouterState state) {
+          final String? tag = state.pathParameters['tag'];
+          if (tag == null || tag.isEmpty) {
+            return const Scaffold(
+              body: Center(child: Text('Hashtag not found')),
+            );
+          }
+          return BlocProvider<HashtagCubit>(
+            create: (_) => getIt<HashtagCubit>(param1: tag),
+            child: HashtagScreen(tag: tag),
           );
         },
       ),

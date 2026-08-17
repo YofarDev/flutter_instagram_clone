@@ -133,5 +133,9 @@
   "editProfileChangePhoto": "Change photo",
   "storiesYourStory": "Your story",
   "storiesAddToStory": "Add to story",
-  "createStoryTitle": "New story"
+  "createStoryTitle": "New story",
+  "searchHint": "Search",
+  "searchAccounts": "Accounts",
+  "searchHashtags": "Hashtags",
+  "searchNoResults": "No results"
 }

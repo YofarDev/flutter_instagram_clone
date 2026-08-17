@@ -64,5 +64,9 @@
   "editProfileChangePhoto": "Changer la photo",
   "storiesYourStory": "Ton histoire",
   "storiesAddToStory": "Ajouter à l'histoire",
-  "createStoryTitle": "Nouvelle histoire"
+  "createStoryTitle": "Nouvelle histoire",
+  "searchHint": "Rechercher",
+  "searchAccounts": "Comptes",
+  "searchHashtags": "Hashtags",
+  "searchNoResults": "Aucun résultat"
 }

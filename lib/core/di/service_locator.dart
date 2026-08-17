@@ -4,6 +4,12 @@ import '../../features/auth/data/datasources/auth_firebase_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/presentation/bloc/auth_cubit.dart';
+import '../../features/explore/data/datasources/explore_firebase_datasource.dart';
+import '../../features/explore/data/repositories/explore_repository_impl.dart';
+import '../../features/explore/domain/repositories/explore_repository.dart';
+import '../../features/explore/presentation/bloc/explore_cubit.dart';
+import '../../features/explore/presentation/bloc/hashtag_cubit.dart';
+import '../../features/explore/presentation/bloc/search_cubit.dart';
 import '../../features/feed/data/datasources/feed_firebase_datasource.dart';
 import '../../features/feed/data/repositories/feed_repository_impl.dart';
 import '../models/app_user.dart';
@@ -80,6 +86,27 @@ Future<void> setupServiceLocator() async {
   );
   getIt.registerFactory<FollowListCubit>(
     () => FollowListCubit(getIt<IProfileRepository>()),
+  );
+
+  // --- Explore feature ---
+  getIt.registerLazySingleton<IExploreDataSource>(
+    () => ExploreFirebaseDataSource(),
+  );
+  getIt.registerLazySingleton<IExploreRepository>(
+    () => ExploreRepositoryImpl(getIt<IExploreDataSource>()),
+  );
+  getIt.registerFactoryParam<ExploreCubit, String, void>(
+    (String uid, _) => ExploreCubit(
+      getIt<IExploreRepository>(),
+      getIt<IProfileRepository>(),
+      myUid: uid,
+    ),
+  );
+  getIt.registerFactory<SearchCubit>(
+    () => SearchCubit(getIt<IExploreRepository>()),
+  );
+  getIt.registerFactoryParam<HashtagCubit, String, void>(
+    (String tag, _) => HashtagCubit(getIt<IExploreRepository>(), tag: tag),
   );
 
   // --- Stories feature ---
