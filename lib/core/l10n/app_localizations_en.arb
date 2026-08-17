@@ -172,5 +172,12 @@
   "reelShare": "Share",
   "reelCaptionHint": "Write a caption…",
   "reelPickVideo": "Choose a video",
-  "reelRecordVideo": "Record a video"
+  "reelRecordVideo": "Record a video",
+  "dmsTitle": "Messages",
+  "dmHint": "Message…",
+  "dmSend": "Send",
+  "newDmTitle": "New message",
+  "dmEmpty": "No conversations",
+  "chatEmpty": "Start the conversation",
+  "dmYouPrefix": "You: "
 }

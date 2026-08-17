@@ -8,6 +8,10 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
+import '../../features/chat/domain/models/conversation.dart';
+import '../../features/chat/presentation/bloc/chat_cubit.dart';
+import '../../features/chat/presentation/bloc/conversations_cubit.dart';
+import '../../features/chat/presentation/bloc/new_chat_cubit.dart';
 import '../../features/explore/presentation/bloc/explore_cubit.dart';
 import '../../features/explore/presentation/bloc/hashtag_cubit.dart';
 import '../../features/explore/presentation/bloc/search_cubit.dart';
@@ -394,6 +398,54 @@ class AppRouter {
             child: const StoryViewerScreen(),
           );
         },
+      ),
+      GoRoute(
+        path: Routes.conversations,
+        name: 'Conversations',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (BuildContext context, GoRouterState state) =>
+            BlocProvider<ConversationsCubit>(
+          create: (_) => getIt<ConversationsCubit>(
+            param1: getIt<AuthCubit>().state.user!.uid,
+          ),
+          // TODO(phase8-task-5): replace placeholder with ConversationsScreen
+          child: const Scaffold(body: Center(child: Text('Conversations'))),
+        ),
+      ),
+      GoRoute(
+        path: Routes.chat,
+        name: 'Chat',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (BuildContext context, GoRouterState state) {
+          final Object? extra = state.extra;
+          if (extra is! Conversation) {
+            return const Scaffold(
+              body: Center(child: Text('Conversation not found')),
+            );
+          }
+          final ChatArgs args = ChatArgs(
+            conversation: extra,
+            myUid: getIt<AuthCubit>().state.user!.uid,
+          );
+          return BlocProvider<ChatCubit>(
+            create: (_) => getIt<ChatCubit>(param1: args),
+            // TODO(phase8-task-5): replace placeholder with ChatScreen
+            child: const Scaffold(body: Center(child: Text('Chat'))),
+          );
+        },
+      ),
+      GoRoute(
+        path: Routes.newChat,
+        name: 'NewChat',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (BuildContext context, GoRouterState state) =>
+            BlocProvider<NewChatCubit>(
+          create: (_) => getIt<NewChatCubit>(
+            param1: getIt<AuthCubit>().state.user!.uid,
+          ),
+          // TODO(phase8-task-5): replace placeholder with NewChatScreen
+          child: const Scaffold(body: Center(child: Text('New chat'))),
+        ),
       ),
       GoRoute(
         path: Routes.splash,

@@ -4,6 +4,12 @@ import '../../features/auth/data/datasources/auth_firebase_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/presentation/bloc/auth_cubit.dart';
+import '../../features/chat/data/datasources/chat_firebase_datasource.dart';
+import '../../features/chat/data/repositories/chat_repository_impl.dart';
+import '../../features/chat/domain/repositories/chat_repository.dart';
+import '../../features/chat/presentation/bloc/chat_cubit.dart';
+import '../../features/chat/presentation/bloc/conversations_cubit.dart';
+import '../../features/chat/presentation/bloc/new_chat_cubit.dart';
 import '../../features/explore/data/datasources/explore_firebase_datasource.dart';
 import '../../features/explore/data/repositories/explore_repository_impl.dart';
 import '../../features/explore/domain/repositories/explore_repository.dart';
@@ -155,6 +161,34 @@ Future<void> setupServiceLocator() async {
   );
   getIt.registerLazySingleton<NotificationsCubit>(
     () => NotificationsCubit(getIt<INotificationsRepository>()),
+  );
+
+  // --- Chat feature ---
+  getIt.registerLazySingleton<IChatDataSource>(
+    () => ChatFirebaseDataSource(),
+  );
+  getIt.registerLazySingleton<IChatRepository>(
+    () => ChatRepositoryImpl(getIt<IChatDataSource>()),
+  );
+  getIt.registerFactoryParam<ConversationsCubit, String, void>(
+    (String uid, _) => ConversationsCubit(
+      getIt<IChatRepository>(),
+      myUid: uid,
+    ),
+  );
+  getIt.registerFactoryParam<ChatCubit, ChatArgs, void>(
+    (ChatArgs args, _) => ChatCubit(
+      getIt<IChatRepository>(),
+      conversation: args.conversation,
+      myUid: args.myUid,
+    ),
+  );
+  getIt.registerFactoryParam<NewChatCubit, String, void>(
+    (String uid, _) => NewChatCubit(
+      getIt<IExploreRepository>(),
+      getIt<IChatRepository>(),
+      myUid: uid,
+    ),
   );
 
   // --- Reels feature ---

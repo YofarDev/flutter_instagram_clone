@@ -20,9 +20,8 @@ class ChatCubit extends Cubit<ChatState> {
   ChatCubit(
     this._repository, {
     required Conversation conversation,
-    required String myUid,
+    required this._myUid,
   })  : _conversation = conversation,
-        _myUid = myUid,
         super(ChatState(conversation: conversation)) {
     _sub = _repository
         .watchMessages(conversationId: conversation.id)

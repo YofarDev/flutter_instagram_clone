@@ -79,5 +79,12 @@
   "reelShare": "Partager",
   "reelCaptionHint": "Écris une légende…",
   "reelPickVideo": "Choisir une vidéo",
-  "reelRecordVideo": "Filmer une vidéo"
+  "reelRecordVideo": "Filmer une vidéo",
+  "dmsTitle": "Messages",
+  "dmHint": "Message…",
+  "dmSend": "Envoyer",
+  "newDmTitle": "Nouveau message",
+  "dmEmpty": "Aucune conversation",
+  "chatEmpty": "Démarre la conversation",
+  "dmYouPrefix": "Vous : "
 }

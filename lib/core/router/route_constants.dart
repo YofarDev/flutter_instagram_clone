@@ -18,6 +18,9 @@ abstract final class Routes {
   static const String hashtag = '/hashtag/:tag';
   static const String reels = '/reels';
   static const String createReel = '/create-reel';
+  static const String conversations = '/conversations';
+  static const String chat = '/chat';
+  static const String newChat = '/new-chat';
 
   static String userPath(String uid) => user.replaceFirst(':uid', uid);
   static String userFollowersPath(String uid) =>

@@ -23,6 +23,10 @@ class FeedScreen extends StatelessWidget {
         title: const Text('Instagram'),
         actions: <Widget>[
           IconButton(
+            icon: const Icon(Icons.send_outlined),
+            onPressed: () => context.push(Routes.conversations),
+          ),
+          IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () => context.read<AuthCubit>().signOut(),
           ),

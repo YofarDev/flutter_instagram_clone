@@ -14,9 +14,8 @@ class NewChatCubit extends Cubit<NewChatState> {
   NewChatCubit(
     this._exploreRepository,
     this._chatRepository, {
-    required String myUid,
-  })   : _myUid = myUid,
-        super(const NewChatState());
+    required this._myUid,
+  })  : super(const NewChatState());
 
   final IExploreRepository _exploreRepository;
   final IChatRepository _chatRepository;
