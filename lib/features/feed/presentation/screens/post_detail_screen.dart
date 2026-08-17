@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
+import '../../../../core/models/post.dart';
 import '../../../../core/router/route_constants.dart';
 import '../bloc/post_detail_cubit.dart';
 import '../bloc/post_detail_state.dart';
@@ -53,18 +54,22 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         },
         child: BlocBuilder<PostDetailCubit, PostDetailState>(
           builder: (BuildContext context, PostDetailState state) {
+            if (state.status == PostDetailStatus.loading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final Post post = state.post!;
             return Column(
               children: <Widget>[
                 Expanded(
                   flex: 2,
                   child: SingleChildScrollView(
                     child: PostCard(
-                      post: state.post,
+                      post: post,
                       isLiked: state.isLiked,
                       onLikeTap: () =>
                           context.read<PostDetailCubit>().toggleLike(),
                       onUsernameTap: () =>
-                          context.push(Routes.userPath(state.post.authorId)),
+                          context.push(Routes.userPath(post.authorId)),
                     ),
                   ),
                 ),

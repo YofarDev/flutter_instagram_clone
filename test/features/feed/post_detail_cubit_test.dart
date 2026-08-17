@@ -66,8 +66,17 @@ void main() {
     },
     wait: const Duration(milliseconds: 200),
     expect: () => <PostDetailState>[
-      PostDetailState(post: p1, isLiked: true),
-      PostDetailState(post: p1, isLiked: true, comments: <Comment>[c1]),
+      PostDetailState(
+        post: p1,
+        status: PostDetailStatus.ready,
+        isLiked: true,
+      ),
+      PostDetailState(
+        post: p1,
+        status: PostDetailStatus.ready,
+        isLiked: true,
+        comments: <Comment>[c1],
+      ),
     ],
   );
 
@@ -80,7 +89,11 @@ void main() {
       return PostDetailCubit(repo, post: p1);
     },
     expect: () => <PostDetailState>[
-      PostDetailState(post: p1, error: 'Failed to load comments'),
+      PostDetailState(
+        post: p1,
+        status: PostDetailStatus.ready,
+        error: 'Failed to load comments',
+      ),
     ],
   );
 
@@ -105,7 +118,11 @@ void main() {
       )).called(1);
     },
     expect: () => <PostDetailState>[
-      PostDetailState(post: p1.copyWith(likeCount: 6), isLiked: true),
+      PostDetailState(
+        post: p1.copyWith(likeCount: 6),
+        status: PostDetailStatus.ready,
+        isLiked: true,
+      ),
     ],
   );
 
@@ -126,8 +143,16 @@ void main() {
     },
     act: (PostDetailCubit cubit) => cubit.toggleLike(),
     expect: () => <PostDetailState>[
-      PostDetailState(post: p1.copyWith(likeCount: 6), isLiked: true),
-      PostDetailState(post: p1, error: 'boom'),
+      PostDetailState(
+        post: p1.copyWith(likeCount: 6),
+        status: PostDetailStatus.ready,
+        isLiked: true,
+      ),
+      PostDetailState(
+        post: p1,
+        status: PostDetailStatus.ready,
+        error: 'boom',
+      ),
     ],
   );
 
@@ -166,8 +191,11 @@ void main() {
           .called(1);
     },
     expect: () => <PostDetailState>[
-      PostDetailState(post: p1, sending: true),
-      PostDetailState(post: p1.copyWith(commentCount: 3)),
+      PostDetailState(post: p1, status: PostDetailStatus.ready, sending: true),
+      PostDetailState(
+        post: p1.copyWith(commentCount: 3),
+        status: PostDetailStatus.ready,
+      ),
     ],
   );
 
@@ -185,8 +213,45 @@ void main() {
     },
     act: (PostDetailCubit cubit) => cubit.addComment('hey'),
     expect: () => <PostDetailState>[
-      PostDetailState(post: p1, sending: true),
-      PostDetailState(post: p1, error: 'boom'),
+      PostDetailState(post: p1, status: PostDetailStatus.ready, sending: true),
+      PostDetailState(
+        post: p1,
+        status: PostDetailStatus.ready,
+        error: 'boom',
+      ),
+    ],
+  );
+
+  blocTest<PostDetailCubit, PostDetailState>(
+    'postId path fetches post then goes ready',
+    build: () {
+      when(() => repo.getPostById(postId: 'p1'))
+          .thenAnswer((_) async => Right<Failure, Post>(p1));
+      when(() => repo.watchComments(postId: 'p1'))
+          .thenAnswer((_) => const Stream<List<Comment>>.empty());
+      when(() => repo.fetchLikedPostIds(postIds: <String>['p1'])).thenAnswer(
+        (_) async =>
+            const Left<Failure, Set<String>>(Failure.serverError(message: 'offline')),
+      );
+      return PostDetailCubit(repo, postId: 'p1');
+    },
+    expect: () => <PostDetailState>[
+      PostDetailState(post: p1, status: PostDetailStatus.ready),
+    ],
+  );
+
+  blocTest<PostDetailCubit, PostDetailState>(
+    'postId path not found sets error',
+    build: () {
+      when(() => repo.getPostById(postId: 'p1')).thenAnswer(
+        (_) async => const Left<Failure, Post>(
+          Failure.serverError(message: 'Post not found'),
+        ),
+      );
+      return PostDetailCubit(repo, postId: 'p1');
+    },
+    expect: () => <PostDetailState>[
+      const PostDetailState(error: 'Post not found'),
     ],
   );
 }

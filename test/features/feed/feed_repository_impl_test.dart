@@ -153,6 +153,30 @@ void main() {
     });
   });
 
+  group('getPostById', () {
+    test('returns Right with post on success', () async {
+      when(() => ds.getPostById(postId: 'p1')).thenAnswer((_) async => post);
+
+      final Either<Failure, Post> result = await repo.getPostById(postId: 'p1');
+
+      expect(result, Right<Failure, Post>(post));
+    });
+
+    test('returns Left with clean message when post missing', () async {
+      when(() => ds.getPostById(postId: 'p1'))
+          .thenThrow(StateError('Post not found'));
+
+      final Either<Failure, Post> result = await repo.getPostById(postId: 'p1');
+
+      final Failure? failure = result.fold(
+        (Failure f) => f,
+        (_) => null,
+      );
+      expect(failure, isNotNull);
+      expect(failure!.message, 'Post not found');
+    });
+  });
+
   group('watchComments', () {
     test('passes datasource stream through unchanged', () async {
       when(() => ds.watchComments(postId: 'p1'))

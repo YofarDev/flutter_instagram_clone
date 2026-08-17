@@ -43,6 +43,15 @@ class FeedRepositoryImpl implements IFeedRepository {
   }
 
   @override
+  Future<Either<Failure, Post>> getPostById({required String postId}) async {
+    try {
+      return Right<Failure, Post>(await _ds.getPostById(postId: postId));
+    } catch (e) {
+      return Left<Failure, Post>(_mapError(e));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> toggleLike({
     required Post post,
     required bool currentlyLiked,
@@ -82,6 +91,10 @@ class FeedRepositoryImpl implements IFeedRepository {
     }
   }
 
-  Failure _mapError(Object e) =>
-      Failure.serverError(message: e.toString()); // ponytail: firestore errors are descriptive strings
+  Failure _mapError(Object e) {
+    // ponytail: StateError carries the datasource's domain message
+    // ('Post not found'), e.toString() would prefix 'Bad state: '
+    if (e is StateError) return Failure.serverError(message: e.message);
+    return Failure.serverError(message: e.toString());
+  }
 }

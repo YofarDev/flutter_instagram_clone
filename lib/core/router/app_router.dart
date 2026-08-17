@@ -15,6 +15,7 @@ import '../../features/explore/presentation/screens/hashtag_screen.dart';
 import '../../features/explore/presentation/screens/search_screen.dart';
 import '../../features/notifications/presentation/bloc/notifications_cubit.dart';
 import '../../features/notifications/presentation/bloc/notifications_state.dart';
+import '../../features/notifications/presentation/screens/activity_screen.dart';
 import '../../features/notifications/presentation/widgets/badge_icon.dart';
 import '../models/app_user.dart';
 import '../models/post.dart';
@@ -214,9 +215,9 @@ class AppRouter {
                 path: Routes.activity,
                 name: 'Activity',
                 builder: (BuildContext context, GoRouterState state) =>
-                    // TODO(phase6-task-5): replace with ActivityScreen
-                    const Scaffold(
-                  body: Center(child: Text('Activity')),
+                    BlocProvider<NotificationsCubit>.value(
+                  value: getIt<NotificationsCubit>(),
+                  child: const ActivityScreen(),
                 ),
               ),
             ],
@@ -247,12 +248,13 @@ class AppRouter {
         parentNavigatorKey: rootNavigatorKey,
         builder: (BuildContext context, GoRouterState state) {
           final Object? extra = state.extra;
-          if (extra is! Post) {
+          if (extra is! Post && extra is! String) {
             return const Scaffold(body: Center(child: Text('Post not found')));
           }
-          final Post post = extra;
           return BlocProvider<PostDetailCubit>(
-            create: (_) => getIt<PostDetailCubit>(param1: post),
+            create: (_) => extra is Post
+                ? getIt<PostDetailCubit>(param1: extra)
+                : getIt<PostDetailCubit>(param2: extra),
             child: const PostDetailScreen(),
           );
         },

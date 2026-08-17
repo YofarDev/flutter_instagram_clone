@@ -40,6 +40,7 @@ abstract interface class IFeedDataSource {
     required String filePath,
   });
   Future<Set<String>> fetchLikedPostIds({required List<String> postIds});
+  Future<Post> getPostById({required String postId});
   Future<void> toggleLike({
     required String postId,
     required String postOwnerId,
@@ -142,6 +143,17 @@ class FeedFirebaseDataSource implements IFeedDataSource {
       for (final DocumentSnapshot<Object?> s in snaps)
         if (s.exists) s.reference.parent.parent!.id,
     };
+  }
+
+  @override
+  Future<Post> getPostById({required String postId}) async {
+    final DocumentSnapshot<Object?> snap =
+        await _db.collection('posts').doc(postId).get();
+    if (!snap.exists) {
+      throw StateError('Post not found');
+    }
+    return PostDto.fromMap(postId, snap.data() as Map<String, dynamic>)
+        .toDomain(postId);
   }
 
   @override

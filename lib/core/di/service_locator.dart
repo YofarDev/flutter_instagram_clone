@@ -66,8 +66,12 @@ Future<void> setupServiceLocator() async {
   getIt.registerFactory<CreatePostCubit>(
     () => CreatePostCubit(getIt<IFeedRepository>()),
   );
-  getIt.registerFactoryParam<PostDetailCubit, Post, void>(
-    (Post post, _) => PostDetailCubit(getIt<IFeedRepository>(), post: post),
+  getIt.registerFactoryParam<PostDetailCubit, Post?, String?>(
+    (Post? post, String? postId) => PostDetailCubit(
+      getIt<IFeedRepository>(),
+      post: post,
+      postId: postId,
+    ),
   );
 
   // --- Profile feature ---
