@@ -68,5 +68,10 @@
   "searchHint": "Rechercher",
   "searchAccounts": "Comptes",
   "searchHashtags": "Hashtags",
-  "searchNoResults": "Aucun résultat"
+  "searchNoResults": "Aucun résultat",
+  "activityTitle": "Activité",
+  "notifEmpty": "Aucune activité pour l'instant",
+  "notifLikedPost": "{user} a aimé ta publication",
+  "notifCommentedPost": "{user} a commenté : {text}",
+  "notifStartedFollowing": "{user} a commencé à te suivre"
 }

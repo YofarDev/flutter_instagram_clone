@@ -18,6 +18,10 @@ import '../../features/feed/domain/repositories/feed_repository.dart';
 import '../../features/feed/presentation/bloc/create_post_cubit.dart';
 import '../../features/feed/presentation/bloc/feed_cubit.dart';
 import '../../features/feed/presentation/bloc/post_detail_cubit.dart';
+import '../../features/notifications/data/datasources/notifications_firebase_datasource.dart';
+import '../../features/notifications/data/repositories/notifications_repository_impl.dart';
+import '../../features/notifications/domain/repositories/notifications_repository.dart';
+import '../../features/notifications/presentation/bloc/notifications_cubit.dart';
 import '../../features/profile/data/datasources/profile_firebase_datasource.dart';
 import '../../features/profile/data/repositories/profile_repository_impl.dart';
 import '../../features/profile/domain/repositories/profile_repository.dart';
@@ -131,5 +135,16 @@ Future<void> setupServiceLocator() async {
       trays: args.trays,
       initialTrayIndex: args.initialTrayIndex,
     ),
+  );
+
+  // --- Notifications feature ---
+  getIt.registerLazySingleton<INotificationsDataSource>(
+    () => const NotificationsFirebaseDataSource(),
+  );
+  getIt.registerLazySingleton<INotificationsRepository>(
+    () => NotificationsRepositoryImpl(getIt<INotificationsDataSource>()),
+  );
+  getIt.registerLazySingleton<NotificationsCubit>(
+    () => NotificationsCubit(getIt<INotificationsRepository>()),
   );
 }

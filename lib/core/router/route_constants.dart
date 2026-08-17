@@ -14,6 +14,7 @@ abstract final class Routes {
   static const String createStory = '/create-story';
   static const String storyViewer = '/story-viewer';
   static const String search = '/search';
+  static const String activity = '/activity';
   static const String hashtag = '/hashtag/:tag';
 
   static String userPath(String uid) => user.replaceFirst(':uid', uid);

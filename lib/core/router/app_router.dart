@@ -13,6 +13,9 @@ import '../../features/explore/presentation/bloc/hashtag_cubit.dart';
 import '../../features/explore/presentation/bloc/search_cubit.dart';
 import '../../features/explore/presentation/screens/hashtag_screen.dart';
 import '../../features/explore/presentation/screens/search_screen.dart';
+import '../../features/notifications/presentation/bloc/notifications_cubit.dart';
+import '../../features/notifications/presentation/bloc/notifications_state.dart';
+import '../../features/notifications/presentation/widgets/badge_icon.dart';
 import '../models/app_user.dart';
 import '../models/post.dart';
 import '../../features/feed/presentation/bloc/create_post_cubit.dart';
@@ -47,6 +50,8 @@ class AppRouter {
       GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> _createNavigatorKey =
       GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> _activityNavigatorKey =
+      GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> _profileNavigatorKey =
       GlobalKey<NavigatorState>();
 
@@ -77,36 +82,62 @@ class AppRouter {
               GoRouterState state,
               StatefulNavigationShell navigationShell,
             ) {
-              return Scaffold(
-                body: navigationShell,
-                bottomNavigationBar: NavigationBar(
-                  selectedIndex: navigationShell.currentIndex,
-                  onDestinationSelected: (int i) => navigationShell.goBranch(
-                    i,
-                    initialLocation: i == navigationShell.currentIndex,
+              // Idempotent — safe on every router rebuild; shell is post-auth
+              // (redirect guarantees user is non-null here).
+              final NotificationsCubit notificationsCubit =
+                  getIt<NotificationsCubit>()
+                    ..init(getIt<AuthCubit>().state.user!.uid);
+              return BlocProvider<NotificationsCubit>.value(
+                value: notificationsCubit,
+                child: Scaffold(
+                  body: navigationShell,
+                  bottomNavigationBar:
+                      BlocBuilder<NotificationsCubit, NotificationsState>(
+                    buildWhen: (NotificationsState previous,
+                            NotificationsState current) =>
+                        previous.unreadCount != current.unreadCount,
+                    builder: (BuildContext context, NotificationsState state) =>
+                        NavigationBar(
+                      selectedIndex: navigationShell.currentIndex,
+                      onDestinationSelected: (int i) => navigationShell.goBranch(
+                        i,
+                        initialLocation: i == navigationShell.currentIndex,
+                      ),
+                      destinations: <NavigationDestination>[
+                        const NavigationDestination(
+                          icon: Icon(Icons.home_outlined),
+                          selectedIcon: Icon(Icons.home),
+                          label: 'Feed',
+                        ),
+                        const NavigationDestination(
+                          icon: Icon(Icons.search),
+                          selectedIcon: Icon(Icons.search),
+                          label: 'Search',
+                        ),
+                        const NavigationDestination(
+                          icon: Icon(Icons.add_box_outlined),
+                          selectedIcon: Icon(Icons.add_box),
+                          label: 'Create',
+                        ),
+                        NavigationDestination(
+                          icon: BadgeIcon(
+                            icon: Icons.favorite_outline,
+                            count: state.unreadCount,
+                          ),
+                          selectedIcon: BadgeIcon(
+                            icon: Icons.favorite,
+                            count: state.unreadCount,
+                          ),
+                          label: 'Activity',
+                        ),
+                        const NavigationDestination(
+                          icon: Icon(Icons.person_outline),
+                          selectedIcon: Icon(Icons.person),
+                          label: 'Profile',
+                        ),
+                      ],
+                    ),
                   ),
-                  destinations: const <NavigationDestination>[
-                    NavigationDestination(
-                      icon: Icon(Icons.home_outlined),
-                      selectedIcon: Icon(Icons.home),
-                      label: 'Feed',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.search),
-                      selectedIcon: Icon(Icons.search),
-                      label: 'Search',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.add_box_outlined),
-                      selectedIcon: Icon(Icons.add_box),
-                      label: 'Create',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.person_outline),
-                      selectedIcon: Icon(Icons.person),
-                      label: 'Profile',
-                    ),
-                  ],
                 ),
               );
             },
@@ -173,6 +204,20 @@ class AppRouter {
                       create: (_) => getIt<CreatePostCubit>(),
                       child: const CreatePostScreen(),
                     ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: _activityNavigatorKey,
+            routes: <RouteBase>[
+              GoRoute(
+                path: Routes.activity,
+                name: 'Activity',
+                builder: (BuildContext context, GoRouterState state) =>
+                    // TODO(phase6-task-5): replace with ActivityScreen
+                    const Scaffold(
+                  body: Center(child: Text('Activity')),
+                ),
               ),
             ],
           ),

@@ -137,5 +137,34 @@
   "searchHint": "Search",
   "searchAccounts": "Accounts",
   "searchHashtags": "Hashtags",
-  "searchNoResults": "No results"
+  "searchNoResults": "No results",
+  "activityTitle": "Activity",
+  "notifEmpty": "No activity yet",
+  "notifLikedPost": "{user} liked your post",
+  "@notifLikedPost": {
+    "placeholders": {
+      "user": {
+        "type": "String"
+      }
+    }
+  },
+  "notifCommentedPost": "{user} commented: {text}",
+  "@notifCommentedPost": {
+    "placeholders": {
+      "user": {
+        "type": "String"
+      },
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "notifStartedFollowing": "{user} started following you",
+  "@notifStartedFollowing": {
+    "placeholders": {
+      "user": {
+        "type": "String"
+      }
+    }
+  }
 }
