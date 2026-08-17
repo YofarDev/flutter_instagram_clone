@@ -21,7 +21,18 @@ class StoriesBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
     // rebuild on auth changes too: user can resolve after first build
-    return BlocBuilder<AuthCubit, AuthState>(
+    return BlocListener<StoriesCubit, StoriesState>(
+      listenWhen: (StoriesState p, StoriesState c) =>
+          p.error != c.error && c.error != null,
+      listener: (BuildContext context, StoriesState state) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(content: Text(state.error ?? l10n.errorGeneric)),
+          );
+        context.read<StoriesCubit>().clearError();
+      },
+      child: BlocBuilder<AuthCubit, AuthState>(
       builder: (BuildContext context, AuthState _) =>
           BlocBuilder<StoriesCubit, StoriesState>(
             buildWhen: (StoriesState p, StoriesState c) =>
@@ -92,6 +103,7 @@ class StoriesBar extends StatelessWidget {
               );
             },
           ),
+      ),
     );
   }
 }

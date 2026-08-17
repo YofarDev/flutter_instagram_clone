@@ -29,7 +29,12 @@ class _StoryViewerScreenState extends State<StoryViewerScreen> {
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 5), (_) => _cubit.next());
+    _timer = Timer.periodic(
+      const Duration(seconds: 5),
+      (_) {
+        if (mounted) _cubit.next();
+      },
+    );
   }
 
   void _resetTimer() {

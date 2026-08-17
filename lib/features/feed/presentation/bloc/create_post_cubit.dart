@@ -12,11 +12,18 @@ class CreatePostCubit extends Cubit<CreatePostState> {
   final IFeedRepository _repository;
 
   Future<void> pickImage(ImageSource source) async {
-    final XFile? picked = await ImagePicker().pickImage(
-      source: source,
-      maxWidth: 1080,
-      imageQuality: 70,
-    );
+    XFile? picked;
+    try {
+      picked = await ImagePicker().pickImage(
+        source: source,
+        maxWidth: 1080,
+        imageQuality: 70,
+      );
+    } catch (_) {
+      // ponytail: plugin cancel/permission errors — nothing sensible to show
+      return;
+    }
+    if (isClosed) return;
     if (picked != null) {
       emit(state.copyWith(pickedPath: picked.path));
     }
