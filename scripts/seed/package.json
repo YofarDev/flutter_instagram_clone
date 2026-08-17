@@ -1,0 +1,13 @@
+{
+  "name": "instagram-clone-seed",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Firestore/Storage dummy-data seeder for the Instagram clone POC",
+  "main": "seed.js",
+  "scripts": {
+    "seed": "node seed.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  }
+}

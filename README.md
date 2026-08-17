@@ -113,6 +113,20 @@ flutter test
 flutter run
 ```
 
+## Dummy Data
+
+Seeds 6 demo users with posts, stories, reels, follows, notifications and a chat, wired to your account:
+
+1. Firebase console → Project settings → Service accounts → **Generate new private key** → save as `scripts/seed/serviceAccount.json` (git-ignored)
+2. Run:
+
+```bash
+cd scripts/seed && npm install
+node seed.js --me=<your-uid>
+```
+
+(`--reset` first wipes previously seeded data. Your uid is visible on your profile screen in the app, or in the Firebase console Authentication tab.)
+
 ## Adding a New Feature
 
 To add a new feature, use the generation script:

@@ -271,3 +271,7 @@ lib/core/l10n/generated/
 
 # iOS Flutter
 **/ios/Flutter/.last_build_id
+
+# Dummy data seeder
+scripts/seed/node_modules/
+scripts/seed/serviceAccount.json
