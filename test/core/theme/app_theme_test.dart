@@ -8,14 +8,14 @@ void main() {
     test('dark theme uses IG tokens', () {
       final ThemeData t = AppTheme.darkTheme;
       expect(t.scaffoldBackgroundColor, IgColors.black);
-      expect(t.colorScheme.onPrimary, IgColors.textPrimary(Brightness.dark));
+      expect(t.colorScheme.onPrimary, IgColors.white);
       expect(t.splashFactory, NoSplash.splashFactory);
     });
 
     test('light theme uses IG tokens', () {
       final ThemeData t = AppTheme.lightTheme;
       expect(t.scaffoldBackgroundColor, IgColors.white);
-      expect(t.colorScheme.onPrimary, IgColors.textPrimary(Brightness.light));
+      expect(t.colorScheme.onPrimary, IgColors.white);
       expect(t.splashFactory, NoSplash.splashFactory);
     });
 

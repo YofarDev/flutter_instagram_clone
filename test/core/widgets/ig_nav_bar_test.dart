@@ -14,7 +14,6 @@ void main() {
           currentIndex: 0,
           onBranchSelected: (_) {},
           onCreate: () {},
-          unreadCount: 0,
         ),
       ),
     );
@@ -34,7 +33,6 @@ void main() {
           currentIndex: 0,
           onBranchSelected: (int i) => branch = i,
           onCreate: () => created = true,
-          unreadCount: 0,
         ),
       ),
     );

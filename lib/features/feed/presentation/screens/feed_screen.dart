@@ -35,7 +35,6 @@ class FeedScreen extends StatelessWidget {
                 IconButton(
                   tooltip: l10n.navActivity,
                   icon: BadgeIcon(
-                    icon: null,
                     igIcon: IgIcons.heart,
                     count: state.unreadCount,
                   ),

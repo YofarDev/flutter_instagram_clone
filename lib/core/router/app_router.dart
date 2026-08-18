@@ -21,7 +21,6 @@ import '../../features/explore/presentation/bloc/search_cubit.dart';
 import '../../features/explore/presentation/screens/hashtag_screen.dart';
 import '../../features/explore/presentation/screens/search_screen.dart';
 import '../../features/notifications/presentation/bloc/notifications_cubit.dart';
-import '../../features/notifications/presentation/bloc/notifications_state.dart';
 import '../../features/notifications/presentation/screens/activity_screen.dart';
 import '../../features/reels/presentation/bloc/create_reel_cubit.dart';
 import '../../features/reels/presentation/bloc/reels_cubit.dart';
@@ -111,39 +110,22 @@ class AppRouter {
                 ],
                 child: Scaffold(
                   body: navigationShell,
-                  bottomNavigationBar:
-                      BlocBuilder<NotificationsCubit, NotificationsState>(
-                        buildWhen:
-                            (
-                              NotificationsState previous,
-                              NotificationsState current,
-                            ) => previous.unreadCount != current.unreadCount,
-                        builder:
-                            (BuildContext context, NotificationsState state) =>
-                                BlocBuilder<AuthCubit, AuthState>(
-                                  buildWhen: (AuthState p, AuthState c) =>
-                                      p.user?.avatarUrl != c.user?.avatarUrl,
-                                  builder:
-                                      (
-                                        BuildContext context,
-                                        AuthState authState,
-                                      ) => IgNavBar(
-                                        currentIndex:
-                                            navigationShell.currentIndex,
-                                        onBranchSelected: (int branch) =>
-                                            navigationShell.goBranch(
-                                              branch,
-                                              initialLocation:
-                                                  branch ==
-                                                  navigationShell.currentIndex,
-                                            ),
-                                        onCreate: () =>
-                                            context.push(Routes.create),
-                                        unreadCount: state.unreadCount,
-                                        avatarUrl: authState.user?.avatarUrl,
-                                      ),
-                                ),
-                      ),
+                  bottomNavigationBar: BlocBuilder<AuthCubit, AuthState>(
+                    buildWhen: (AuthState p, AuthState c) =>
+                        p.user?.avatarUrl != c.user?.avatarUrl,
+                    builder: (BuildContext context, AuthState authState) =>
+                        IgNavBar(
+                          currentIndex: navigationShell.currentIndex,
+                          onBranchSelected: (int branch) =>
+                              navigationShell.goBranch(
+                                branch,
+                                initialLocation:
+                                    branch == navigationShell.currentIndex,
+                              ),
+                          onCreate: () => context.push(Routes.create),
+                          avatarUrl: authState.user?.avatarUrl,
+                        ),
+                  ),
                 ),
               );
             },

@@ -13,7 +13,6 @@ class IgNavBar extends StatelessWidget {
     required this.currentIndex,
     required this.onBranchSelected,
     required this.onCreate,
-    required this.unreadCount,
     this.avatarUrl,
     super.key,
   });
@@ -21,7 +20,6 @@ class IgNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onBranchSelected;
   final VoidCallback onCreate;
-  final int unreadCount;
   final String? avatarUrl;
 
   static const List<int> _branchIndexOf = <int>[0, 1, -1, 2, 3];

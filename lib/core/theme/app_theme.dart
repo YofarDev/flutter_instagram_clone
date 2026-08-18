@@ -18,7 +18,7 @@ class AppTheme {
       colorScheme: ColorScheme(
         brightness: brightness,
         primary: IgColors.blue,
-        onPrimary: textPrimary,
+        onPrimary: IgColors.white,
         secondary: IgColors.blue,
         onSecondary: IgColors.white,
         error: IgColors.alertRed,
