@@ -1,10 +1,12 @@
-# Flutter Instagram Clone
+# Instagram clone — Flutter + Firebase
 
-A fully vibe-coded clone of the Instagram mobile app, built as a proof of concept with [opencode](https://opencode.ai) (GLM 5.3). No hand-written code — everything is AI-generated, piece by piece.
+A working clone of Instagram, built to find out how far "vibe coding" gets you: every line was written by an AI agent (opencode / Claude Code on GLM 5.3), one feature at a time, with tests and reviews along the way. No hand-written Dart.
+
+What's in it: auth (email + Google), a home feed with images and video reels, stories that expire after 24h, likes, comments, follow graph, search over users and hashtags, notifications, and real-time direct messages. It runs against a real Firebase backend — no mocks, no fake latency.
 
 ## Screenshots
 
-Captured from the Android emulator with seeded demo data:
+From the Android emulator, running on seeded demo data (dark theme; the app follows the system theme and has a matching light one):
 
 | | |
 |---|---|
@@ -14,137 +16,58 @@ Captured from the Android emulator with seeded demo data:
 | ![Activity](assets/screenshots/07-activity.png) | ![Profile](assets/screenshots/08-profile.png) |
 | ![Post detail](assets/screenshots/09-post-detail.png) | ![Chat](assets/screenshots/10-chat.png) |
 
-## Stack
+## Running it
 
-| Layer | Technology |
-|-------|------------|
-| Framework | Flutter |
-| State management | BLoC / Cubits (`flutter_bloc`) |
-| Navigation | `go_router` |
-| Models / immutability | `freezed` + `json_serializable` |
-| DI | `get_it` |
-| Functional error handling | `fpdart` (`Either`) |
-| Backend | Firebase — Auth, Cloud Firestore, Cloud Storage |
-
-## Feature Roadmap
-
-Built incrementally, one phase at a time:
-
-- [x] **Phase 1 — Foundation**: Firebase wiring, auth (email + Google), signup/login/onboarding, user profile creation
-- [x] **Phase 2 — Posts & Feed**: image posts (gallery/camera), home feed, like, comment
-- [x] **Phase 3 — Social Graph**: follow/unfollow, profile grid, followers/following lists
-- [x] **Phase 4 — Stories**: 24h stories, story creation, story viewer
-- [x] **Phase 5 — Explore & Search**: explore grid, user & hashtag search
-- [x] **Phase 6 — Notifications**: likes, comments, follows
-- [x] **Phase 7 — Reels**: short video posts, vertical feed
-- [x] **Phase 8 — Direct Messages**: 1:1 chat, real-time
-
-## Firebase Setup
-
-1. Create a project at [console.firebase.google.com](https://console.firebase.google.com)
-2. Enable **Authentication** (Email/Password + Google providers)
-3. Create a **Firestore** database (start in test mode for the POC)
-4. Enable **Cloud Storage**
-5. Configure the FlutterFire CLI:
+You need a Firebase project with **Authentication** (Email/Password + Google), **Firestore** and **Storage** enabled. Then:
 
 ```bash
-dart pub global activate flutterfire_cli
-flutterfire configure
-```
-
-This generates `lib/firebase_options.dart` (git-ignored) used by `main.dart`.
-
-## Architecture
-
-This project follows a **Feature-based Clean Architecture** pattern:
-
-- **Data Layer**: DTOs, Data Sources, and Repository implementations.
-- **Domain Layer**: Models, Repository interfaces, and Domain Services (Business Logic).
-- **Presentation Layer**: Cubits (State Management), Screens, and Widgets.
-
-Dependencies flow inward only: `presentation → domain ← data`.
-
-## Project Structure
-
-```text
-lib/
-├── main.dart              # runApp() only — no wiring, no logic
-├── app.dart               # MaterialApp.router configuration
-├── core/
-│   ├── di/
-│   │   └── service_locator.dart   # All DI wiring
-│   ├── router/
-│   │   ├── app_router.dart
-│   │   └── route_constants.dart
-│   ├── models/            # Shared domain models only (freezed)
-│   └── utils/
-└── features/
-    └── [feature_name]/
-        ├── data/
-        │   ├── datasources/       # Local/remote data sources
-        │   ├── models/            # DTOs (data transfer objects)
-        │   └── repositories/      # Repository implementations
-        ├── domain/
-        │   ├── models/            # Feature models (freezed)
-        │   ├── repositories/      # Repository interfaces
-        │   └── services/          # Domain coordination logic
-        └── presentation/
-            ├── bloc/               # Cubits + states
-            ├── screens/
-            └── widgets/
-```
-
-## CLI Tools
-
-The following utility scripts are available in the `scripts/` folder:
-
-| Script | Purpose |
-|--------|---------|
-| `./scripts/fgen.sh "name"` | **Generate New Feature**: Creates all Clean Architecture boilerplate and runs code generation. |
-| `./scripts/fstr.sh "key" "FR" "EN"` | **Add Localization**: Adds a new key to both French and English `.arb` files. |
-| `./scripts/fanal.sh` | **Audit**: Generates a code quality and architecture report. |
-| `./scripts/fdead.sh` | **Dead Code**: Identifies unused files in the project. |
-| `./scripts/fimp.sh` | **Fix Imports**: Automatically converts package imports to relative imports. |
-
-## Development Commands
-
-```bash
-# Install dependencies
 flutter pub get
-
-# Generate localization files
-flutter gen-l10n
-
-# Run code generation (Freezed/JSON)
-dart run build_runner build --delete-conflicting-outputs
-
-# Run tests
-flutter test
-
-# Run the app
+dart pub global activate flutterfire_cli
+flutterfire configure        # generates lib/firebase_options.dart (git-ignored)
 flutter run
 ```
 
-## Dummy Data
+The security rules are in `firestore.rules` and `firebase.storage.rules` at the repo root — deploy them with `firebase deploy --only firestore:rules,storage` rather than running in test mode forever.
 
-Seeds 6 demo users with posts, stories, reels, follows, notifications and a chat, wired to your account:
+## Demo data
 
-1. Firebase console → Project settings → Service accounts → **Generate new private key** → save as `scripts/seed/serviceAccount.json` (git-ignored)
-2. Run:
+The seeder fills the project with 12 users, 60 posts with real photos (picsum/pravatar, downloaded and cached in `scripts/seed/assets/`), stories, reels, comments, notifications and chat threads, all wired to your own account so your feed isn't empty:
 
 ```bash
 cd scripts/seed && npm install
-node seed.js --me=<your-uid>
+# Firebase console → Project settings → Service accounts → Generate new private key
+# save it as scripts/seed/serviceAccount.json (git-ignored)
+node seed.js --me=<your-uid>       # add --reset to wipe and reseed
 ```
 
-(`--reset` first wipes previously seeded data. Your uid is visible on your profile screen in the app, or in the Firebase console Authentication tab.)
+Your uid is in the Firebase console under Authentication. Re-runs are idempotent — every document id is deterministic, so nothing duplicates.
 
-## Adding a New Feature
+## How it's built
 
-To add a new feature, use the generation script:
+Feature-first clean architecture: each feature (`feed`, `stories`, `reels`, `chat`, …) owns its `data` / `domain` / `presentation` layers, and only `core/` is shared. Dependencies point inward — screens talk to cubits (`flutter_bloc`), cubits to repository interfaces, implementations live in data and are wired in a single `service_locator.dart`. Failures travel as `Either<Failure, T>` from `fpdart`, so error handling is a type, not a promise.
+
+A few decisions worth knowing about:
+
+- **go_router with an indexed StatefulShellRoute** — five tabs, each branch keeps its own navigator stack, so pushing a profile from search doesn't blow away your feed scroll position.
+- **The follow graph is client-side-filtered.** Firestore's `whereIn` caps at 10 items, so the feed watches all posts and filters by your following set locally. Fine at demo scale; the comment in `feed_cubit.dart` marks where server-side filtering takes over.
+- **Counts are denormalized** onto user and post docs and mutated in transactions, because counting subcollections on read doesn't scale and Firestore can't do it in a query anyway.
+- **freezed + json_serializable** for models, **build_runner** codegen, l10n via ARB files (English and French).
+
+## Scripts
+
+| Script | What it does |
+|--------|--------------|
+| `scripts/fgen.sh <name>` | Scaffolds a new feature (all three layers + tests) and runs codegen |
+| `scripts/fstr.sh <key> <fr> <en>` | Adds a localization key to both ARB files |
+| `scripts/fimp.sh` | Rewrites package imports to relative |
+| `scripts/fdead.sh` | Finds orphaned files |
+| `scripts/screenshots.sh` | Walks the app and captures the screenshots above |
 
 ```bash
-./scripts/fgen.sh my_new_feature
+dart run build_runner build --delete-conflicting-outputs   # after model changes
+flutter test                                               # 204 tests
 ```
 
-After generation, register your new classes in `lib/core/di/service_locator.dart` and add routes in `lib/core/router/app_router.dart`.
+## Status
+
+All features listed above work end-to-end. The current branch is a visual-fidelity pass — Instagram-exact theming, custom-drawn icons, a real IG nav bar — with animation polish (double-tap-to-like, story rings, page transitions) still in progress.
