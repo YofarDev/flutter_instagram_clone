@@ -3,11 +3,19 @@
 
 Usage: uv run --with pillow --with numpy scripts/seed/gen_assets.py
 Writes into scripts/seed/assets/.
+
+Brand icons/wordmarks are PIL-generated. Dummy media (avatars/posts/stories/
+reels) is downloaded from pravatar.cc / picsum.photos with deterministic,
+cache-stable filenames — re-runs skip files that already exist. If a download
+fails (offline etc.), the slot falls back to the legacy PIL generator so the
+script never hard-fails.
 """
 
 from __future__ import annotations
 
 import subprocess
+import urllib.request
+import zlib
 from pathlib import Path
 
 import numpy as np
@@ -108,7 +116,52 @@ def gen_wordmarks() -> None:
         img.save(ROOT / name)
 
 
+# ---------------------------------------------------------------------------
+# Dummy media: downloads (deterministic slugs, cached) + PIL fallbacks.
+# ---------------------------------------------------------------------------
+
 USERS = [
+    "alice", "bob", "chloe", "dave", "eve", "frank",
+    "grace", "henry", "iris", "jack", "kate", "leo",
+]
+
+# 12 distinct pravatar ids (verified to resolve; pravatar has ~70).
+PRAVATAR_IDS = [1, 3, 5, 7, 8, 9, 10, 11, 12, 13, 15, 16]
+
+# 4:5 / 1:1 / 16:9 mix, cycled per post index.
+POST_HEIGHTS = [1350, 1080, 810]
+
+POSTS_PER_USER = 5
+STORY_WORDS = ("sunset", "vibes", "code", "coffee", "travel", "mood") * 2
+REEL_COUNT = 6
+REEL_FRAMES = 5
+
+UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36"
+
+fallbacks_used: list[str] = []
+
+
+def fetch(url: str, dest: Path) -> bool:
+    """Download url -> dest. One retry. Returns success."""
+    for attempt in (1, 2):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": UA})
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = resp.read()
+            if not data:
+                raise ValueError("empty body")
+            dest.write_bytes(data)
+            return True
+        except Exception as e:  # noqa: BLE001 — never hard-fail
+            if attempt == 2:
+                print(f"  download failed ({e}), using PIL fallback: {url}")
+                return False
+    return False
+
+
+# --- legacy PIL generators (kept as offline fallbacks) ----------------------
+
+LEGACY_GRADS = [
     ("alice", "A", (0xDD, 0x2A, 0x7B), (0xFD, 0x8A, 0x3C)),
     ("bob", "B", (0x51, 0x5B, 0xD4), (0x81, 0x34, 0xAF)),
     ("chloe", "C", (0xF5, 0x85, 0x29), (0xFE, 0xDA, 0x77)),
@@ -116,28 +169,6 @@ USERS = [
     ("eve", "E", (0x8A, 0x2B, 0xE2), (0xDD, 0x2A, 0x7B)),
     ("frank", "F", (0xFE, 0xDA, 0x77), (0xF5, 0x85, 0x29)),
 ]
-
-
-def two_stop(size: int, a: tuple[int, int, int], b: tuple[int, int, int]) -> Image.Image:
-    arr = np.zeros((size, size, 3), dtype=float)
-    t = np.linspace(0, 1, size)[..., None]
-    for c in range(3):
-        arr[..., c] = a[c] * (1 - t) + b[c] * t
-    return Image.fromarray(arr.astype(np.uint8), "RGB")
-
-
-def gen_avatars() -> None:
-    font = ImageFont.truetype(str(FONT), 260)
-    for name, initial, a, b in USERS:
-        img = two_stop(512, a, b).convert("RGBA")
-        mask = Image.new("L", img.size, 0)
-        ImageDraw.Draw(mask).ellipse([8, 8, 504, 504], fill=255)
-        img.putalpha(mask)
-        d = ImageDraw.Draw(img)
-        box = d.textbbox((0, 0), initial, font=font)
-        d.text(((512 - box[2] + box[0]) / 2 - box[0], (512 - box[3] + box[1]) / 2 - box[1] - 20), initial, font=font, fill=(255, 255, 255, 255))
-        img.save(ROOT / "avatars" / f"{name}.png")
-
 
 PALETTES = [
     ((0x51, 0x5B, 0xD4), (0xDD, 0x2A, 0x7B)),
@@ -147,6 +178,14 @@ PALETTES = [
     ((0x8A, 0x2B, 0xE2), (0xF5, 0x85, 0x29)),
     ((0x13, 0x52, 0x2B), (0x8F, 0xBC, 0x8F)),
 ]
+
+
+def two_stop(size: int, a: tuple[int, int, int], b: tuple[int, int, int]) -> Image.Image:
+    arr = np.zeros((size, size, 3), dtype=float)
+    t = np.linspace(0, 1, size)[..., None]
+    for c in range(3):
+        arr[..., c] = a[c] * (1 - t) + b[c] * t
+    return Image.fromarray(arr.astype(np.uint8), "RGB")
 
 
 def art_image(seed: int, size: int) -> Image.Image:
@@ -177,43 +216,107 @@ def art_image(seed: int, size: int) -> Image.Image:
     return out.convert("RGB")
 
 
+def fallback_avatar(name: str, dest: Path) -> None:
+    k = USERS.index(name)
+    legacy = LEGACY_GRADS[k % len(LEGACY_GRADS)]
+    _, initial, a, b = legacy
+    font = ImageFont.truetype(str(FONT), 260)
+    img = two_stop(512, a, b).convert("RGB")
+    d = ImageDraw.Draw(img)
+    box = d.textbbox((0, 0), initial, font=font)
+    d.text(((512 - box[2] + box[0]) / 2 - box[0], (512 - box[3] + box[1]) / 2 - box[1] - 20), initial, font=font, fill=(255, 255, 255))
+    img.save(dest, quality=85)
+    fallbacks_used.append(str(dest))
+
+
+def fallback_post(slug: str, dest: Path) -> None:
+    seed = zlib.crc32(slug.encode()) % 10_000
+    art_image(seed, 1080).save(dest, quality=85)
+    fallbacks_used.append(str(dest))
+
+
+def fallback_story(name: str, dest: Path) -> None:
+    i = USERS.index(name) + 1
+    a, b = PALETTES[(i + 2) % len(PALETTES)]
+    base = two_stop(1280, a, b).resize((1080, 1920))
+    overlay = Image.new("RGBA", (1080, 1920), (0, 0, 0, 0))
+    d = ImageDraw.Draw(overlay)
+    for k in range(3):
+        r = 300 - k * 90
+        cx, cy = 540 + k * 45, 780 - k * 60
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=(255, 255, 255, 140), width=40)
+    font = ImageFont.truetype(str(FONT), 160)
+    d.text((540, 1350), STORY_WORDS[i - 1], font=font, fill=(255, 255, 255, 230), anchor="mm")
+    out = base.convert("RGBA")
+    out.alpha_composite(overlay)
+    out.convert("RGB").save(dest, quality=85)
+    fallbacks_used.append(str(dest))
+
+
+def fallback_frame(n: int, f: int, dest: Path) -> None:
+    a, b = PALETTES[(n + f) % len(PALETTES)]
+    two_stop(720, a, b).resize((720, 1280)).save(dest, quality=85)
+    fallbacks_used.append(str(dest))
+
+
+# --- download-or-fallback per media kind ------------------------------------
+
+
+def cached(dest: Path) -> bool:
+    return dest.exists() and dest.stat().st_size > 0
+
+
+def gen_avatars() -> None:
+    for name, img_id in zip(USERS, PRAVATAR_IDS, strict=True):
+        dest = ROOT / "avatars" / f"{name}.jpg"
+        if cached(dest):
+            continue
+        if not fetch(f"https://i.pravatar.cc/300?img={img_id}", dest):
+            fallback_avatar(name, dest)
+
+
 def gen_posts() -> None:
-    for i in range(1, 19):
-        art_image(i + 30, 1080).save(ROOT / "posts" / f"p{i:02d}.jpg", quality=85)
+    for name in USERS:
+        for i in range(1, POSTS_PER_USER + 1):
+            slug = f"insta-{name}-{i}"
+            dest = ROOT / "posts" / f"{slug}.jpg"
+            if cached(dest):
+                continue
+            h = POST_HEIGHTS[(i - 1) % len(POST_HEIGHTS)]
+            if not fetch(f"https://picsum.photos/seed/{slug}/1080/{h}", dest):
+                fallback_post(slug, dest)
 
 
 def gen_stories() -> None:
-    for i in range(1, 7):
-        a, b = PALETTES[(i + 2) % len(PALETTES)]
-        base = two_stop(1280, a, b).resize((720, 1280))
-        overlay = Image.new("RGBA", (720, 1280), (0, 0, 0, 0))
-        d = ImageDraw.Draw(overlay)
-        for k in range(3):
-            r = 200 - k * 60
-            cx, cy = 360 + k * 30, 520 - k * 40
-            d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=(255, 255, 255, 140), width=26)
-        font = ImageFont.truetype(str(FONT), 110)
-        d.text((360, 900), ("sunset", "vibes", "code", "coffee", "travel", "mood")[i - 1], font=font, fill=(255, 255, 255, 230), anchor="mm")
-        out = base.convert("RGBA")
-        out.alpha_composite(overlay)
-        out.convert("RGB").save(ROOT / "stories" / f"s{i}.jpg", quality=85)
+    for name in USERS:
+        dest = ROOT / "stories" / f"story-{name}-1.jpg"
+        if cached(dest):
+            continue
+        if not fetch(f"https://picsum.photos/seed/story-{name}-1/1080/1920", dest):
+            fallback_story(name, dest)
 
 
 def gen_reels() -> None:
-    colors = [
-        ("0xDD2A7B", "0xFE8A3C"),
-        ("0x515BD4", "0xDD2A7B"),
-        ("0x0F8B99", "0x515BD4"),
-    ]
-    words = ("demo reel", "vibe check", "code & coffee")
-    for i, ((c0, c1), word) in enumerate(zip(colors, words, strict=True), start=1):
-        out = ROOT / "reels" / f"r{i}.mp4"
+    frames_dir = ROOT / "reels" / "frames"
+    frames_dir.mkdir(parents=True, exist_ok=True)
+    for n in range(1, REEL_COUNT + 1):
+        out = ROOT / "reels" / f"r{n}.mp4"
+        if cached(out):
+            continue
+        for f in range(1, REEL_FRAMES + 1):
+            dest = frames_dir / f"r{n}_f{f}.jpg"
+            if cached(dest):
+                continue
+            if not fetch(f"https://picsum.photos/seed/reel-{n}-{f}/720/1280", dest):
+                fallback_frame(n, f, dest)
+        # 5 frames @ 5/6 fps = ~6s clip, 30fps output, H.264 yuv420p (was lavfi
+        # gradients before; same invocation style — subprocess + check=True).
         subprocess.run(
             [
                 "ffmpeg", "-y",
-                "-f", "lavfi", "-i", f"gradients=s=720x1280:d=6:c0={c0}:c1={c1}:speed=0.08",
-                "-vf", f"drawtext=fontfile={FONT}:text='{word}':fontcolor=white@0.9:fontsize=110:x=(w-text_w)/2:y=(h-text_h)/2",
-                "-r", "30", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-an",
+                "-framerate", "5/6", "-i", str(frames_dir / f"r{n}_f%d.jpg"),
+                "-vf", "scale=720:1280:flags=bicubic,format=yuv420p",
+                "-r", "30", "-c:v", "libx264", "-an",
                 str(out),
             ],
             check=True,
@@ -234,6 +337,8 @@ def main() -> None:
     print(f"generated {len(files)} files")
     for f in files:
         print(f"  {f}")
+    if fallbacks_used:
+        print(f"PIL fallback used for {len(fallbacks_used)} file(s)")
 
 
 if __name__ == "__main__":
