@@ -685,16 +685,20 @@ async function seed({ avatarUrls, postUrls, storyUrls, reelUrls }) {
   );
   console.log('Sample post media URL:', postUrls[POST_COUNT]);
 
-  // Net-zero count fix for --me's real doc (re-runs don't inflate).
+  // --me's counts are SET from the actual edge docs (authoritative), not
+  // incremented — increment bookkeeping drifts across resets/re-runs.
   if (me) {
-    const existing = await countSeedEdgesUnderMe();
+    const [fDocs, gDocs] = await Promise.all([
+      db.collection('users').doc(me).collection('followers').get(),
+      db.collection('users').doc(me).collection('following').get(),
+    ]);
     await db
       .collection('users')
       .doc(me)
       .set(
         {
-          followerCount: FieldValue.increment(NAMES.length - existing.followers),
-          followingCount: FieldValue.increment(ME_FOLLOWS.length - existing.following),
+          followerCount: fDocs.size,
+          followingCount: gDocs.size,
         },
         { merge: true },
       );
