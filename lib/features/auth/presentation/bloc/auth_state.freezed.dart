@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AuthState {
 
- AuthStatus get status; AppUser? get user; bool get submitting; String? get error;
+ AuthStatus get status; AppUser? get user; bool get submitting; bool get resetSent; String? get error;
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $AuthStateCopyWith<AuthState> get copyWith => _$AuthStateCopyWithImpl<AuthState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthState&&(identical(other.status, status) || other.status == status)&&(identical(other.user, user) || other.user == user)&&(identical(other.submitting, submitting) || other.submitting == submitting)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthState&&(identical(other.status, status) || other.status == status)&&(identical(other.user, user) || other.user == user)&&(identical(other.submitting, submitting) || other.submitting == submitting)&&(identical(other.resetSent, resetSent) || other.resetSent == resetSent)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,user,submitting,error);
+int get hashCode => Object.hash(runtimeType,status,user,submitting,resetSent,error);
 
 @override
 String toString() {
-  return 'AuthState(status: $status, user: $user, submitting: $submitting, error: $error)';
+  return 'AuthState(status: $status, user: $user, submitting: $submitting, resetSent: $resetSent, error: $error)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $AuthStateCopyWith<$Res>  {
   factory $AuthStateCopyWith(AuthState value, $Res Function(AuthState) _then) = _$AuthStateCopyWithImpl;
 @useResult
 $Res call({
- AuthStatus status, AppUser? user, bool submitting, String? error
+ AuthStatus status, AppUser? user, bool submitting, bool resetSent, String? error
 });
 
 
@@ -62,11 +62,12 @@ class _$AuthStateCopyWithImpl<$Res>
 
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? user = freezed,Object? submitting = null,Object? error = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? user = freezed,Object? submitting = null,Object? resetSent = null,Object? error = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as AuthStatus,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
 as AppUser?,submitting: null == submitting ? _self.submitting : submitting // ignore: cast_nullable_to_non_nullable
+as bool,resetSent: null == resetSent ? _self.resetSent : resetSent // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
@@ -162,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AuthStatus status,  AppUser? user,  bool submitting,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AuthStatus status,  AppUser? user,  bool submitting,  bool resetSent,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AuthState() when $default != null:
-return $default(_that.status,_that.user,_that.submitting,_that.error);case _:
+return $default(_that.status,_that.user,_that.submitting,_that.resetSent,_that.error);case _:
   return orElse();
 
 }
@@ -183,10 +184,10 @@ return $default(_that.status,_that.user,_that.submitting,_that.error);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AuthStatus status,  AppUser? user,  bool submitting,  String? error)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AuthStatus status,  AppUser? user,  bool submitting,  bool resetSent,  String? error)  $default,) {final _that = this;
 switch (_that) {
 case _AuthState():
-return $default(_that.status,_that.user,_that.submitting,_that.error);}
+return $default(_that.status,_that.user,_that.submitting,_that.resetSent,_that.error);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -200,10 +201,10 @@ return $default(_that.status,_that.user,_that.submitting,_that.error);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AuthStatus status,  AppUser? user,  bool submitting,  String? error)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AuthStatus status,  AppUser? user,  bool submitting,  bool resetSent,  String? error)?  $default,) {final _that = this;
 switch (_that) {
 case _AuthState() when $default != null:
-return $default(_that.status,_that.user,_that.submitting,_that.error);case _:
+return $default(_that.status,_that.user,_that.submitting,_that.resetSent,_that.error);case _:
   return null;
 
 }
@@ -215,12 +216,13 @@ return $default(_that.status,_that.user,_that.submitting,_that.error);case _:
 
 
 class _AuthState implements AuthState {
-  const _AuthState({this.status = AuthStatus.loading, this.user, this.submitting = false, this.error});
+  const _AuthState({this.status = AuthStatus.loading, this.user, this.submitting = false, this.resetSent = false, this.error});
   
 
 @override@JsonKey() final  AuthStatus status;
 @override final  AppUser? user;
 @override@JsonKey() final  bool submitting;
+@override@JsonKey() final  bool resetSent;
 @override final  String? error;
 
 /// Create a copy of AuthState
@@ -233,16 +235,16 @@ _$AuthStateCopyWith<_AuthState> get copyWith => __$AuthStateCopyWithImpl<_AuthSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthState&&(identical(other.status, status) || other.status == status)&&(identical(other.user, user) || other.user == user)&&(identical(other.submitting, submitting) || other.submitting == submitting)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthState&&(identical(other.status, status) || other.status == status)&&(identical(other.user, user) || other.user == user)&&(identical(other.submitting, submitting) || other.submitting == submitting)&&(identical(other.resetSent, resetSent) || other.resetSent == resetSent)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,user,submitting,error);
+int get hashCode => Object.hash(runtimeType,status,user,submitting,resetSent,error);
 
 @override
 String toString() {
-  return 'AuthState(status: $status, user: $user, submitting: $submitting, error: $error)';
+  return 'AuthState(status: $status, user: $user, submitting: $submitting, resetSent: $resetSent, error: $error)';
 }
 
 
@@ -253,7 +255,7 @@ abstract mixin class _$AuthStateCopyWith<$Res> implements $AuthStateCopyWith<$Re
   factory _$AuthStateCopyWith(_AuthState value, $Res Function(_AuthState) _then) = __$AuthStateCopyWithImpl;
 @override @useResult
 $Res call({
- AuthStatus status, AppUser? user, bool submitting, String? error
+ AuthStatus status, AppUser? user, bool submitting, bool resetSent, String? error
 });
 
 
@@ -270,11 +272,12 @@ class __$AuthStateCopyWithImpl<$Res>
 
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? user = freezed,Object? submitting = null,Object? error = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? user = freezed,Object? submitting = null,Object? resetSent = null,Object? error = freezed,}) {
   return _then(_AuthState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as AuthStatus,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
 as AppUser?,submitting: null == submitting ? _self.submitting : submitting // ignore: cast_nullable_to_non_nullable
+as bool,resetSent: null == resetSent ? _self.resetSent : resetSent // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,
   ));

@@ -243,4 +243,43 @@ void main() {
       ),
     ],
   );
+
+  blocTest<AuthCubit, AuthState>(
+    'sendPasswordReset flips resetSent on success',
+    build: () {
+      when(
+        () => repo.authStateChanges,
+      ).thenAnswer((_) => const Stream<AppUser?>.empty());
+      when(
+        () => repo.sendPasswordReset(email: 'a@b.c'),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
+      return AuthCubit(repo);
+    },
+    seed: () => const AuthState(status: AuthStatus.unauthenticated),
+    act: (AuthCubit cubit) => cubit.sendPasswordReset('a@b.c'),
+    expect: () => const <AuthState>[
+      AuthState(status: AuthStatus.unauthenticated, submitting: true),
+      AuthState(status: AuthStatus.unauthenticated, resetSent: true),
+    ],
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'sendPasswordReset surfaces failure message',
+    build: () {
+      when(
+        () => repo.authStateChanges,
+      ).thenAnswer((_) => const Stream<AppUser?>.empty());
+      when(() => repo.sendPasswordReset(email: 'a@b.c')).thenAnswer(
+        (_) async =>
+            const Left<Failure, void>(Failure.serverError(message: 'boom')),
+      );
+      return AuthCubit(repo);
+    },
+    seed: () => const AuthState(status: AuthStatus.unauthenticated),
+    act: (AuthCubit cubit) => cubit.sendPasswordReset('a@b.c'),
+    expect: () => const <AuthState>[
+      AuthState(status: AuthStatus.unauthenticated, submitting: true),
+      AuthState(status: AuthStatus.unauthenticated, error: 'boom'),
+    ],
+  );
 }

@@ -74,5 +74,9 @@
   "postSaveAction": "Enregistrer",
   "profileTabPosts": "Publications",
   "profileTabSaved": "Enregistrées",
-  "savedEmpty": "Enregistre des publications pour les retrouver ici"
+  "savedEmpty": "Enregistre des publications pour les retrouver ici",
+  "authForgotPassword": "Mot de passe oublié ?",
+  "authResetTitle": "Réinitialiser le mot de passe",
+  "authResetSend": "Envoyer le lien",
+  "authResetSent": "Lien envoyé — vérifie ta boîte mail"
 }

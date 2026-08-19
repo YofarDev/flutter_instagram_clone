@@ -182,4 +182,29 @@ void main() {
       ).called(1);
     });
   });
+
+  group('sendPasswordReset', () {
+    test('forwards email and returns Right', () async {
+      when(() => ds.sendPasswordReset(email: 'a@b.c')).thenAnswer((_) async {});
+
+      final Either<Failure, void> result = await repo.sendPasswordReset(
+        email: 'a@b.c',
+      );
+
+      expect(result.isRight(), isTrue);
+      verify(() => ds.sendPasswordReset(email: 'a@b.c')).called(1);
+    });
+
+    test('maps FirebaseAuthException to friendly failure', () async {
+      when(
+        () => ds.sendPasswordReset(email: 'a@b.c'),
+      ).thenThrow(FirebaseAuthException(code: 'invalid-email'));
+
+      final Either<Failure, void> result = await repo.sendPasswordReset(
+        email: 'a@b.c',
+      );
+
+      expect(result.isLeft(), isTrue);
+    });
+  });
 }

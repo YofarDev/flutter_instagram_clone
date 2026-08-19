@@ -104,5 +104,9 @@
   "postSaveAction": "Save",
   "profileTabPosts": "Posts",
   "profileTabSaved": "Saved",
-  "savedEmpty": "Save posts to find them again here"
+  "savedEmpty": "Save posts to find them again here",
+  "authForgotPassword": "Forgot password?",
+  "authResetTitle": "Reset password",
+  "authResetSend": "Send link",
+  "authResetSent": "Link sent — check your inbox"
 }

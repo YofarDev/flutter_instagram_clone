@@ -12,6 +12,7 @@ sealed class AuthState with _$AuthState {
     @Default(AuthStatus.loading) AuthStatus status,
     AppUser? user,
     @Default(false) bool submitting,
+    @Default(false) bool resetSent,
     String? error,
   }) = _AuthState;
 }

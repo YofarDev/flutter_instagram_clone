@@ -27,6 +27,33 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  Future<void> _showResetDialog(BuildContext context, AppLocalizations l10n) {
+    final TextEditingController resetEmail = TextEditingController();
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        title: Text(l10n.authResetTitle),
+        content: AuthTextField(
+          label: l10n.authEmail,
+          controller: resetEmail,
+          keyboardType: TextInputType.emailAddress,
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l10n.menuCancel),
+          ),
+          FilledButton(
+            onPressed: () => context.read<AuthCubit>().sendPasswordReset(
+              resetEmail.text.trim(),
+            ),
+            child: Text(l10n.authResetSend),
+          ),
+        ],
+      ),
+    ).whenComplete(resetEmail.dispose);
+  }
+
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
@@ -36,12 +63,18 @@ class _LoginScreenState extends State<LoginScreen> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: BlocListener<AuthCubit, AuthState>(
-              listenWhen: (AuthState p, AuthState c) => p.error != c.error,
+              listenWhen: (AuthState p, AuthState c) =>
+                  p.error != c.error || p.resetSent != c.resetSent,
               listener: (BuildContext context, AuthState state) {
                 if (state.error != null) {
                   ScaffoldMessenger.of(context)
                     ..hideCurrentSnackBar()
                     ..showSnackBar(SnackBar(content: Text(state.error!)));
+                } else if (state.resetSent) {
+                  Navigator.of(context, rootNavigator: true).pop();
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(SnackBar(content: Text(l10n.authResetSent)));
                 }
               },
               child: BlocBuilder<AuthCubit, AuthState>(
@@ -64,6 +97,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         label: l10n.authPassword,
                         controller: _password,
                         obscure: true,
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () => _showResetDialog(context, l10n),
+                          child: Text(l10n.authForgotPassword),
+                        ),
                       ),
                       const SizedBox(height: 24),
                       FilledButton(

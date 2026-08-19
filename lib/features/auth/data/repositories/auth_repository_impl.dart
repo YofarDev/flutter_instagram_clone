@@ -63,6 +63,17 @@ class AuthRepositoryImpl implements IAuthRepository {
   }
 
   @override
+  Future<Either<Failure, void>> sendPasswordReset({
+    required String email,
+  }) async {
+    try {
+      return Right<Failure, void>(await _ds.sendPasswordReset(email: email));
+    } catch (e) {
+      return Left<Failure, void>(_mapError(e));
+    }
+  }
+
+  @override
   Future<Either<Failure, AppUser?>> findProfile({
     required String uid,
     required String email,

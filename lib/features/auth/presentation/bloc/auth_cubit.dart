@@ -102,6 +102,19 @@ class AuthCubit extends Cubit<AuthState> {
     result.fold((Failure f) => emit(state.copyWith(error: f.message)), (_) {});
   }
 
+  /// Fire-and-forget reset link; success surfaces via `resetSent`.
+  Future<void> sendPasswordReset(String email) async {
+    emit(state.copyWith(submitting: true, error: null, resetSent: false));
+    final Either<Failure, void> either = await _repository.sendPasswordReset(
+      email: email,
+    );
+    if (isClosed) return;
+    either.fold(
+      (Failure f) => emit(state.copyWith(submitting: false, error: f.message)),
+      (_) => emit(state.copyWith(submitting: false, resetSent: true)),
+    );
+  }
+
   Future<void> _runAction(
     Future<Either<Failure, Object?>> Function() action,
   ) async {
