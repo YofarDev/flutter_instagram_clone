@@ -43,6 +43,19 @@ class FeedRepositoryImpl implements IFeedRepository {
   }
 
   @override
+  Future<Either<Failure, Set<String>>> fetchSavedPostIds({
+    required List<String> postIds,
+  }) async {
+    try {
+      return Right<Failure, Set<String>>(
+        await _ds.fetchSavedPostIds(postIds: postIds),
+      );
+    } catch (e) {
+      return Left<Failure, Set<String>>(_mapError(e));
+    }
+  }
+
+  @override
   Future<Either<Failure, Post>> getPostById({required String postId}) async {
     try {
       return Right<Failure, Post>(await _ds.getPostById(postId: postId));
@@ -64,6 +77,20 @@ class FeedRepositoryImpl implements IFeedRepository {
           postImageUrl: post.imageUrl,
           currentlyLiked: currentlyLiked,
         ),
+      );
+    } catch (e) {
+      return Left<Failure, void>(_mapError(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> toggleSave({
+    required Post post,
+    required bool currentlySaved,
+  }) async {
+    try {
+      return Right<Failure, void>(
+        await _ds.toggleSave(postId: post.id, currentlySaved: currentlySaved),
       );
     } catch (e) {
       return Left<Failure, void>(_mapError(e));

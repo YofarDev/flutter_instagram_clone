@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ProfileState {
 
- ProfileStatus get status; UserProfile? get profile; List<Post> get posts; bool get isFollowing; bool get isMe; bool get hasMore; String? get error;
+ ProfileStatus get status; UserProfile? get profile; List<Post> get posts; List<Post> get savedPosts; bool get savedLoading; bool get isFollowing; bool get isMe; bool get hasMore; String? get error;
 /// Create a copy of ProfileState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ProfileStateCopyWith<ProfileState> get copyWith => _$ProfileStateCopyWithImpl<P
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfileState&&(identical(other.status, status) || other.status == status)&&(identical(other.profile, profile) || other.profile == profile)&&const DeepCollectionEquality().equals(other.posts, posts)&&(identical(other.isFollowing, isFollowing) || other.isFollowing == isFollowing)&&(identical(other.isMe, isMe) || other.isMe == isMe)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfileState&&(identical(other.status, status) || other.status == status)&&(identical(other.profile, profile) || other.profile == profile)&&const DeepCollectionEquality().equals(other.posts, posts)&&const DeepCollectionEquality().equals(other.savedPosts, savedPosts)&&(identical(other.savedLoading, savedLoading) || other.savedLoading == savedLoading)&&(identical(other.isFollowing, isFollowing) || other.isFollowing == isFollowing)&&(identical(other.isMe, isMe) || other.isMe == isMe)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,profile,const DeepCollectionEquality().hash(posts),isFollowing,isMe,hasMore,error);
+int get hashCode => Object.hash(runtimeType,status,profile,const DeepCollectionEquality().hash(posts),const DeepCollectionEquality().hash(savedPosts),savedLoading,isFollowing,isMe,hasMore,error);
 
 @override
 String toString() {
-  return 'ProfileState(status: $status, profile: $profile, posts: $posts, isFollowing: $isFollowing, isMe: $isMe, hasMore: $hasMore, error: $error)';
+  return 'ProfileState(status: $status, profile: $profile, posts: $posts, savedPosts: $savedPosts, savedLoading: $savedLoading, isFollowing: $isFollowing, isMe: $isMe, hasMore: $hasMore, error: $error)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ProfileStateCopyWith<$Res>  {
   factory $ProfileStateCopyWith(ProfileState value, $Res Function(ProfileState) _then) = _$ProfileStateCopyWithImpl;
 @useResult
 $Res call({
- ProfileStatus status, UserProfile? profile, List<Post> posts, bool isFollowing, bool isMe, bool hasMore, String? error
+ ProfileStatus status, UserProfile? profile, List<Post> posts, List<Post> savedPosts, bool savedLoading, bool isFollowing, bool isMe, bool hasMore, String? error
 });
 
 
@@ -62,12 +62,14 @@ class _$ProfileStateCopyWithImpl<$Res>
 
 /// Create a copy of ProfileState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? profile = freezed,Object? posts = null,Object? isFollowing = null,Object? isMe = null,Object? hasMore = null,Object? error = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? profile = freezed,Object? posts = null,Object? savedPosts = null,Object? savedLoading = null,Object? isFollowing = null,Object? isMe = null,Object? hasMore = null,Object? error = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as ProfileStatus,profile: freezed == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
 as UserProfile?,posts: null == posts ? _self.posts : posts // ignore: cast_nullable_to_non_nullable
-as List<Post>,isFollowing: null == isFollowing ? _self.isFollowing : isFollowing // ignore: cast_nullable_to_non_nullable
+as List<Post>,savedPosts: null == savedPosts ? _self.savedPosts : savedPosts // ignore: cast_nullable_to_non_nullable
+as List<Post>,savedLoading: null == savedLoading ? _self.savedLoading : savedLoading // ignore: cast_nullable_to_non_nullable
+as bool,isFollowing: null == isFollowing ? _self.isFollowing : isFollowing // ignore: cast_nullable_to_non_nullable
 as bool,isMe: null == isMe ? _self.isMe : isMe // ignore: cast_nullable_to_non_nullable
 as bool,hasMore: null == hasMore ? _self.hasMore : hasMore // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
@@ -165,10 +167,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ProfileStatus status,  UserProfile? profile,  List<Post> posts,  bool isFollowing,  bool isMe,  bool hasMore,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ProfileStatus status,  UserProfile? profile,  List<Post> posts,  List<Post> savedPosts,  bool savedLoading,  bool isFollowing,  bool isMe,  bool hasMore,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProfileState() when $default != null:
-return $default(_that.status,_that.profile,_that.posts,_that.isFollowing,_that.isMe,_that.hasMore,_that.error);case _:
+return $default(_that.status,_that.profile,_that.posts,_that.savedPosts,_that.savedLoading,_that.isFollowing,_that.isMe,_that.hasMore,_that.error);case _:
   return orElse();
 
 }
@@ -186,10 +188,10 @@ return $default(_that.status,_that.profile,_that.posts,_that.isFollowing,_that.i
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ProfileStatus status,  UserProfile? profile,  List<Post> posts,  bool isFollowing,  bool isMe,  bool hasMore,  String? error)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ProfileStatus status,  UserProfile? profile,  List<Post> posts,  List<Post> savedPosts,  bool savedLoading,  bool isFollowing,  bool isMe,  bool hasMore,  String? error)  $default,) {final _that = this;
 switch (_that) {
 case _ProfileState():
-return $default(_that.status,_that.profile,_that.posts,_that.isFollowing,_that.isMe,_that.hasMore,_that.error);}
+return $default(_that.status,_that.profile,_that.posts,_that.savedPosts,_that.savedLoading,_that.isFollowing,_that.isMe,_that.hasMore,_that.error);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -203,10 +205,10 @@ return $default(_that.status,_that.profile,_that.posts,_that.isFollowing,_that.i
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ProfileStatus status,  UserProfile? profile,  List<Post> posts,  bool isFollowing,  bool isMe,  bool hasMore,  String? error)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ProfileStatus status,  UserProfile? profile,  List<Post> posts,  List<Post> savedPosts,  bool savedLoading,  bool isFollowing,  bool isMe,  bool hasMore,  String? error)?  $default,) {final _that = this;
 switch (_that) {
 case _ProfileState() when $default != null:
-return $default(_that.status,_that.profile,_that.posts,_that.isFollowing,_that.isMe,_that.hasMore,_that.error);case _:
+return $default(_that.status,_that.profile,_that.posts,_that.savedPosts,_that.savedLoading,_that.isFollowing,_that.isMe,_that.hasMore,_that.error);case _:
   return null;
 
 }
@@ -218,7 +220,7 @@ return $default(_that.status,_that.profile,_that.posts,_that.isFollowing,_that.i
 
 
 class _ProfileState implements ProfileState {
-  const _ProfileState({this.status = ProfileStatus.loading, this.profile, final  List<Post> posts = const <Post>[], this.isFollowing = false, this.isMe = false, this.hasMore = true, this.error}): _posts = posts;
+  const _ProfileState({this.status = ProfileStatus.loading, this.profile, final  List<Post> posts = const <Post>[], final  List<Post> savedPosts = const <Post>[], this.savedLoading = true, this.isFollowing = false, this.isMe = false, this.hasMore = true, this.error}): _posts = posts,_savedPosts = savedPosts;
   
 
 @override@JsonKey() final  ProfileStatus status;
@@ -230,6 +232,14 @@ class _ProfileState implements ProfileState {
   return EqualUnmodifiableListView(_posts);
 }
 
+ final  List<Post> _savedPosts;
+@override@JsonKey() List<Post> get savedPosts {
+  if (_savedPosts is EqualUnmodifiableListView) return _savedPosts;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_savedPosts);
+}
+
+@override@JsonKey() final  bool savedLoading;
 @override@JsonKey() final  bool isFollowing;
 @override@JsonKey() final  bool isMe;
 @override@JsonKey() final  bool hasMore;
@@ -245,16 +255,16 @@ _$ProfileStateCopyWith<_ProfileState> get copyWith => __$ProfileStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfileState&&(identical(other.status, status) || other.status == status)&&(identical(other.profile, profile) || other.profile == profile)&&const DeepCollectionEquality().equals(other._posts, _posts)&&(identical(other.isFollowing, isFollowing) || other.isFollowing == isFollowing)&&(identical(other.isMe, isMe) || other.isMe == isMe)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfileState&&(identical(other.status, status) || other.status == status)&&(identical(other.profile, profile) || other.profile == profile)&&const DeepCollectionEquality().equals(other._posts, _posts)&&const DeepCollectionEquality().equals(other._savedPosts, _savedPosts)&&(identical(other.savedLoading, savedLoading) || other.savedLoading == savedLoading)&&(identical(other.isFollowing, isFollowing) || other.isFollowing == isFollowing)&&(identical(other.isMe, isMe) || other.isMe == isMe)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,profile,const DeepCollectionEquality().hash(_posts),isFollowing,isMe,hasMore,error);
+int get hashCode => Object.hash(runtimeType,status,profile,const DeepCollectionEquality().hash(_posts),const DeepCollectionEquality().hash(_savedPosts),savedLoading,isFollowing,isMe,hasMore,error);
 
 @override
 String toString() {
-  return 'ProfileState(status: $status, profile: $profile, posts: $posts, isFollowing: $isFollowing, isMe: $isMe, hasMore: $hasMore, error: $error)';
+  return 'ProfileState(status: $status, profile: $profile, posts: $posts, savedPosts: $savedPosts, savedLoading: $savedLoading, isFollowing: $isFollowing, isMe: $isMe, hasMore: $hasMore, error: $error)';
 }
 
 
@@ -265,7 +275,7 @@ abstract mixin class _$ProfileStateCopyWith<$Res> implements $ProfileStateCopyWi
   factory _$ProfileStateCopyWith(_ProfileState value, $Res Function(_ProfileState) _then) = __$ProfileStateCopyWithImpl;
 @override @useResult
 $Res call({
- ProfileStatus status, UserProfile? profile, List<Post> posts, bool isFollowing, bool isMe, bool hasMore, String? error
+ ProfileStatus status, UserProfile? profile, List<Post> posts, List<Post> savedPosts, bool savedLoading, bool isFollowing, bool isMe, bool hasMore, String? error
 });
 
 
@@ -282,12 +292,14 @@ class __$ProfileStateCopyWithImpl<$Res>
 
 /// Create a copy of ProfileState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? profile = freezed,Object? posts = null,Object? isFollowing = null,Object? isMe = null,Object? hasMore = null,Object? error = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? profile = freezed,Object? posts = null,Object? savedPosts = null,Object? savedLoading = null,Object? isFollowing = null,Object? isMe = null,Object? hasMore = null,Object? error = freezed,}) {
   return _then(_ProfileState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as ProfileStatus,profile: freezed == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
 as UserProfile?,posts: null == posts ? _self._posts : posts // ignore: cast_nullable_to_non_nullable
-as List<Post>,isFollowing: null == isFollowing ? _self.isFollowing : isFollowing // ignore: cast_nullable_to_non_nullable
+as List<Post>,savedPosts: null == savedPosts ? _self._savedPosts : savedPosts // ignore: cast_nullable_to_non_nullable
+as List<Post>,savedLoading: null == savedLoading ? _self.savedLoading : savedLoading // ignore: cast_nullable_to_non_nullable
+as bool,isFollowing: null == isFollowing ? _self.isFollowing : isFollowing // ignore: cast_nullable_to_non_nullable
 as bool,isMe: null == isMe ? _self.isMe : isMe // ignore: cast_nullable_to_non_nullable
 as bool,hasMore: null == hasMore ? _self.hasMore : hasMore // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable

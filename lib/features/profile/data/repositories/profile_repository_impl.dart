@@ -36,6 +36,10 @@ class ProfileRepositoryImpl implements IProfileRepository {
   }) => _ds.watchUserPosts(uid: uid, limit: limit);
 
   @override
+  Stream<List<Post>> watchSavedPosts({required String uid}) =>
+      _ds.watchSavedPosts(uid: uid);
+
+  @override
   Future<Either<Failure, void>> toggleFollow({
     required String uid,
     required bool currentlyFollowing,

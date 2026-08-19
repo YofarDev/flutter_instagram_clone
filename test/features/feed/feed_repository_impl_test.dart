@@ -224,4 +224,54 @@ void main() {
       expect(result.isLeft(), true);
     });
   });
+
+  group('saved posts', () {
+    test('toggleSave forwards post id and current state', () async {
+      when(
+        () => ds.toggleSave(
+          postId: any(named: 'postId'),
+          currentlySaved: any(named: 'currentlySaved'),
+        ),
+      ).thenAnswer((_) async {});
+
+      final Either<Failure, void> result = await repo.toggleSave(
+        post: post,
+        currentlySaved: true,
+      );
+
+      expect(result.isRight(), isTrue);
+      verify(() => ds.toggleSave(postId: 'p1', currentlySaved: true)).called(1);
+    });
+
+    test('toggleSave maps datasource throw to Left', () async {
+      when(
+        () => ds.toggleSave(
+          postId: any(named: 'postId'),
+          currentlySaved: any(named: 'currentlySaved'),
+        ),
+      ).thenThrow(Exception('boom'));
+
+      final Either<Failure, void> result = await repo.toggleSave(
+        post: post,
+        currentlySaved: false,
+      );
+
+      expect(result.isLeft(), isTrue);
+    });
+
+    test('fetchSavedPostIds wraps datasource result', () async {
+      when(
+        () => ds.fetchSavedPostIds(postIds: any(named: 'postIds')),
+      ).thenAnswer((_) async => const <String>{'p1'});
+
+      final Either<Failure, Set<String>> result = await repo.fetchSavedPostIds(
+        postIds: const <String>['p1'],
+      );
+
+      expect(result, const Right<Failure, Set<String>>(<String>{'p1'}));
+      verify(
+        () => ds.fetchSavedPostIds(postIds: const <String>['p1']),
+      ).called(1);
+    });
+  });
 }

@@ -129,6 +129,11 @@ class IgIcons {
     ], close: true),
   );
 
+  static final IgIconData bookmarkFilled = IgIconData(
+    bookmark.builder,
+    filled: true,
+  );
+
   /// Plus in square (create).
   static final IgIconData plusSquare = IgIconData(
     (Size s) => _r(s, 3, 3, 18, 18, rr: 5)

@@ -76,25 +76,30 @@ class FeedCubit extends Cubit<FeedState> {
   Future<void> _emitFiltered(int gen) async {
     if (isClosed || gen != _gen) return;
     final List<Post> visible = _visiblePosts;
-    final Either<Failure, Set<String>> either = await _repository
-        .fetchLikedPostIds(postIds: visible.map((Post p) => p.id).toList());
+    final List<String> ids = visible.map((Post p) => p.id).toList();
+    final List<Either<Failure, Set<String>>> results =
+        await Future.wait(<Future<Either<Failure, Set<String>>>>[
+          _repository.fetchLikedPostIds(postIds: ids),
+          _repository.fetchSavedPostIds(postIds: ids),
+        ]);
     if (isClosed || gen != _gen) return;
     _fetchingMore = false;
-    either.fold(
-      (_) => emit(
-        state.copyWith(
-          status: FeedStatus.ready,
-          posts: visible,
-          hasMore: _allPosts!.length >= _limit,
-        ),
-      ), // ponytail: keep stale likedIds on hydration failure
-      (Set<String> ids) => emit(
-        state.copyWith(
-          status: FeedStatus.ready,
-          posts: visible,
-          likedIds: ids,
-          hasMore: _allPosts!.length >= _limit,
-        ),
+    // ponytail: keep stale liked/saved ids on hydration failure
+    final Set<String>? liked = results[0].fold(
+      (Failure _) => null,
+      (Set<String> ids) => ids,
+    );
+    final Set<String>? saved = results[1].fold(
+      (Failure _) => null,
+      (Set<String> ids) => ids,
+    );
+    emit(
+      state.copyWith(
+        status: FeedStatus.ready,
+        posts: visible,
+        likedIds: liked ?? state.likedIds,
+        savedIds: saved ?? state.savedIds,
+        hasMore: _allPosts!.length >= _limit,
       ),
     );
   }
@@ -154,6 +159,34 @@ class FeedCubit extends Cubit<FeedState> {
           likedIds: wasLiked
               ? <String>{...state.likedIds, post.id}
               : (<String>{...state.likedIds}..remove(post.id)),
+        ),
+      ),
+      (_) {},
+    );
+  }
+
+  Future<void> toggleSave(Post post) async {
+    final bool wasSaved = state.savedIds.contains(post.id);
+    // optimistic flip, rollback on failure — same discipline as toggleLike
+    emit(
+      state.copyWith(
+        savedIds: wasSaved
+            ? (<String>{...state.savedIds}..remove(post.id))
+            : <String>{...state.savedIds, post.id},
+      ),
+    );
+    final Either<Failure, void> either = await _repository.toggleSave(
+      post: post,
+      currentlySaved: wasSaved,
+    );
+    if (isClosed) return;
+    either.fold(
+      (Failure f) => emit(
+        state.copyWith(
+          error: f.message,
+          savedIds: wasSaved
+              ? <String>{...state.savedIds, post.id}
+              : (<String>{...state.savedIds}..remove(post.id)),
         ),
       ),
       (_) {},

@@ -55,6 +55,9 @@ void main() {
 
   setUp(() {
     repo = MockIProfileRepository();
+    when(
+      () => repo.watchSavedPosts(uid: any(named: 'uid')),
+    ).thenAnswer((_) => const Stream<List<Post>>.empty());
   });
 
   void stubIdleProfile() {
@@ -70,7 +73,32 @@ void main() {
     when(
       () => repo.watchIsFollowing(uid: any(named: 'uid')),
     ).thenAnswer((_) => const Stream<bool>.empty());
+    when(
+      () => repo.watchSavedPosts(uid: any(named: 'uid')),
+    ).thenAnswer((_) => const Stream<List<Post>>.empty());
   }
+
+  test('own profile hydrates saved posts live', () async {
+    when(
+      () => repo.getProfile(uid: 'u2'),
+    ).thenAnswer((_) async => Right<Failure, UserProfile>(profile));
+    when(
+      () => repo.watchUserPosts(
+        uid: 'u2',
+        limit: any(named: 'limit'),
+      ),
+    ).thenAnswer((_) => const Stream<List<Post>>.empty());
+    when(
+      () => repo.watchSavedPosts(uid: 'u2'),
+    ).thenAnswer((_) => Stream<List<Post>>.value(<Post>[p1]));
+
+    final ProfileCubit cubit = ProfileCubit(repo, uid: 'u2', isMe: true);
+    addTearDown(cubit.close);
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+
+    expect(cubit.state.savedPosts, <Post>[p1]);
+    expect(cubit.state.savedLoading, isFalse);
+  });
 
   blocTest<ProfileCubit, ProfileState>(
     'ctor hydrates posts, following, then profile',

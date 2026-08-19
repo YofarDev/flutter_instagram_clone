@@ -26,6 +26,7 @@ class PostDetailCubit extends Cubit<PostDetailState> {
   final IFeedRepository _repository;
   StreamSubscription<List<Comment>>? _commentsSub;
   bool _toggled = false;
+  bool _savedToggled = false;
 
   Future<void> _fetchPost(String postId) async {
     final Either<Failure, Post> either = await _repository.getPostById(
@@ -65,6 +66,13 @@ class PostDetailCubit extends Cubit<PostDetailState> {
       (_) {}, // ponytail: default unliked on hydration failure
       (Set<String> ids) => emit(state.copyWith(isLiked: ids.contains(postId))),
     );
+    final Either<Failure, Set<String>> savedEither = await _repository
+        .fetchSavedPostIds(postIds: <String>[postId]);
+    if (isClosed || _savedToggled) return;
+    savedEither.fold(
+      (_) {},
+      (Set<String> ids) => emit(state.copyWith(isSaved: ids.contains(postId))),
+    );
   }
 
   void _onComments(List<Comment> comments) =>
@@ -96,6 +104,21 @@ class PostDetailCubit extends Cubit<PostDetailState> {
           ),
         ),
       ),
+      (_) {},
+    );
+  }
+
+  Future<void> toggleSave() async {
+    final bool wasSaved = state.isSaved;
+    _savedToggled = true;
+    emit(state.copyWith(isSaved: !wasSaved));
+    final Either<Failure, void> either = await _repository.toggleSave(
+      post: state.post!,
+      currentlySaved: wasSaved,
+    );
+    if (isClosed) return;
+    either.fold(
+      (Failure f) => emit(state.copyWith(isSaved: wasSaved, error: f.message)),
       (_) {},
     );
   }

@@ -14,6 +14,8 @@ class PostCard extends StatefulWidget {
     required this.post,
     required this.isLiked,
     required this.onLikeTap,
+    this.isSaved = false,
+    this.onSaveTap,
     this.onCommentTap,
     this.onUsernameTap,
     super.key,
@@ -22,6 +24,8 @@ class PostCard extends StatefulWidget {
   final Post post;
   final bool isLiked;
   final VoidCallback onLikeTap;
+  final bool isSaved;
+  final VoidCallback? onSaveTap;
   final VoidCallback? onCommentTap;
   final VoidCallback? onUsernameTap;
 
@@ -113,6 +117,16 @@ class _PostCardState extends State<PostCard> {
               icon: IgIcon(IgIcons.comment, color: onSurface),
               onPressed: widget.onCommentTap,
             ),
+            const Spacer(),
+            if (widget.onSaveTap != null)
+              IconButton(
+                tooltip: l10n.postSaveAction,
+                icon: IgIcon(
+                  widget.isSaved ? IgIcons.bookmarkFilled : IgIcons.bookmark,
+                  color: onSurface,
+                ),
+                onPressed: widget.onSaveTap,
+              ),
           ],
         ),
         Padding(

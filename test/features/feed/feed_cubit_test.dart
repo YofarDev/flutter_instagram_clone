@@ -80,6 +80,9 @@ void main() {
     when(
       () => profileRepo.watchFollowingIds(uid: any(named: 'uid')),
     ).thenAnswer((_) => const Stream<List<String>>.empty());
+    when(
+      () => repo.fetchSavedPostIds(postIds: any(named: 'postIds')),
+    ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
   });
 
   blocTest<FeedCubit, FeedState>(
@@ -267,6 +270,95 @@ void main() {
       verify(() => repo.watchFeed(limit: any(named: 'limit'))).called(1);
     },
     expect: () => const <FeedState>[],
+  );
+
+  blocTest<FeedCubit, FeedState>(
+    'initial load hydrates saved ids alongside liked ids',
+    build: () {
+      when(
+        () => repo.watchFeed(limit: any(named: 'limit')),
+      ).thenAnswer((_) => Stream<List<Post>>.value(<Post>[p1]));
+      when(
+        () => repo.fetchLikedPostIds(postIds: any(named: 'postIds')),
+      ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
+      when(
+        () => repo.fetchSavedPostIds(postIds: any(named: 'postIds')),
+      ).thenAnswer(
+        (_) async => const Right<Failure, Set<String>>(<String>{'p1'}),
+      );
+      return FeedCubit(repo, profileRepo, myUid: 'u1');
+    },
+    expect: () => <FeedState>[
+      FeedState(
+        status: FeedStatus.ready,
+        posts: <Post>[p1],
+        savedIds: const <String>{'p1'},
+        hasMore: false,
+      ),
+    ],
+  );
+
+  blocTest<FeedCubit, FeedState>(
+    'toggleSave optimistic flip on success',
+    build: () {
+      when(
+        () => repo.watchFeed(limit: any(named: 'limit')),
+      ).thenAnswer((_) => const Stream<List<Post>>.empty());
+      when(
+        () => repo.toggleSave(
+          post: any(named: 'post'),
+          currentlySaved: any(named: 'currentlySaved'),
+        ),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
+      return FeedCubit(repo, profileRepo, myUid: 'u1');
+    },
+    seed: () =>
+        FeedState(status: FeedStatus.ready, posts: <Post>[p1], hasMore: true),
+    act: (FeedCubit cubit) => cubit.toggleSave(p1),
+    expect: () => <FeedState>[
+      FeedState(
+        status: FeedStatus.ready,
+        posts: <Post>[p1],
+        savedIds: const <String>{'p1'},
+        hasMore: true,
+      ),
+    ],
+  );
+
+  blocTest<FeedCubit, FeedState>(
+    'toggleSave rolls back on failure',
+    build: () {
+      when(
+        () => repo.watchFeed(limit: any(named: 'limit')),
+      ).thenAnswer((_) => const Stream<List<Post>>.empty());
+      when(
+        () => repo.toggleSave(
+          post: any(named: 'post'),
+          currentlySaved: any(named: 'currentlySaved'),
+        ),
+      ).thenAnswer(
+        (_) async =>
+            const Left<Failure, void>(Failure.serverError(message: 'boom')),
+      );
+      return FeedCubit(repo, profileRepo, myUid: 'u1');
+    },
+    seed: () => FeedState(
+      status: FeedStatus.ready,
+      posts: <Post>[p1],
+      savedIds: const <String>{'p1'},
+      hasMore: true,
+    ),
+    act: (FeedCubit cubit) => cubit.toggleSave(p1),
+    expect: () => <FeedState>[
+      FeedState(status: FeedStatus.ready, posts: <Post>[p1], hasMore: true),
+      FeedState(
+        status: FeedStatus.ready,
+        posts: <Post>[p1],
+        savedIds: const <String>{'p1'},
+        hasMore: true,
+        error: 'boom',
+      ),
+    ],
   );
 
   blocTest<FeedCubit, FeedState>(

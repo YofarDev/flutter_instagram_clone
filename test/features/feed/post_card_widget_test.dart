@@ -63,11 +63,20 @@ void main() {
       () => repo.fetchLikedPostIds(postIds: any(named: 'postIds')),
     ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
     when(
+      () => repo.fetchSavedPostIds(postIds: any(named: 'postIds')),
+    ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
+    when(
       () => repo.toggleLike(
         post: any(named: 'post'),
         currentlyLiked: any(named: 'currentlyLiked'),
       ),
     ).thenAnswer((_) => toggleGate.future);
+    when(
+      () => repo.toggleSave(
+        post: any(named: 'post'),
+        currentlySaved: any(named: 'currentlySaved'),
+      ),
+    ).thenAnswer((_) async => const Right<Failure, void>(null));
   });
 
   Widget subject() {
@@ -85,6 +94,9 @@ void main() {
                   isLiked: state.likedIds.contains('p1'),
                   onLikeTap: () =>
                       context.read<FeedCubit>().toggleLike(_post()),
+                  isSaved: state.savedIds.contains('p1'),
+                  onSaveTap: () =>
+                      context.read<FeedCubit>().toggleSave(_post()),
                 ),
               ),
             ],
@@ -153,6 +165,34 @@ void main() {
     verifyNever(
       () => repo.toggleLike(post: any(named: 'post'), currentlyLiked: true),
     );
+  });
+
+  testWidgets('bookmark tap saves optimistically', (WidgetTester tester) async {
+    await pumpSubject(tester);
+
+    final Finder bookmark = find.descendant(
+      of: find.byType(PostCard),
+      matching: find.byWidgetPredicate(
+        (Widget w) => w is IgIcon && w.data == IgIcons.bookmark,
+      ),
+    );
+    expect(bookmark, findsOneWidget);
+
+    await tester.tap(find.byTooltip('Save'));
+    await tester.pump();
+
+    expect(
+      find.descendant(
+        of: find.byType(PostCard),
+        matching: find.byWidgetPredicate(
+          (Widget w) => w is IgIcon && w.data == IgIcons.bookmarkFilled,
+        ),
+      ),
+      findsOneWidget,
+    );
+    verify(
+      () => repo.toggleSave(post: any(named: 'post'), currentlySaved: false),
+    ).called(1);
   });
 
   testWidgets('renders username, caption and localized counts from post', (

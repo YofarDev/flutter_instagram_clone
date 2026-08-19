@@ -17,11 +17,20 @@ abstract interface class IFeedRepository {
     required List<String> postIds,
   });
 
+  Future<Either<Failure, Set<String>>> fetchSavedPostIds({
+    required List<String> postIds,
+  });
+
   Future<Either<Failure, Post>> getPostById({required String postId});
 
   Future<Either<Failure, void>> toggleLike({
     required Post post,
     required bool currentlyLiked,
+  });
+
+  Future<Either<Failure, void>> toggleSave({
+    required Post post,
+    required bool currentlySaved,
   });
 
   Stream<List<Comment>> watchComments({required String postId});

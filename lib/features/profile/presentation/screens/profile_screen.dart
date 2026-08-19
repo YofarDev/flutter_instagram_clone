@@ -66,6 +66,8 @@ class ProfileScreen extends StatelessWidget {
             p.status != c.status ||
             p.profile != c.profile ||
             p.posts != c.posts ||
+            p.savedPosts != c.savedPosts ||
+            p.savedLoading != c.savedLoading ||
             p.isFollowing != c.isFollowing,
         builder: (BuildContext context, ProfileState state) {
           if (state.status == ProfileStatus.loading) {
@@ -132,153 +134,66 @@ class ProfileScreen extends StatelessWidget {
             ),
             body: profile == null
                 ? const SizedBox.shrink()
-                : SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
+                : (state.isMe
+                      ? DefaultTabController(
+                          length: 2,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              CircleAvatar(
-                                radius: 32,
-                                backgroundImage: profile.avatarUrl != null
-                                    ? NetworkImage(profile.avatarUrl!)
-                                    : null,
-                                child: profile.avatarUrl == null
-                                    ? Text(
-                                        profile.username?.isNotEmpty == true
-                                            ? profile.username![0].toUpperCase()
-                                            : '?',
-                                      )
-                                    : null,
+                              _Header(
+                                profile: profile,
+                                l10n: l10n,
+                                isMe: state.isMe,
+                                isFollowing: state.isFollowing,
                               ),
-                              const SizedBox(width: 24),
+                              TabBar(
+                                tabs: <Widget>[
+                                  Tab(
+                                    icon: IgIcon(
+                                      IgIcons.grid,
+                                      size: 20,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
+                                    ),
+                                  ),
+                                  Tab(
+                                    icon: IgIcon(
+                                      IgIcons.bookmark,
+                                      size: 20,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
+                                    ),
+                                  ),
+                                ],
+                              ),
                               Expanded(
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
+                                child: TabBarView(
                                   children: <Widget>[
-                                    _CountColumn(
-                                      count: profile.postCount,
-                                      label: l10n.profilePosts,
-                                    ),
-                                    InkWell(
-                                      onTap: () => context.push(
-                                        Routes.userFollowersPath(profile.uid),
-                                      ),
-                                      child: _CountColumn(
-                                        count: profile.followerCount,
-                                        label: l10n.profileFollowers,
-                                      ),
-                                    ),
-                                    InkWell(
-                                      onTap: () => context.push(
-                                        Routes.userFollowingPath(profile.uid),
-                                      ),
-                                      child: _CountColumn(
-                                        count: profile.followingCount,
-                                        label: l10n.profileFollowing,
-                                      ),
+                                    _PostsGrid(posts: state.posts),
+                                    _SavedTab(
+                                      posts: state.savedPosts,
+                                      loading: state.savedLoading,
                                     ),
                                   ],
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                profile.username ?? '',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              if (profile.bio?.isNotEmpty == true)
-                                Text(profile.bio!),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: state.isMe
-                                    ? OutlinedButton(
-                                        onPressed: () => context.push(
-                                          Routes.profileEdit,
-                                          extra: AppUser(
-                                            uid: profile.uid,
-                                            email: profile.email,
-                                            username: profile.username,
-                                            bio: profile.bio,
-                                            avatarUrl: profile.avatarUrl,
-                                          ),
-                                        ),
-                                        child: Text(l10n.profileEdit),
-                                      )
-                                    : (state.isFollowing
-                                          ? OutlinedButton(
-                                              onPressed: () {
-                                                AppHaptics.follow();
-                                                context
-                                                    .read<ProfileCubit>()
-                                                    .toggleFollow();
-                                              },
-                                              child: Text(l10n.profileUnfollow),
-                                            )
-                                          : FilledButton(
-                                              onPressed: () {
-                                                AppHaptics.follow();
-                                                context
-                                                    .read<ProfileCubit>()
-                                                    .toggleFollow();
-                                              },
-                                              child: Text(l10n.profileFollow),
-                                            )),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (state.posts.isNotEmpty)
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 3,
-                                  childAspectRatio: 1,
-                                  mainAxisSpacing: 2,
-                                  crossAxisSpacing: 2,
-                                ),
-                            itemCount: state.posts.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              final Post post = state.posts[index];
-                              return InkWell(
-                                onTap: () => context.push(
-                                  Routes.postDetailPath(post.id),
-                                  extra: post,
-                                ),
-                                child: Image.network(
-                                  post.imageUrl,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, _, _) =>
-                                      Container(color: Colors.grey),
-                                ),
-                              );
-                            },
-                          ),
-                      ],
-                    ),
-                  ),
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            _Header(
+                              profile: profile,
+                              l10n: l10n,
+                              isMe: state.isMe,
+                              isFollowing: state.isFollowing,
+                            ),
+                            Expanded(child: _PostsGrid(posts: state.posts)),
+                          ],
+                        )),
           );
         },
       ),
@@ -301,5 +216,188 @@ class _CountColumn extends StatelessWidget {
         Text(label),
       ],
     );
+  }
+}
+
+/// Avatar + stats row, name/bio, and the edit/follow button row.
+class _Header extends StatelessWidget {
+  const _Header({
+    required this.profile,
+    required this.l10n,
+    required this.isMe,
+    required this.isFollowing,
+  });
+
+  final UserProfile profile;
+  final AppLocalizations l10n;
+  final bool isMe;
+  final bool isFollowing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: <Widget>[
+              CircleAvatar(
+                radius: 32,
+                backgroundImage: profile.avatarUrl != null
+                    ? NetworkImage(profile.avatarUrl!)
+                    : null,
+                child: profile.avatarUrl == null
+                    ? Text(
+                        profile.username?.isNotEmpty == true
+                            ? profile.username![0].toUpperCase()
+                            : '?',
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 24),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    _CountColumn(
+                      count: profile.postCount,
+                      label: l10n.profilePosts,
+                    ),
+                    InkWell(
+                      onTap: () =>
+                          context.push(Routes.userFollowersPath(profile.uid)),
+                      child: _CountColumn(
+                        count: profile.followerCount,
+                        label: l10n.profileFollowers,
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () =>
+                          context.push(Routes.userFollowingPath(profile.uid)),
+                      child: _CountColumn(
+                        count: profile.followingCount,
+                        label: l10n.profileFollowing,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                profile.username ?? '',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              if (profile.bio?.isNotEmpty == true) Text(profile.bio!),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: isMe
+                    ? OutlinedButton(
+                        onPressed: () => context.push(
+                          Routes.profileEdit,
+                          extra: AppUser(
+                            uid: profile.uid,
+                            email: profile.email,
+                            username: profile.username,
+                            bio: profile.bio,
+                            avatarUrl: profile.avatarUrl,
+                          ),
+                        ),
+                        child: Text(l10n.profileEdit),
+                      )
+                    : (isFollowing
+                          ? OutlinedButton(
+                              onPressed: () {
+                                AppHaptics.follow();
+                                context.read<ProfileCubit>().toggleFollow();
+                              },
+                              child: Text(l10n.profileUnfollow),
+                            )
+                          : FilledButton(
+                              onPressed: () {
+                                AppHaptics.follow();
+                                context.read<ProfileCubit>().toggleFollow();
+                              },
+                              child: Text(l10n.profileFollow),
+                            )),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PostsGrid extends StatelessWidget {
+  const _PostsGrid({required this.posts});
+
+  final List<Post> posts;
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        childAspectRatio: 1,
+        mainAxisSpacing: 2,
+        crossAxisSpacing: 2,
+      ),
+      itemCount: posts.length,
+      itemBuilder: (BuildContext context, int index) {
+        final Post post = posts[index];
+        return InkWell(
+          onTap: () =>
+              context.push(Routes.postDetailPath(post.id), extra: post),
+          child: Image.network(
+            post.imageUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => Container(color: Colors.grey),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SavedTab extends StatelessWidget {
+  const _SavedTab({required this.posts, required this.loading});
+
+  final List<Post> posts;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    if (loading) {
+      return Shimmer(
+        child: GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            mainAxisSpacing: 2,
+            crossAxisSpacing: 2,
+          ),
+          itemCount: 9,
+          itemBuilder: (_, _) => const SkeletonGridTile(),
+        ),
+      );
+    }
+    if (posts.isEmpty) {
+      return Center(child: Text(l10n.savedEmpty));
+    }
+    return _PostsGrid(posts: posts);
   }
 }

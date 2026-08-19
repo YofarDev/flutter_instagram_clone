@@ -81,6 +81,9 @@ void main() {
       () => repo.fetchLikedPostIds(postIds: any(named: 'postIds')),
     ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
     when(
+      () => repo.fetchSavedPostIds(postIds: any(named: 'postIds')),
+    ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
+    when(
       () => repo.toggleLike(
         post: any(named: 'post'),
         currentlyLiked: any(named: 'currentlyLiked'),

@@ -73,6 +73,7 @@ class FeedScreen extends StatelessWidget {
                     p.status != c.status ||
                     p.posts != c.posts ||
                     p.likedIds != c.likedIds ||
+                    p.savedIds != c.savedIds ||
                     p.hasMore != c.hasMore,
                 builder: (BuildContext context, FeedState state) {
                   if (state.status == FeedStatus.loading) {
@@ -124,6 +125,9 @@ class FeedScreen extends StatelessWidget {
                               isLiked: state.likedIds.contains(post.id),
                               onLikeTap: () =>
                                   context.read<FeedCubit>().toggleLike(post),
+                              isSaved: state.savedIds.contains(post.id),
+                              onSaveTap: () =>
+                                  context.read<FeedCubit>().toggleSave(post),
                               onCommentTap: () => context.push(
                                 Routes.postDetailPath(post.id),
                                 extra: post,

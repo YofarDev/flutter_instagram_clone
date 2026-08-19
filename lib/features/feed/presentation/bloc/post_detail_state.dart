@@ -13,6 +13,7 @@ sealed class PostDetailState with _$PostDetailState {
     Post? post,
     @Default(PostDetailStatus.loading) PostDetailStatus status,
     @Default(false) bool isLiked,
+    @Default(false) bool isSaved,
     @Default(<Comment>[]) List<Comment> comments,
     @Default(false) bool sending,
     String? error,

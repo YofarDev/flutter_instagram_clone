@@ -72,6 +72,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       isLiked: state.isLiked,
                       onLikeTap: () =>
                           context.read<PostDetailCubit>().toggleLike(),
+                      isSaved: state.isSaved,
+                      onSaveTap: () =>
+                          context.read<PostDetailCubit>().toggleSave(),
                       onUsernameTap: () =>
                           context.push(Routes.userPath(post.authorId)),
                     ),

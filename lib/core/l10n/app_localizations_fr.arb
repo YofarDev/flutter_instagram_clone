@@ -70,5 +70,9 @@
   "postLikes": "{count, plural, =1{{count} J'aime} other{{count} J'aime}}",
   "postComments": "{count, plural, =1{{count} commentaire} other{{count} commentaires}}",
   "feedDiscoverCta": "Découvrir des personnes",
-  "menuCancel": "Annuler"
+  "menuCancel": "Annuler",
+  "postSaveAction": "Enregistrer",
+  "profileTabPosts": "Publications",
+  "profileTabSaved": "Enregistrées",
+  "savedEmpty": "Enregistre des publications pour les retrouver ici"
 }

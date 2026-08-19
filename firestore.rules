@@ -79,6 +79,13 @@ service cloud.firestore {
       }
     }
 
+    match /savedPosts/{id} {
+      // doc id is {uid}_{postId}; owner-only reads and writes
+      allow read, create, delete: if signedIn() &&
+          resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
     match /notifications/{id} {
       allow read: if signedIn() && resource.data.ownerUid == request.auth.uid;
       // ponytail: still client-writable, but no impersonation (actorId must be

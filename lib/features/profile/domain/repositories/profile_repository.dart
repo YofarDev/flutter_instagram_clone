@@ -24,4 +24,7 @@ abstract interface class IProfileRepository {
   Future<Either<Failure, List<AppUser>>> fetchFollowing({required String uid});
 
   Stream<List<Post>> watchUserPosts({required String uid, required int limit});
+
+  /// Live stream of posts this user saved (own profile only, rules-enforced).
+  Stream<List<Post>> watchSavedPosts({required String uid});
 }

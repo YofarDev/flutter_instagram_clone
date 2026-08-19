@@ -63,6 +63,9 @@ void main() {
       () => repo.watchIsFollowing(uid: any(named: 'uid')),
     ).thenAnswer((_) => Stream<bool>.value(false));
     when(
+      () => repo.watchSavedPosts(uid: any(named: 'uid')),
+    ).thenAnswer((_) => const Stream<List<Post>>.empty());
+    when(
       () => repo.toggleFollow(
         uid: any(named: 'uid'),
         currentlyFollowing: any(named: 'currentlyFollowing'),

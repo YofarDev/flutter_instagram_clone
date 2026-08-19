@@ -100,5 +100,9 @@
   "postLikes": "{count, plural, =1{1 like} other{{count} likes}}",
   "postComments": "{count, plural, =1{1 comment} other{{count} comments}}",
   "feedDiscoverCta": "Discover people",
-  "menuCancel": "Cancel"
+  "menuCancel": "Cancel",
+  "postSaveAction": "Save",
+  "profileTabPosts": "Posts",
+  "profileTabSaved": "Saved",
+  "savedEmpty": "Save posts to find them again here"
 }
