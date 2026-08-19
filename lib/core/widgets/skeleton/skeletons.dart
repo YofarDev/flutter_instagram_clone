@@ -109,3 +109,33 @@ class SkeletonGridTile extends StatelessWidget {
     );
   }
 }
+
+/// List-row placeholder (avatar + two lines): activity feed, DM list.
+class SkeletonListRow extends StatelessWidget {
+  const SkeletonListRow({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          children: <Widget>[
+            const SkeletonCircle(radius: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const <Widget>[
+                  SkeletonBox(height: 12),
+                  SizedBox(height: 8),
+                  SkeletonBox(width: 180, height: 10),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

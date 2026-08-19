@@ -34,6 +34,8 @@ class FeedCubit extends Cubit<FeedState> {
   List<Post>? _allPosts;
   int _limit = _pageSize;
   int _gen = 0;
+  bool _fetchingMore = false;
+  Completer<void>? _refreshCompleter;
 
   // ponytail: client-side follow filter; Firestore 'in' caps at 10 —
   // server-side whereIn when the graph outgrows it
@@ -53,6 +55,7 @@ class FeedCubit extends Cubit<FeedState> {
           onError: (Object e) {
             if (isClosed) return;
             emit(state.copyWith(error: 'Failed to load feed'));
+            _completeRefresh();
           },
         );
   }
@@ -61,6 +64,13 @@ class FeedCubit extends Cubit<FeedState> {
     if (isClosed || gen != _gen) return;
     _allPosts = posts;
     await _emitFiltered(gen);
+    _completeRefresh();
+  }
+
+  void _completeRefresh() {
+    if (!(_refreshCompleter?.isCompleted ?? true)) {
+      _refreshCompleter!.complete();
+    }
   }
 
   Future<void> _emitFiltered(int gen) async {
@@ -69,6 +79,7 @@ class FeedCubit extends Cubit<FeedState> {
     final Either<Failure, Set<String>> either = await _repository
         .fetchLikedPostIds(postIds: visible.map((Post p) => p.id).toList());
     if (isClosed || gen != _gen) return;
+    _fetchingMore = false;
     either.fold(
       (_) => emit(
         state.copyWith(
@@ -89,9 +100,22 @@ class FeedCubit extends Cubit<FeedState> {
   }
 
   void loadMore() {
-    if (!state.hasMore) return;
+    if (!state.hasMore || _fetchingMore) return;
+    _fetchingMore = true;
     _limit += _pageSize;
     _subscribe();
+  }
+
+  /// Pull-to-refresh: reset to the first page and complete once the
+  /// re-subscribed stream has emitted (or failed).
+  Future<void> refresh() {
+    if (!(_refreshCompleter?.isCompleted ?? true)) {
+      return _refreshCompleter!.future;
+    }
+    _refreshCompleter = Completer<void>();
+    _limit = _pageSize;
+    _subscribe();
+    return _refreshCompleter!.future;
   }
 
   Future<void> toggleLike(Post post) async {

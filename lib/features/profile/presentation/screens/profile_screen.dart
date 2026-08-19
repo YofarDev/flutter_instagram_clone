@@ -6,8 +6,12 @@ import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/models/app_user.dart';
 import '../../../../core/models/post.dart';
 import '../../../../core/router/route_constants.dart';
+import '../../../../core/theme/ig_colors.dart';
+import '../../../../core/utils/haptics.dart';
 import '../../../../core/widgets/ig_icon.dart';
 import '../../../../core/widgets/ig_icons.dart';
+import '../../../../core/widgets/skeleton/shimmer.dart';
+import '../../../../core/widgets/skeleton/skeletons.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../domain/models/user_profile.dart';
 import '../bloc/profile_cubit.dart';
@@ -15,6 +19,34 @@ import '../bloc/profile_state.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
+
+  void _showMoreMenu(BuildContext context, AppLocalizations l10n) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (BuildContext sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: Text(l10n.navLogout),
+              textColor: IgColors.alertRed,
+              iconColor: IgColors.alertRed,
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                context.read<AuthCubit>().signOut();
+              },
+            ),
+            ListTile(
+              title: Text(l10n.menuCancel),
+              onTap: () => Navigator.of(sheetContext).pop(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +69,47 @@ class ProfileScreen extends StatelessWidget {
             p.isFollowing != c.isFollowing,
         builder: (BuildContext context, ProfileState state) {
           if (state.status == ProfileStatus.loading) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
+            return Scaffold(
+              body: Shimmer(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: <Widget>[
+                            const SkeletonCircle(radius: 32),
+                            const SizedBox(width: 24),
+                            Expanded(
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: List<SkeletonBox>.generate(
+                                  3,
+                                  (_) =>
+                                      const SkeletonBox(width: 48, height: 36),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              mainAxisSpacing: 2,
+                              crossAxisSpacing: 2,
+                            ),
+                        itemCount: 9,
+                        itemBuilder: (_, _) => const SkeletonGridTile(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             );
           }
           final UserProfile? profile = state.profile;
@@ -46,7 +117,8 @@ class ProfileScreen extends StatelessWidget {
             appBar: AppBar(
               title: Text(profile?.username ?? ''),
               actions: <Widget>[
-                // Own profile only — placeholder until the P4 more-menu sheet.
+                // Own profile only. Full P4 menu (Saved, Settings) lands with
+                // the phase-4 surfaces; for now it holds Log out.
                 if (state.isMe)
                   IconButton(
                     tooltip: l10n.navLogout,
@@ -54,7 +126,7 @@ class ProfileScreen extends StatelessWidget {
                       IgIcons.moreDots,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
-                    onPressed: () => context.read<AuthCubit>().signOut(),
+                    onPressed: () => _showMoreMenu(context, l10n),
                   ),
               ],
             ),
@@ -155,15 +227,21 @@ class ProfileScreen extends StatelessWidget {
                                       )
                                     : (state.isFollowing
                                           ? OutlinedButton(
-                                              onPressed: () => context
-                                                  .read<ProfileCubit>()
-                                                  .toggleFollow(),
+                                              onPressed: () {
+                                                AppHaptics.follow();
+                                                context
+                                                    .read<ProfileCubit>()
+                                                    .toggleFollow();
+                                              },
                                               child: Text(l10n.profileUnfollow),
                                             )
                                           : FilledButton(
-                                              onPressed: () => context
-                                                  .read<ProfileCubit>()
-                                                  .toggleFollow(),
+                                              onPressed: () {
+                                                AppHaptics.follow();
+                                                context
+                                                    .read<ProfileCubit>()
+                                                    .toggleFollow();
+                                              },
                                               child: Text(l10n.profileFollow),
                                             )),
                               ),

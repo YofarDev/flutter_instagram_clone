@@ -7,6 +7,7 @@ import '../../../../core/router/route_constants.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../../../core/models/post.dart';
 import '../../../../core/widgets/ig_icon.dart';
+import '../../../../core/widgets/skeleton/skeletons.dart';
 import '../../../../core/widgets/ig_icons.dart';
 import '../../../../core/widgets/wordmark.dart';
 import '../../../notifications/presentation/bloc/notifications_cubit.dart';
@@ -71,10 +72,16 @@ class FeedScreen extends StatelessWidget {
                 buildWhen: (FeedState p, FeedState c) =>
                     p.status != c.status ||
                     p.posts != c.posts ||
-                    p.likedIds != c.likedIds,
+                    p.likedIds != c.likedIds ||
+                    p.hasMore != c.hasMore,
                 builder: (BuildContext context, FeedState state) {
                   if (state.status == FeedStatus.loading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return ListView(
+                      children: const <Widget>[
+                        SkeletonPostCard(),
+                        SkeletonPostCard(),
+                      ],
+                    );
                   }
                   if (state.posts.isEmpty) {
                     return Center(
@@ -88,39 +95,58 @@ class FeedScreen extends StatelessWidget {
                             const SizedBox(height: 8),
                             Text('@$username'),
                           ],
+                          const SizedBox(height: 16),
+                          FilledButton(
+                            onPressed: () => context.go(Routes.search),
+                            child: Text(l10n.feedDiscoverCta),
+                          ),
                         ],
                       ),
                     );
                   }
-                  return ListView.builder(
-                    itemCount: state.posts.length + (state.hasMore ? 1 : 0),
-                    itemBuilder: (BuildContext context, int index) {
-                      if (index < state.posts.length) {
-                        final Post post = state.posts[index];
-                        return PostCard(
-                          post: post,
-                          isLiked: state.likedIds.contains(post.id),
-                          onLikeTap: () =>
-                              context.read<FeedCubit>().toggleLike(post),
-                          onCommentTap: () => context.push(
-                            Routes.postDetailPath(post.id),
-                            extra: post,
-                          ),
-                          onUsernameTap: () =>
-                              context.push(Routes.userPath(post.authorId)),
-                        );
-                      }
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Center(
-                          child: TextButton(
-                            onPressed: () =>
-                                context.read<FeedCubit>().loadMore(),
-                            child: Text(l10n.feedLoadMore),
-                          ),
-                        ),
-                      );
-                    },
+                  return RefreshIndicator(
+                    onRefresh: () => context.read<FeedCubit>().refresh(),
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (ScrollNotification n) {
+                        if (n.metrics.pixels >
+                            n.metrics.maxScrollExtent - 300) {
+                          context.read<FeedCubit>().loadMore();
+                        }
+                        return false;
+                      },
+                      child: ListView.builder(
+                        itemCount: state.posts.length + (state.hasMore ? 1 : 0),
+                        itemBuilder: (BuildContext context, int index) {
+                          if (index < state.posts.length) {
+                            final Post post = state.posts[index];
+                            return PostCard(
+                              post: post,
+                              isLiked: state.likedIds.contains(post.id),
+                              onLikeTap: () =>
+                                  context.read<FeedCubit>().toggleLike(post),
+                              onCommentTap: () => context.push(
+                                Routes.postDetailPath(post.id),
+                                extra: post,
+                              ),
+                              onUsernameTap: () =>
+                                  context.push(Routes.userPath(post.authorId)),
+                            );
+                          }
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            child: Center(
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   );
                 },
               ),

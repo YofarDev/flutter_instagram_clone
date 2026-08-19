@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/models/post.dart';
+import '../../../../core/theme/ig_colors.dart';
+import '../../../../core/utils/haptics.dart';
 import '../../../../core/utils/time_ago.dart';
+import '../../../../core/widgets/heart_burst.dart';
+import '../../../../core/widgets/ig_icon.dart';
+import '../../../../core/widgets/ig_icons.dart';
 
-class PostCard extends StatelessWidget {
+class PostCard extends StatefulWidget {
   const PostCard({
     required this.post,
     required this.isLiked,
@@ -20,12 +26,30 @@ class PostCard extends StatelessWidget {
   final VoidCallback? onUsernameTap;
 
   @override
+  State<PostCard> createState() => _PostCardState();
+}
+
+class _PostCardState extends State<PostCard> {
+  // HeartBurst's own state detaches from this controller on dispose
+  final HeartBurstController _burstController = HeartBurstController();
+
+  void _onDoubleTap() {
+    _burstController.fire();
+    AppHaptics.like();
+    // IG never un-likes on double-tap, only likes
+    if (!widget.isLiked) widget.onLikeTap();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final Color onSurface = Theme.of(context).colorScheme.onSurface;
+    final Post post = widget.post;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         ListTile(
-          onTap: onUsernameTap,
+          onTap: widget.onUsernameTap,
           leading: CircleAvatar(
             backgroundImage: post.authorAvatarUrl != null
                 ? NetworkImage(post.authorAvatarUrl!)
@@ -44,33 +68,50 @@ class PostCard extends StatelessWidget {
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ),
-        AspectRatio(
-          aspectRatio: 1,
-          child: Image.network(
-            post.imageUrl,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => Container(color: Colors.grey),
-            loadingBuilder: (_, Widget child, ImageChunkEvent? progress) =>
-                progress == null
-                ? child
-                : Container(
-                    color: Colors.grey,
-                    child: const Center(child: CircularProgressIndicator()),
-                  ),
+        GestureDetector(
+          onDoubleTap: _onDoubleTap,
+          child: AspectRatio(
+            aspectRatio: 1,
+            child: Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                Image.network(
+                  post.imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => Container(color: Colors.grey),
+                  loadingBuilder:
+                      (_, Widget child, ImageChunkEvent? progress) =>
+                          progress == null
+                          ? child
+                          : Container(
+                              color: Colors.grey,
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                ),
+                HeartBurst(controller: _burstController),
+              ],
+            ),
           ),
         ),
         Row(
           children: <Widget>[
             IconButton(
-              icon: Icon(
-                isLiked ? Icons.favorite : Icons.favorite_border,
-                color: isLiked ? Colors.red : null,
+              tooltip: l10n.postLikes(post.likeCount),
+              icon: IgIcon(
+                widget.isLiked ? IgIcons.heartFilled : IgIcons.heart,
+                color: widget.isLiked ? IgColors.likeRed : onSurface,
               ),
-              onPressed: onLikeTap,
+              onPressed: () {
+                if (!widget.isLiked) AppHaptics.like();
+                widget.onLikeTap();
+              },
             ),
             IconButton(
-              icon: const Icon(Icons.comment_outlined),
-              onPressed: onCommentTap,
+              tooltip: l10n.postComments(post.commentCount),
+              icon: IgIcon(IgIcons.comment, color: onSurface),
+              onPressed: widget.onCommentTap,
             ),
           ],
         ),
@@ -79,9 +120,8 @@ class PostCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              // TODO(l10n): plural units
               Text(
-                '${post.likeCount} likes',
+                l10n.postLikes(post.likeCount),
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 4),
@@ -89,7 +129,7 @@ class PostCard extends StatelessWidget {
                 Text('${post.authorUsername}  ${post.caption}'),
               const SizedBox(height: 4),
               Text(
-                '${post.commentCount} comments',
+                l10n.postComments(post.commentCount),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],

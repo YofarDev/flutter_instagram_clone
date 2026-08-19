@@ -7,6 +7,10 @@ import '../../../../core/models/app_user.dart';
 import '../../../../core/models/post.dart';
 import '../../../../core/router/route_constants.dart';
 import '../../../../core/utils/normalize_tag.dart';
+import '../../../../core/widgets/ig_icon.dart';
+import '../../../../core/widgets/ig_icons.dart';
+import '../../../../core/widgets/skeleton/shimmer.dart';
+import '../../../../core/widgets/skeleton/skeletons.dart';
 import '../bloc/explore_cubit.dart';
 import '../bloc/explore_state.dart';
 import '../bloc/search_cubit.dart';
@@ -44,7 +48,11 @@ class _SearchScreenState extends State<SearchScreen> {
                     controller: _controller,
                     decoration: InputDecoration(
                       hintText: l10n.searchHint,
-                      prefixIcon: const Icon(Icons.search),
+                      prefixIcon: IgIcon(
+                        IgIcons.search,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                       suffixIcon: state.query.isEmpty
                           ? null
                           : IconButton(
@@ -75,6 +83,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     ..showSnackBar(
                       SnackBar(content: Text(state.error ?? l10n.errorGeneric)),
                     );
+                  context.read<SearchCubit>().clearError();
                 },
                 child: BlocBuilder<SearchCubit, SearchState>(
                   buildWhen: (SearchState p, SearchState c) =>
@@ -91,7 +100,11 @@ class _SearchScreenState extends State<SearchScreen> {
                             ScaffoldMessenger.of(context)
                               ..hideCurrentSnackBar()
                               ..showSnackBar(
-                                SnackBar(content: Text(state.error!)),
+                                SnackBar(
+                                  content: Text(
+                                    state.error ?? l10n.errorGeneric,
+                                  ),
+                                ),
                               );
                             context.read<ExploreCubit>().clearError();
                           }
@@ -99,8 +112,19 @@ class _SearchScreenState extends State<SearchScreen> {
                         child: BlocBuilder<ExploreCubit, ExploreState>(
                           builder: (BuildContext context, ExploreState state) {
                             if (state.status == ExploreStatus.loading) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
+                              return Shimmer(
+                                child: GridView.builder(
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 3,
+                                        childAspectRatio: 1,
+                                        mainAxisSpacing: 2,
+                                        crossAxisSpacing: 2,
+                                      ),
+                                  itemCount: 18,
+                                  itemBuilder: (_, _) =>
+                                      const SkeletonGridTile(),
+                                ),
                               );
                             }
                             if (state.posts.isEmpty) {

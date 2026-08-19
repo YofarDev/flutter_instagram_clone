@@ -3,6 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../core/router/route_constants.dart';
+import '../../../../core/theme/ig_colors.dart';
+import '../../../../core/utils/haptics.dart';
+import '../../../../core/widgets/heart_burst.dart';
+import '../../../../core/widgets/ig_icon.dart';
+import '../../../../core/widgets/ig_icons.dart';
 import '../../domain/models/reel.dart';
 
 class ReelItem extends StatefulWidget {
@@ -27,7 +32,14 @@ class ReelItem extends StatefulWidget {
 
 class _ReelItemState extends State<ReelItem> {
   late final VideoPlayerController _controller;
+  final HeartBurstController _burstController = HeartBurstController();
   bool _failed = false;
+
+  void _onDoubleTap() {
+    _burstController.fire();
+    AppHaptics.like();
+    if (!widget.isLiked) widget.onLikeTap();
+  }
 
   @override
   void initState() {
@@ -99,7 +111,7 @@ class _ReelItemState extends State<ReelItem> {
       children: <Widget>[
         GestureDetector(
           onTap: _toggleMute,
-          onDoubleTap: widget.isLiked ? null : widget.onLikeTap,
+          onDoubleTap: _onDoubleTap,
           child: SizedBox.expand(
             child: AspectRatio(
               aspectRatio: _controller.value.aspectRatio,
@@ -107,6 +119,7 @@ class _ReelItemState extends State<ReelItem> {
             ),
           ),
         ),
+        Center(child: HeartBurst(controller: _burstController)),
         Positioned(
           left: 0,
           right: 72,
@@ -148,11 +161,14 @@ class _ReelItemState extends State<ReelItem> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 IconButton(
-                  icon: Icon(
-                    widget.isLiked ? Icons.favorite : Icons.favorite_border,
-                    color: widget.isLiked ? Colors.red : Colors.white,
+                  icon: IgIcon(
+                    widget.isLiked ? IgIcons.heartFilled : IgIcons.heart,
+                    color: widget.isLiked ? IgColors.likeRed : Colors.white,
                   ),
-                  onPressed: widget.onLikeTap,
+                  onPressed: () {
+                    if (!widget.isLiked) AppHaptics.like();
+                    widget.onLikeTap();
+                  },
                 ),
                 Text(
                   '${widget.reel.likeCount}',

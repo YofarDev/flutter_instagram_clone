@@ -1,5 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/ig_colors.dart';
 import '../../domain/models/story_tray.dart';
 
 class StoryTrayAvatar extends StatelessWidget {
@@ -20,17 +23,26 @@ class StoryTrayAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // IG gradient ring on unseen stories, hairline gray once seen
+    final BoxDecoration ring = unviewed
+        ? BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const SweepGradient(
+              colors: IgColors.gradientRing,
+              startAngle: -math.pi / 2,
+              endAngle: 3 * math.pi / 2,
+            ),
+          )
+        : BoxDecoration(
+            shape: BoxShape.circle,
+            color: IgColors.divider(Theme.of(context).brightness),
+          );
     final Widget avatar = Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: unviewed ? Colors.pinkAccent : Colors.grey,
-          width: 2.5,
-        ),
-      ),
-      padding: const EdgeInsets.all(2),
+      decoration: ring,
+      padding: const EdgeInsets.all(2.5),
       child: CircleAvatar(
         radius: 26,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         backgroundImage: tray.avatarUrl != null
             ? NetworkImage(tray.avatarUrl!)
             : null,
