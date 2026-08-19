@@ -81,8 +81,11 @@ service cloud.firestore {
 
     match /notifications/{id} {
       allow read: if signedIn() && resource.data.ownerUid == request.auth.uid;
-      // ponytail: client-writable create is spoofable; server-side writes later
-      allow create: if signedIn();
+      // ponytail: still client-writable, but no impersonation (actorId must be
+      // the caller) and no self-notifications; server-side writes later
+      allow create: if signedIn() &&
+          request.resource.data.actorId == request.auth.uid &&
+          request.resource.data.ownerUid != request.auth.uid;
       allow update, delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
     }
 
