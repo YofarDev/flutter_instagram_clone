@@ -78,5 +78,6 @@
   "authForgotPassword": "Mot de passe oublié ?",
   "authResetTitle": "Réinitialiser le mot de passe",
   "authResetSend": "Envoyer le lien",
-  "authResetSent": "Lien envoyé — vérifie ta boîte mail"
+  "authResetSent": "Lien envoyé — vérifie ta boîte mail",
+  "chatTyping": "en train d'écrire…"
 }

@@ -54,6 +54,28 @@ class ChatRepositoryImpl implements IChatRepository {
     }
   }
 
+  @override
+  Stream<String?> watchTyping({required String conversationId}) =>
+      _ds.watchTyping(conversationId: conversationId);
+
+  @override
+  Future<Either<Failure, void>> setTyping({
+    required String conversationId,
+    required String myUid,
+    required bool typing,
+  }) async {
+    try {
+      return Right<Failure, void>(
+        await _ds.setTyping(
+          conversationId: conversationId,
+          typingUid: typing ? myUid : null,
+        ),
+      );
+    } catch (e) {
+      return Left<Failure, void>(_mapError(e));
+    }
+  }
+
   Failure _mapError(Object e) {
     return Failure.serverError(message: e.toString());
   }

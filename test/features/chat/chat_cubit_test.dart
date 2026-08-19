@@ -46,6 +46,19 @@ void main() {
 
   setUp(() {
     repo = MockIChatRepository();
+    when(
+      () => repo.watchTyping(conversationId: any(named: 'conversationId')),
+    ).thenAnswer((_) => const Stream<String?>.empty());
+    when(
+      () => repo.watchMessages(conversationId: 'c1'),
+    ).thenAnswer((_) => const Stream<List<ChatMessage>>.empty());
+    when(
+      () => repo.setTyping(
+        conversationId: any(named: 'conversationId'),
+        myUid: any(named: 'myUid'),
+        typing: any(named: 'typing'),
+      ),
+    ).thenAnswer((_) async => const Right<Failure, void>(null));
   });
 
   blocTest<ChatCubit, ChatState>(
@@ -124,6 +137,111 @@ void main() {
     expect: () => <ChatState>[
       ChatState(conversation: convo, sending: true),
       ChatState(conversation: convo, sending: false, error: 'boom'),
+    ],
+  );
+
+  blocTest<ChatCubit, ChatState>(
+    'typing: one write on first keystroke, cleared on empty input',
+    build: () => ChatCubit(repo, conversation: convo, myUid: 'me'),
+    act: (ChatCubit cubit) {
+      cubit.onInputChanged('h');
+      cubit.onInputChanged('hi');
+      cubit.onInputChanged('');
+    },
+    verify: (ChatCubit cubit) {
+      verify(
+        () => repo.setTyping(
+          conversationId: 'c1',
+          myUid: 'me',
+          typing: true,
+        ),
+      ).called(1);
+      verify(
+        () => repo.setTyping(
+          conversationId: 'c1',
+          myUid: 'me',
+          typing: false,
+        ),
+      ).called(1);
+    },
+  );
+
+  blocTest<ChatCubit, ChatState>(
+    'typing: idle timeout clears the flag without further input',
+    build: () => ChatCubit(repo, conversation: convo, myUid: 'me'),
+    act: (ChatCubit cubit) async {
+      cubit.onInputChanged('h');
+      await Future<void>.delayed(const Duration(seconds: 5));
+    },
+    verify: (ChatCubit cubit) {
+      verify(
+        () => repo.setTyping(
+          conversationId: 'c1',
+          myUid: 'me',
+          typing: false,
+        ),
+      ).called(1);
+    },
+  );
+
+  blocTest<ChatCubit, ChatState>(
+    'typing: send clears the flag before dispatching the message',
+    build: () {
+      when(
+        () => repo.sendMessage(
+          conversationId: 'c1',
+          myUid: 'me',
+          otherUid: 'u2',
+          text: 'hi',
+        ),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
+      when(
+        () => repo.watchMessages(conversationId: 'c1'),
+      ).thenAnswer((_) => const Stream<List<ChatMessage>>.empty());
+      return ChatCubit(repo, conversation: convo, myUid: 'me');
+    },
+    act: (ChatCubit cubit) {
+      cubit.onInputChanged('hi');
+      cubit.send('hi');
+    },
+    verify: (ChatCubit cubit) {
+      verifyInOrder(<dynamic Function()>[
+        () => repo.setTyping(
+              conversationId: 'c1',
+              myUid: 'me',
+              typing: true,
+            ),
+        () => repo.setTyping(
+              conversationId: 'c1',
+              myUid: 'me',
+              typing: false,
+            ),
+        () => repo.sendMessage(
+              conversationId: 'c1',
+              myUid: 'me',
+              otherUid: 'u2',
+              text: 'hi',
+            ),
+      ]);
+    },
+  );
+
+  blocTest<ChatCubit, ChatState>(
+    'typing: other participant typing flips otherTyping',
+    build: () {
+      when(
+        () => repo.watchTyping(conversationId: 'c1'),
+      ).thenAnswer(
+        (_) => Stream<String?>.fromIterable(const <String?>['u2', null]),
+      );
+      when(
+        () => repo.watchMessages(conversationId: 'c1'),
+      ).thenAnswer((_) => const Stream<List<ChatMessage>>.empty());
+      return ChatCubit(repo, conversation: convo, myUid: 'me');
+    },
+    expect: () => <ChatState>[
+      ChatState(conversation: convo, otherTyping: true),
+      ChatState(conversation: convo),
     ],
   );
 }

@@ -108,5 +108,6 @@
   "authForgotPassword": "Forgot password?",
   "authResetTitle": "Reset password",
   "authResetSend": "Send link",
-  "authResetSent": "Link sent — check your inbox"
+  "authResetSent": "Link sent — check your inbox",
+  "chatTyping": "typing…"
 }

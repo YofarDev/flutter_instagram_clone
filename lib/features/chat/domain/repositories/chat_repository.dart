@@ -17,4 +17,14 @@ abstract interface class IChatRepository {
     required String otherUid,
     required String text,
   });
+
+  /// Live uid of whoever is typing in this conversation (null = nobody).
+  Stream<String?> watchTyping({required String conversationId});
+
+  /// Flags/clears [myUid] as typing.
+  Future<Either<Failure, void>> setTyping({
+    required String conversationId,
+    required String myUid,
+    required bool typing,
+  });
 }

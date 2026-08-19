@@ -35,16 +35,74 @@ class ChatCubit extends Cubit<ChatState> {
             emit(state.copyWith(error: 'Failed to load messages'));
           },
         );
+    _typingSub = _repository
+        .watchTyping(conversationId: conversation.id)
+        .listen((String? typingUid) {
+          if (isClosed) return;
+          // ponytail: field trusted as-is; writer self-clears after 4s
+          emit(
+            state.copyWith(
+              otherTyping: typingUid == conversation.otherUser.uid,
+            ),
+          );
+        }, onError: (Object _) {});
   }
+
+  static const Duration _typingTimeout = Duration(seconds: 4);
 
   final IChatRepository _repository;
   final Conversation _conversation;
   final String _myUid;
   StreamSubscription<List<ChatMessage>>? _sub;
+  StreamSubscription<String?>? _typingSub;
+  Timer? _typingTimer;
+  bool _typingSent = false;
+
+  /// Typing lifecycle: first keystroke flags, idle timeout / send / empty
+  /// input clears. One write per state change, not per keystroke.
+  void onInputChanged(String text) {
+    if (text.trim().isNotEmpty) {
+      _markTyping();
+    } else {
+      _clearTyping();
+    }
+  }
+
+  void _markTyping() {
+    if (_typingSent) {
+      _typingTimer?.cancel();
+    } else {
+      _typingSent = true;
+      _repository
+          .setTyping(
+            conversationId: _conversation.id,
+            myUid: _myUid,
+            typing: true,
+          )
+          .then((_) {}, onError: (Object _) {});
+    }
+    _typingTimer?.cancel();
+    _typingTimer = Timer(_typingTimeout, _clearTyping);
+  }
+
+  void _clearTyping() {
+    _typingTimer?.cancel();
+    _typingTimer = null;
+    if (!_typingSent) return;
+    _typingSent = false;
+    _repository
+        .setTyping(
+          conversationId: _conversation.id,
+          myUid: _myUid,
+          typing: false,
+        )
+        .then((_) {}, onError: (Object _) {});
+  }
 
   Future<void> send(String text) async {
     final String trimmed = text.trim();
     if (trimmed.isEmpty || state.sending) return;
+    _clearTyping();
     emit(state.copyWith(sending: true, error: null));
     final Either<Failure, void> either = await _repository.sendMessage(
       conversationId: _conversation.id,
@@ -64,7 +122,9 @@ class ChatCubit extends Cubit<ChatState> {
 
   @override
   Future<void> close() {
+    _clearTyping();
     _sub?.cancel();
+    _typingSub?.cancel();
     return super.close();
   }
 }

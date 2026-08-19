@@ -11,6 +11,7 @@ sealed class ChatState with _$ChatState {
     required Conversation conversation,
     @Default(<ChatMessage>[]) List<ChatMessage> messages,
     @Default(false) bool sending,
+    @Default(false) bool otherTyping,
     String? error,
   }) = _ChatState;
 }

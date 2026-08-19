@@ -9,6 +9,7 @@ import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../domain/models/chat_message.dart';
 import '../bloc/chat_cubit.dart';
 import '../bloc/chat_state.dart';
+import '../widgets/typing_dots.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -80,7 +81,9 @@ class _ChatScreenState extends State<ChatScreen> {
         },
         child: BlocBuilder<ChatCubit, ChatState>(
           buildWhen: (ChatState p, ChatState c) =>
-              p.messages != c.messages || p.sending != c.sending,
+              p.messages != c.messages ||
+              p.sending != c.sending ||
+              p.otherTyping != c.otherTyping,
           builder: (BuildContext context, ChatState state) {
             return Column(
               children: <Widget>[
@@ -138,25 +141,42 @@ class _ChatScreenState extends State<ChatScreen> {
                 SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
-                    child: Row(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Expanded(
-                          child: TextField(
-                            controller: _controller,
-                            decoration: InputDecoration(
-                              hintText: l10n.dmHint,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                              filled: true,
+                        if (state.otherTyping)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 12, bottom: 2),
+                            child: Semantics(
+                              label: l10n.chatTyping,
+                              child: const TypingDots(),
                             ),
-                            onSubmitted: (_) => _send(),
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.send),
-                          tooltip: l10n.dmSend,
-                          onPressed: _send,
+                        Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: TextField(
+                                controller: _controller,
+                                decoration: InputDecoration(
+                                  hintText: l10n.dmHint,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(24),
+                                  ),
+                                  filled: true,
+                                ),
+                                onChanged: (String text) => context
+                                    .read<ChatCubit>()
+                                    .onInputChanged(text),
+                                onSubmitted: (_) => _send(),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.send),
+                              tooltip: l10n.dmSend,
+                              onPressed: _send,
+                            ),
+                          ],
                         ),
                       ],
                     ),
