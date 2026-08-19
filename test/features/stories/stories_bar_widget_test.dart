@@ -10,6 +10,7 @@ import 'package:flutter_instagram_clone/core/l10n/generated/app_localizations.da
 import 'package:flutter_instagram_clone/core/models/app_user.dart';
 import 'package:flutter_instagram_clone/core/models/failure.dart';
 import 'package:flutter_instagram_clone/core/router/route_constants.dart';
+import 'package:flutter_instagram_clone/core/theme/ig_colors.dart';
 import 'package:flutter_instagram_clone/features/auth/domain/repositories/auth_repository.dart';
 import 'package:flutter_instagram_clone/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:flutter_instagram_clone/features/stories/domain/models/story.dart';
@@ -108,13 +109,13 @@ void main() {
     expect(find.text('alice'), findsOneWidget);
   });
 
-  testWidgets('viewed tray ring is grey, unviewed is pink', (
+  testWidgets('viewed tray ring is flat grey, unviewed is IG gradient', (
     WidgetTester tester,
   ) async {
     when(() => mockStoriesRepo.watchStories()).thenAnswer(
       (_) => Stream<List<Story>>.value(<Story>[aliceT2, mineStory, aliceT3]),
     );
-    // alice's stories already viewed -> grey; mine never viewed -> pink
+    // alice's stories already viewed -> flat grey; mine never viewed -> gradient
     when(
       () =>
           mockStoriesRepo.fetchViewedStoryIds(storyIds: any(named: 'storyIds')),
@@ -125,18 +126,22 @@ void main() {
 
     await pumpBar(tester);
 
-    int ringCount(Color color) => find
+    int ringCount(bool gradient) => find
         .byWidgetPredicate((Widget w) {
           if (w is! Container) return false;
           final Decoration? d = w.decoration;
-          if (d is! BoxDecoration || d.border is! Border) return false;
-          return (d.border as Border).top.color == color;
+          if (d is! BoxDecoration) return false;
+          if (gradient) {
+            return d.gradient is SweepGradient;
+          }
+          return d.gradient == null &&
+              d.color == IgColors.divider(Brightness.light);
         })
         .evaluate()
         .length;
 
-    expect(ringCount(Colors.grey), 1);
-    expect(ringCount(Colors.pinkAccent), 1);
+    expect(ringCount(false), 1);
+    expect(ringCount(true), 1);
   });
 
   testWidgets('empty stories shows single own tray and taps through', (

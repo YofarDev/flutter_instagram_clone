@@ -13,9 +13,13 @@ import 'package:flutter_instagram_clone/core/models/app_user.dart';
 import 'package:flutter_instagram_clone/features/auth/domain/repositories/auth_repository.dart';
 import 'package:flutter_instagram_clone/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:flutter_instagram_clone/core/models/post.dart';
+import 'package:flutter_instagram_clone/core/widgets/ig_icon.dart';
+import 'package:flutter_instagram_clone/core/widgets/ig_icons.dart';
+import 'package:flutter_instagram_clone/core/widgets/skeleton/skeletons.dart';
 import 'package:flutter_instagram_clone/features/feed/domain/repositories/feed_repository.dart';
 import 'package:flutter_instagram_clone/features/feed/presentation/bloc/feed_cubit.dart';
 import 'package:flutter_instagram_clone/features/feed/presentation/screens/feed_screen.dart';
+import 'package:flutter_instagram_clone/features/feed/presentation/widgets/post_card.dart';
 import 'package:flutter_instagram_clone/features/notifications/domain/repositories/notifications_repository.dart';
 import 'package:flutter_instagram_clone/features/notifications/presentation/bloc/notifications_cubit.dart';
 import 'package:flutter_instagram_clone/features/profile/domain/repositories/profile_repository.dart';
@@ -42,6 +46,12 @@ Post _post() => Post(
   caption: 'hello world',
   createdAt: DateTime(2026, 1, 1),
   likeCount: 3,
+);
+
+Finder _heartIcon({required bool filled}) => find.byWidgetPredicate(
+  (Widget w) =>
+      w is IgIcon &&
+      (filled ? w.data == IgIcons.heartFilled : w.data == IgIcons.heart),
 );
 
 void main() {
@@ -125,21 +135,54 @@ void main() {
   ) async {
     await pumpSubject(tester);
 
-    expect(find.byIcon(Icons.favorite_border), findsOneWidget);
-    expect(find.byIcon(Icons.favorite), findsNothing);
+    // scope to the post card — the appbar activity badge also paints a heart
+    final Finder cardHeart = find.descendant(
+      of: find.byType(PostCard),
+      matching: _heartIcon(filled: false),
+    );
+    expect(cardHeart, findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(PostCard),
+        matching: _heartIcon(filled: true),
+      ),
+      findsNothing,
+    );
 
-    await tester.tap(find.byIcon(Icons.favorite_border));
+    await tester.tap(cardHeart);
     await tester.pump();
 
     // toggling changes likedIds (and post likeCount) without touching status
     // or posts.length — the buildWhen path Fix 1 restored
-    expect(find.byIcon(Icons.favorite), findsOneWidget);
-    expect(find.byIcon(Icons.favorite_border), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byType(PostCard),
+        matching: _heartIcon(filled: true),
+      ),
+      findsOneWidget,
+    );
+    expect(cardHeart, findsNothing);
     expect(find.text('4 likes'), findsOneWidget);
 
     verify(
       () => repo.toggleLike(post: any(named: 'post'), currentlyLiked: false),
     ).called(1);
+  });
+
+  testWidgets('cold load renders skeleton post cards', (
+    WidgetTester tester,
+  ) async {
+    when(
+      () => repo.watchFeed(limit: any(named: 'limit')),
+    ).thenAnswer((_) => const Stream<List<Post>>.empty());
+
+    await tester.binding.setSurfaceSize(const Size(400, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(subject());
+    await tester.pump();
+
+    expect(find.byType(SkeletonPostCard), findsNWidgets(2));
+    expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
   testWidgets('appbar shows heart and plane, no logout, no FAB', (
