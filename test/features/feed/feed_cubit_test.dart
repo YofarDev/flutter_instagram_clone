@@ -273,6 +273,43 @@ void main() {
   );
 
   blocTest<FeedCubit, FeedState>(
+    'auto-loadMore when a raw page has zero followed authors',
+    build: () {
+      final List<Post> strangers = List<Post>.generate(
+        10,
+        (int i) => Post(
+          id: 'x$i',
+          authorId: 'u9',
+          authorUsername: 'stranger',
+          imageUrl: 'http://img/x$i',
+          createdAt: DateTime(2026, 1, 1),
+        ),
+      );
+      when(
+        () => repo.fetchLikedPostIds(postIds: any(named: 'postIds')),
+      ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
+      when(
+        () => repo.watchFeed(limit: 10),
+      ).thenAnswer((_) => Stream<List<Post>>.value(strangers));
+      when(
+        () => repo.watchFeed(limit: 20),
+      ).thenAnswer((_) => Stream<List<Post>>.value(<Post>[...strangers, mine]));
+      return FeedCubit(repo, profileRepo, myUid: 'me');
+    },
+    // page one is all strangers -> empty visible feed triggers loadMore
+    // automatically; page two finally contains a visible post
+    expect: () => <FeedState>[
+      FeedState(status: FeedStatus.ready, posts: <Post>[], hasMore: true),
+      FeedState(
+        status: FeedStatus.ready,
+        posts: <Post>[mine],
+        likedIds: const <String>{},
+        hasMore: false,
+      ),
+    ],
+  );
+
+  blocTest<FeedCubit, FeedState>(
     'initial load hydrates saved ids alongside liked ids',
     build: () {
       when(

@@ -35,6 +35,7 @@ class FeedCubit extends Cubit<FeedState> {
   int _limit = _pageSize;
   int _gen = 0;
   bool _fetchingMore = false;
+  int _emptyPages = 0;
   Completer<void>? _refreshCompleter;
 
   // ponytail: client-side follow filter; Firestore 'in' caps at 10 —
@@ -102,6 +103,13 @@ class FeedCubit extends Cubit<FeedState> {
         hasMore: _allPosts!.length >= _limit,
       ),
     );
+    // A raw page can hold zero followed authors (sparse follow graph) — an
+    // empty list can't scroll, so pull the next page automatically.
+    // Capped so a feed with nothing relevant stops after 5 extra pages.
+    if (visible.isEmpty && _allPosts!.length >= _limit && _emptyPages < 5) {
+      _emptyPages++;
+      loadMore();
+    }
   }
 
   void loadMore() {
@@ -119,6 +127,7 @@ class FeedCubit extends Cubit<FeedState> {
     }
     _refreshCompleter = Completer<void>();
     _limit = _pageSize;
+    _emptyPages = 0;
     _subscribe();
     return _refreshCompleter!.future;
   }

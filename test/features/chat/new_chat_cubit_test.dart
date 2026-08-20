@@ -111,9 +111,7 @@ void main() {
     build: () {
       when(
         () => exploreRepo.fetchSuggestedUsers(myUid: 'me', limit: 12),
-      ).thenAnswer(
-        (_) async => Right<Failure, List<AppUser>>(<AppUser>[user]),
-      );
+      ).thenAnswer((_) async => Right<Failure, List<AppUser>>(<AppUser>[user]));
       return NewChatCubit(exploreRepo, chatRepo, myUid: 'me');
     },
     expect: () => <NewChatState>[
