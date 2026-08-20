@@ -65,6 +65,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
               buildWhen: (NewChatState p, NewChatState c) =>
                   p.query != c.query ||
                   p.users != c.users ||
+                  p.suggestions != c.suggestions ||
+                  p.suggestionsLoading != c.suggestionsLoading ||
                   p.searching != c.searching ||
                   p.opening != c.opening,
               builder: (BuildContext context, NewChatState state) {
@@ -72,7 +74,59 @@ class _NewChatScreenState extends State<NewChatScreen> {
                   return const LinearProgressIndicator(minHeight: 2);
                 }
                 if (state.query.trim().isEmpty) {
-                  return const SizedBox.shrink();
+                  if (state.suggestions.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  return Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                          child: Text(
+                            l10n.newDmSuggestions,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: state.suggestions.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              final AppUser user = state.suggestions[index];
+                              final String username = user.username ?? '';
+                              return ListTile(
+                                leading: CircleAvatar(
+                                  backgroundImage: user.avatarUrl != null
+                                      ? NetworkImage(user.avatarUrl!)
+                                      : null,
+                                  child: user.avatarUrl == null
+                                      ? Text(
+                                          username.isNotEmpty
+                                              ? username[0].toUpperCase()
+                                              : '?',
+                                        )
+                                      : null,
+                                ),
+                                title: Text(username),
+                                trailing: state.opening
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : null,
+                                onTap: () => context
+                                    .read<NewChatCubit>()
+                                    .startConversation(user),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 }
                 if (state.users.isEmpty) {
                   return Padding(

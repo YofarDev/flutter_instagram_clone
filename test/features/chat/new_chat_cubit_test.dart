@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
@@ -25,6 +27,12 @@ void main() {
   setUp(() {
     chatRepo = MockIChatRepository();
     exploreRepo = MockIExploreRepository();
+    when(
+      () => exploreRepo.fetchSuggestedUsers(
+        myUid: any(named: 'myUid'),
+        limit: any(named: 'limit'),
+      ),
+    ).thenAnswer((_) => Completer<Either<Failure, List<AppUser>>>().future);
   });
 
   blocTest<NewChatCubit, NewChatState>(
@@ -96,5 +104,38 @@ void main() {
       NewChatState(opening: true, opened: convo),
       NewChatState(opened: convo, error: 'boom'),
     ],
+  );
+
+  blocTest<NewChatCubit, NewChatState>(
+    'ctor loads suggestions once ready',
+    build: () {
+      when(
+        () => exploreRepo.fetchSuggestedUsers(myUid: 'me', limit: 12),
+      ).thenAnswer(
+        (_) async => Right<Failure, List<AppUser>>(<AppUser>[user]),
+      );
+      return NewChatCubit(exploreRepo, chatRepo, myUid: 'me');
+    },
+    expect: () => <NewChatState>[
+      NewChatState(suggestions: <AppUser>[user], suggestionsLoading: false),
+    ],
+  );
+
+  blocTest<NewChatCubit, NewChatState>(
+    'suggestion failure falls back to the empty state silently',
+    build: () {
+      when(
+        () => exploreRepo.fetchSuggestedUsers(
+          myUid: any(named: 'myUid'),
+          limit: any(named: 'limit'),
+        ),
+      ).thenAnswer(
+        (_) async => const Left<Failure, List<AppUser>>(
+          Failure.serverError(message: 'boom'),
+        ),
+      );
+      return NewChatCubit(exploreRepo, chatRepo, myUid: 'me');
+    },
+    expect: () => const <NewChatState>[NewChatState(suggestionsLoading: false)],
   );
 }

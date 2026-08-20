@@ -110,5 +110,6 @@
   "authResetSend": "Send link",
   "authResetSent": "Link sent — check your inbox",
   "chatTyping": "typing…",
-  "commentsEmpty": "No comments yet"
+  "commentsEmpty": "No comments yet",
+  "newDmSuggestions": "Suggested"
 }

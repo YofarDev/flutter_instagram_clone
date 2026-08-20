@@ -30,6 +30,20 @@ class ExploreRepositoryImpl implements IExploreRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, List<AppUser>>> fetchSuggestedUsers({
+    required String myUid,
+    required int limit,
+  }) async {
+    try {
+      return Right<Failure, List<AppUser>>(
+        await _ds.fetchSuggestedUsers(myUid: myUid, limit: limit),
+      );
+    } catch (e) {
+      return Left<Failure, List<AppUser>>(_mapError(e));
+    }
+  }
+
   Failure _mapError(Object e) => Failure.serverError(
     message: e.toString(),
   ); // ponytail: firestore errors are descriptive strings

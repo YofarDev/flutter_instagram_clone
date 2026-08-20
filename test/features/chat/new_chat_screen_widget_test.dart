@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,6 +33,12 @@ void main() {
 
   setUp(() {
     exploreRepo = MockExploreRepository();
+    when(
+      () => exploreRepo.fetchSuggestedUsers(
+        myUid: any(named: 'myUid'),
+        limit: any(named: 'limit'),
+      ),
+    ).thenAnswer((_) => Completer<Either<Failure, List<AppUser>>>().future);
     chatRepo = MockChatRepository();
     when(() => exploreRepo.searchUsers(query: 'al')).thenAnswer(
       (_) async => Right<Failure, List<AppUser>>(<AppUser>[_alice()]),

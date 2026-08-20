@@ -8,6 +8,10 @@ import '../../../../core/utils/normalize_tag.dart';
 abstract interface class IExploreDataSource {
   Stream<List<Post>> watchExplorePosts({required int limit});
   Future<List<AppUser>> searchUsers({required String query});
+  Future<List<AppUser>> fetchSuggestedUsers({
+    required String myUid,
+    required int limit,
+  });
   Stream<List<Post>> watchPostsByTag({required String tag});
 }
 
@@ -54,6 +58,44 @@ class ExploreFirebaseDataSource implements IExploreDataSource {
         avatarUrl: data['avatarUrl'] as String?,
       );
     }).toList();
+  }
+
+  @override
+  Future<List<AppUser>> fetchSuggestedUsers({
+    required String myUid,
+    required int limit,
+  }) async {
+    // most-followed users first, then drop self + already-followed on the
+    // client (the following set is tiny; a whereIn query would cap at 10)
+    final List<Future<QuerySnapshot<Object?>>> futures =
+        <Future<QuerySnapshot<Object?>>>[
+          _db
+              .collection('users')
+              .orderBy('followerCount', descending: true)
+              .limit(limit + 20)
+              .get(),
+          _db.collection('users').doc(myUid).collection('following').get(),
+        ];
+    final List<QuerySnapshot<Object?>> results = await Future.wait(futures);
+    final Set<String> following = results[1].docs
+        .map((QueryDocumentSnapshot<Object?> d) => d.id)
+        .toSet();
+    return results[0].docs
+        .where(
+          (QueryDocumentSnapshot<Object?> d) =>
+              d.id != myUid && !following.contains(d.id),
+        )
+        .take(limit)
+        .map((QueryDocumentSnapshot<Object?> doc) {
+          final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          return AppUser(
+            uid: doc.id,
+            email: data['email'] as String? ?? '',
+            username: data['username'] as String?,
+            avatarUrl: data['avatarUrl'] as String?,
+          );
+        })
+        .toList();
   }
 
   @override

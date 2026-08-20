@@ -15,7 +15,9 @@ class NewChatCubit extends Cubit<NewChatState> {
     this._exploreRepository,
     this._chatRepository, {
     required this._myUid,
-  }) : super(const NewChatState());
+  }) : super(const NewChatState()) {
+    loadSuggestions();
+  }
 
   final IExploreRepository _exploreRepository;
   final IChatRepository _chatRepository;
@@ -57,6 +59,19 @@ class NewChatCubit extends Cubit<NewChatState> {
       (Failure f) => emit(state.copyWith(opening: false, error: f.message)),
       (Conversation conversation) =>
           emit(state.copyWith(opening: false, opened: conversation)),
+    );
+  }
+
+  /// Most-followed people you don't follow yet — fills the empty-query
+  /// state so the screen isn't a dead end before the first keystroke.
+  Future<void> loadSuggestions() async {
+    final Either<Failure, List<AppUser>> either = await _exploreRepository
+        .fetchSuggestedUsers(myUid: _myUid, limit: 12);
+    if (isClosed) return;
+    either.fold(
+      (_) => emit(state.copyWith(suggestionsLoading: false)),
+      (List<AppUser> users) =>
+          emit(state.copyWith(suggestions: users, suggestionsLoading: false)),
     );
   }
 
