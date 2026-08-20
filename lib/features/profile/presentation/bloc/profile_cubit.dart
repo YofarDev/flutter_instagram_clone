@@ -36,6 +36,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   final String _uid;
   final bool _isMe;
   StreamSubscription<List<Post>>? _sub;
+  StreamSubscription<List<Post>>? _savedSub;
   StreamSubscription<bool>? _subFollow;
   int _limit = _pageSize;
   int _gen = 0;
@@ -52,6 +53,19 @@ class ProfileCubit extends Cubit<ProfileState> {
             emit(state.copyWith(error: 'Failed to load posts'));
           },
         );
+    if (_isMe) {
+      _savedSub ??= _repository
+          .watchSavedPosts(uid: _uid)
+          .listen(
+            (List<Post> posts) =>
+                emit(state.copyWith(savedPosts: posts, savedLoading: false)),
+            onError: (Object e) {
+              // ponytail: saved tab falls back to its empty state on error
+              if (isClosed) return;
+              emit(state.copyWith(savedLoading: false));
+            },
+          );
+    }
   }
 
   void _onPosts(List<Post> posts, int gen) {
@@ -125,6 +139,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   @override
   Future<void> close() {
     _sub?.cancel();
+    _savedSub?.cancel();
     _subFollow?.cancel();
     return super.close();
   }

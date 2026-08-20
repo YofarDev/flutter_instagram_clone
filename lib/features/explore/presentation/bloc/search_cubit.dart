@@ -40,6 +40,8 @@ class SearchCubit extends Cubit<SearchState> {
     );
   }
 
+  void clearError() => emit(state.copyWith(error: null));
+
   @override
   Future<void> close() {
     _debounce?.cancel();

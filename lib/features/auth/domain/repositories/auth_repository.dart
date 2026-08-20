@@ -21,6 +21,10 @@ abstract interface class IAuthRepository {
 
   Future<Either<Failure, void>> signOut();
 
+  /// Sends a password-reset email. Succeeds silently for unknown addresses
+  /// (Firebase does not disclose account existence).
+  Future<Either<Failure, void>> sendPasswordReset({required String email});
+
   /// Full profile from Firestore; null if the profile doc doesn't exist yet.
   Future<Either<Failure, AppUser?>> findProfile({
     required String uid,

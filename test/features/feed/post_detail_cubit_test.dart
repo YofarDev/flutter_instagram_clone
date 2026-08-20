@@ -4,7 +4,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:flutter_instagram_clone/core/models/failure.dart';
-import 'package:flutter_instagram_clone/features/feed/domain/models/comment.dart';
+import 'package:flutter_instagram_clone/core/models/comment.dart';
 import 'package:flutter_instagram_clone/core/models/post.dart';
 import 'package:flutter_instagram_clone/features/feed/domain/repositories/feed_repository.dart';
 import 'package:flutter_instagram_clone/features/feed/presentation/bloc/post_detail_cubit.dart';
@@ -36,6 +36,12 @@ void main() {
   setUp(() {
     repo = MockIFeedRepository();
     registerFallbackValue(p1);
+    // saved hydration defaults to offline/Left; tests can re-stub
+    when(() => repo.fetchSavedPostIds(postIds: <String>['p1'])).thenAnswer(
+      (_) async => const Left<Failure, Set<String>>(
+        Failure.serverError(message: 'offline'),
+      ),
+    );
   });
 
   // ponytail: exact-arg stubs, no registerFallbackValue needed
@@ -48,7 +54,39 @@ void main() {
         Failure.serverError(message: 'offline'),
       ),
     );
+    when(() => repo.fetchSavedPostIds(postIds: <String>['p1'])).thenAnswer(
+      (_) async => const Left<Failure, Set<String>>(
+        Failure.serverError(message: 'offline'),
+      ),
+    );
   }
+
+  blocTest<PostDetailCubit, PostDetailState>(
+    'toggleSave flips optimistically and rolls back on failure',
+    build: () {
+      stubQuietCtor();
+      when(
+        () => repo.toggleSave(
+          post: any(named: 'post'),
+          currentlySaved: any(named: 'currentlySaved'),
+        ),
+      ).thenAnswer(
+        (_) async =>
+            const Left<Failure, void>(Failure.serverError(message: 'boom')),
+      );
+      return PostDetailCubit(repo, post: p1);
+    },
+    act: (PostDetailCubit cubit) => cubit.toggleSave(),
+    expect: () => <PostDetailState>[
+      PostDetailState(post: p1, status: PostDetailStatus.ready, isSaved: true),
+      PostDetailState(
+        post: p1,
+        status: PostDetailStatus.ready,
+        isSaved: false,
+        error: 'boom',
+      ),
+    ],
+  );
 
   blocTest<PostDetailCubit, PostDetailState>(
     'hydrates like state then comments',

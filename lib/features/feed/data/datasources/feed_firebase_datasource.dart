@@ -5,9 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-import '../../domain/models/comment.dart';
+import '../../../../core/models/comment.dart';
 import '../../../../core/models/post.dart';
-import '../models/comment_dto.dart';
+import '../../../../core/models/comment_dto.dart';
 import '../../../../core/models/post_dto.dart';
 
 /// #hashtag extraction: unicode word chars, Latin-1 accent fold, lowercase,
@@ -37,12 +37,17 @@ abstract interface class IFeedDataSource {
   Stream<List<Post>> watchFeed({required int limit});
   Future<void> createPost({required String caption, required String filePath});
   Future<Set<String>> fetchLikedPostIds({required List<String> postIds});
+  Future<Set<String>> fetchSavedPostIds({required List<String> postIds});
   Future<Post> getPostById({required String postId});
   Future<void> toggleLike({
     required String postId,
     required String postOwnerId,
     required String postImageUrl,
     required bool currentlyLiked,
+  });
+  Future<void> toggleSave({
+    required String postId,
+    required bool currentlySaved,
   });
   Stream<List<Comment>> watchComments({required String postId});
   Future<void> addComment({
@@ -153,6 +158,23 @@ class FeedFirebaseDataSource implements IFeedDataSource {
   }
 
   @override
+  Future<Set<String>> fetchSavedPostIds({required List<String> postIds}) async {
+    if (postIds.isEmpty) return <String>{};
+    final List<DocumentSnapshot<Object?>> snaps = await Future.wait(
+      postIds.map(
+        (String id) => _db.collection('savedPosts').doc(_savedDocId(id)).get(),
+      ),
+    );
+    return <String>{
+      for (final DocumentSnapshot<Object?> s in snaps)
+        if (s.exists) s.id.substring(_uid.length + 1),
+    };
+  }
+
+  /// savedPosts doc ids embed the owner: {uid}_{postId}
+  String _savedDocId(String postId) => '${_uid}_$postId';
+
+  @override
   Future<Post> getPostById({required String postId}) async {
     final DocumentSnapshot<Object?> snap = await _db
         .collection('posts')
@@ -200,6 +222,25 @@ class FeedFirebaseDataSource implements IFeedDataSource {
           postImageUrl: postImageUrl,
         ),
       );
+    }
+  }
+
+  @override
+  Future<void> toggleSave({
+    required String postId,
+    required bool currentlySaved,
+  }) async {
+    final DocumentReference<Object?> ref = _db
+        .collection('savedPosts')
+        .doc(_savedDocId(postId));
+    if (currentlySaved) {
+      await ref.delete();
+    } else {
+      await ref.set(<String, dynamic>{
+        'uid': _uid,
+        'postId': postId,
+        'createdAt': DateTime.now().millisecondsSinceEpoch,
+      });
     }
   }
 

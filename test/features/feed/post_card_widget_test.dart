@@ -6,8 +6,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 
+import 'package:flutter_instagram_clone/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_instagram_clone/core/models/failure.dart';
 import 'package:flutter_instagram_clone/core/models/post.dart';
+import 'package:flutter_instagram_clone/core/theme/ig_colors.dart';
+import 'package:flutter_instagram_clone/core/widgets/heart_burst.dart';
+import 'package:flutter_instagram_clone/core/widgets/ig_icon.dart';
+import 'package:flutter_instagram_clone/core/widgets/ig_icons.dart';
 import 'package:flutter_instagram_clone/features/feed/domain/repositories/feed_repository.dart';
 import 'package:flutter_instagram_clone/features/feed/presentation/bloc/feed_cubit.dart';
 import 'package:flutter_instagram_clone/features/feed/presentation/bloc/feed_state.dart';
@@ -27,6 +32,12 @@ Post _post() => Post(
   createdAt: DateTime(2026, 1, 1),
   likeCount: 3,
   commentCount: 2,
+);
+
+Finder igHeart(bool filled) => find.byWidgetPredicate(
+  (Widget w) =>
+      w is IgIcon &&
+      (filled ? w.data == IgIcons.heartFilled : w.data == IgIcons.heart),
 );
 
 void main() {
@@ -52,15 +63,26 @@ void main() {
       () => repo.fetchLikedPostIds(postIds: any(named: 'postIds')),
     ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
     when(
+      () => repo.fetchSavedPostIds(postIds: any(named: 'postIds')),
+    ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
+    when(
       () => repo.toggleLike(
         post: any(named: 'post'),
         currentlyLiked: any(named: 'currentlyLiked'),
       ),
     ).thenAnswer((_) => toggleGate.future);
+    when(
+      () => repo.toggleSave(
+        post: any(named: 'post'),
+        currentlySaved: any(named: 'currentlySaved'),
+      ),
+    ).thenAnswer((_) async => const Right<Failure, void>(null));
   });
 
   Widget subject() {
     return MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: BlocProvider<FeedCubit>(
         create: (_) => FeedCubit(repo, profileRepo, myUid: 'u1'),
         child: Scaffold(
@@ -72,6 +94,9 @@ void main() {
                   isLiked: state.likedIds.contains('p1'),
                   onLikeTap: () =>
                       context.read<FeedCubit>().toggleLike(_post()),
+                  isSaved: state.savedIds.contains('p1'),
+                  onSaveTap: () =>
+                      context.read<FeedCubit>().toggleSave(_post()),
                 ),
               ),
             ],
@@ -94,22 +119,83 @@ void main() {
   ) async {
     await pumpSubject(tester);
 
-    expect(find.byIcon(Icons.favorite_border), findsOneWidget);
-    expect(find.byIcon(Icons.favorite), findsNothing);
+    expect(igHeart(false), findsOneWidget);
+    expect(igHeart(true), findsNothing);
 
-    await tester.tap(find.byIcon(Icons.favorite_border));
+    await tester.tap(igHeart(false));
     await tester.pump();
 
-    expect(find.byIcon(Icons.favorite), findsOneWidget);
-    expect(find.byIcon(Icons.favorite_border), findsNothing);
-    expect(tester.widget<Icon>(find.byIcon(Icons.favorite)).color, Colors.red);
+    expect(igHeart(true), findsOneWidget);
+    expect(igHeart(false), findsNothing);
+    expect(tester.widget<IgIcon>(igHeart(true)).color, IgColors.likeRed);
 
     verify(
       () => repo.toggleLike(post: any(named: 'post'), currentlyLiked: false),
     ).called(1);
   });
 
-  testWidgets('renders username, caption and counts from post', (
+  testWidgets('double-tap image likes once unliked, never un-likes', (
+    WidgetTester tester,
+  ) async {
+    await pumpSubject(tester);
+
+    // first double-tap: burst fires and the like goes through
+    await tester.tap(find.byType(Image));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byType(Image));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // two filled hearts mid-gesture: the like button + the burst overlay
+    expect(igHeart(true), findsNWidgets(2));
+    verify(
+      () => repo.toggleLike(post: any(named: 'post'), currentlyLiked: false),
+    ).called(1);
+
+    // burst heart is mid-animation and visible
+    expect(find.byType(HeartBurst), findsOneWidget);
+
+    // second double-tap on an already-liked post: burst, no un-like call
+    await tester.tap(find.byType(Image));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byType(Image));
+    // let the double-tap recognizer's settle timer expire before teardown
+    await tester.pump(const Duration(milliseconds: 300));
+
+    verifyNever(
+      () => repo.toggleLike(post: any(named: 'post'), currentlyLiked: true),
+    );
+  });
+
+  testWidgets('bookmark tap saves optimistically', (WidgetTester tester) async {
+    await pumpSubject(tester);
+
+    final Finder bookmark = find.descendant(
+      of: find.byType(PostCard),
+      matching: find.byWidgetPredicate(
+        (Widget w) => w is IgIcon && w.data == IgIcons.bookmark,
+      ),
+    );
+    expect(bookmark, findsOneWidget);
+
+    await tester.tap(find.byTooltip('Save'));
+    await tester.pump();
+
+    expect(
+      find.descendant(
+        of: find.byType(PostCard),
+        matching: find.byWidgetPredicate(
+          (Widget w) => w is IgIcon && w.data == IgIcons.bookmarkFilled,
+        ),
+      ),
+      findsOneWidget,
+    );
+    verify(
+      () => repo.toggleSave(post: any(named: 'post'), currentlySaved: false),
+    ).called(1);
+  });
+
+  testWidgets('renders username, caption and localized counts from post', (
     WidgetTester tester,
   ) async {
     await pumpSubject(tester);

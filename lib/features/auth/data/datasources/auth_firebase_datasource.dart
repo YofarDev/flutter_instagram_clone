@@ -15,6 +15,7 @@ abstract interface class IAuthDataSource {
   Future<AppUser> signIn({required String email, required String password});
   Future<AppUser> signInWithGoogle();
   Future<void> signOut();
+  Future<void> sendPasswordReset({required String email});
   Future<Map<String, dynamic>?> fetchProfileDoc(String uid);
   Future<void> saveProfileDoc({
     required String uid,
@@ -89,6 +90,10 @@ class AuthFirebaseDataSource implements IAuthDataSource {
     }
     await _auth.signOut();
   }
+
+  @override
+  Future<void> sendPasswordReset({required String email}) =>
+      _auth.sendPasswordResetEmail(email: email);
 
   @override
   Future<Map<String, dynamic>?> fetchProfileDoc(String uid) async {

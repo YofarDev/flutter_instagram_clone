@@ -21,9 +21,7 @@ import '../../features/explore/presentation/bloc/search_cubit.dart';
 import '../../features/explore/presentation/screens/hashtag_screen.dart';
 import '../../features/explore/presentation/screens/search_screen.dart';
 import '../../features/notifications/presentation/bloc/notifications_cubit.dart';
-import '../../features/notifications/presentation/bloc/notifications_state.dart';
 import '../../features/notifications/presentation/screens/activity_screen.dart';
-import '../../features/notifications/presentation/widgets/badge_icon.dart';
 import '../../features/reels/presentation/bloc/create_reel_cubit.dart';
 import '../../features/reels/presentation/bloc/reels_cubit.dart';
 import '../../features/reels/presentation/screens/create_reel_screen.dart';
@@ -48,6 +46,7 @@ import '../../features/stories/presentation/bloc/story_viewer_cubit.dart';
 import '../../features/stories/presentation/screens/create_story_screen.dart';
 import '../../features/stories/presentation/screens/story_viewer_screen.dart';
 import '../di/service_locator.dart';
+import '../widgets/ig_nav_bar.dart';
 import 'go_router_refresh.dart';
 import 'route_constants.dart';
 
@@ -65,11 +64,7 @@ class AppRouter {
       GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> _searchNavigatorKey =
       GlobalKey<NavigatorState>();
-  static final GlobalKey<NavigatorState> _createNavigatorKey =
-      GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> _reelsNavigatorKey =
-      GlobalKey<NavigatorState>();
-  static final GlobalKey<NavigatorState> _activityNavigatorKey =
       GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> _profileNavigatorKey =
       GlobalKey<NavigatorState>();
@@ -106,67 +101,31 @@ class AppRouter {
               final NotificationsCubit notificationsCubit =
                   getIt<NotificationsCubit>()
                     ..init(getIt<AuthCubit>().state.user!.uid);
-              return BlocProvider<NotificationsCubit>.value(
-                value: notificationsCubit,
+              return MultiBlocProvider(
+                providers: <BlocProvider<dynamic>>[
+                  BlocProvider<NotificationsCubit>.value(
+                    value: notificationsCubit,
+                  ),
+                  BlocProvider<AuthCubit>.value(value: getIt<AuthCubit>()),
+                ],
                 child: Scaffold(
                   body: navigationShell,
-                  bottomNavigationBar:
-                      BlocBuilder<NotificationsCubit, NotificationsState>(
-                        buildWhen:
-                            (
-                              NotificationsState previous,
-                              NotificationsState current,
-                            ) => previous.unreadCount != current.unreadCount,
-                        builder:
-                            (BuildContext context, NotificationsState state) =>
-                                NavigationBar(
-                                  selectedIndex: navigationShell.currentIndex,
-                                  onDestinationSelected: (int i) =>
-                                      navigationShell.goBranch(
-                                        i,
-                                        initialLocation:
-                                            i == navigationShell.currentIndex,
-                                      ),
-                                  destinations: <NavigationDestination>[
-                                    const NavigationDestination(
-                                      icon: Icon(Icons.home_outlined),
-                                      selectedIcon: Icon(Icons.home),
-                                      label: 'Feed',
-                                    ),
-                                    const NavigationDestination(
-                                      icon: Icon(Icons.search),
-                                      selectedIcon: Icon(Icons.search),
-                                      label: 'Search',
-                                    ),
-                                    const NavigationDestination(
-                                      icon: Icon(Icons.add_box_outlined),
-                                      selectedIcon: Icon(Icons.add_box),
-                                      label: 'Create',
-                                    ),
-                                    const NavigationDestination(
-                                      icon: Icon(Icons.movie_outlined),
-                                      selectedIcon: Icon(Icons.movie),
-                                      label: 'Reels',
-                                    ),
-                                    NavigationDestination(
-                                      icon: BadgeIcon(
-                                        icon: Icons.favorite_outline,
-                                        count: state.unreadCount,
-                                      ),
-                                      selectedIcon: BadgeIcon(
-                                        icon: Icons.favorite,
-                                        count: state.unreadCount,
-                                      ),
-                                      label: 'Activity',
-                                    ),
-                                    const NavigationDestination(
-                                      icon: Icon(Icons.person_outline),
-                                      selectedIcon: Icon(Icons.person),
-                                      label: 'Profile',
-                                    ),
-                                  ],
-                                ),
-                      ),
+                  bottomNavigationBar: BlocBuilder<AuthCubit, AuthState>(
+                    buildWhen: (AuthState p, AuthState c) =>
+                        p.user?.avatarUrl != c.user?.avatarUrl,
+                    builder: (BuildContext context, AuthState authState) =>
+                        IgNavBar(
+                          currentIndex: navigationShell.currentIndex,
+                          onBranchSelected: (int branch) =>
+                              navigationShell.goBranch(
+                                branch,
+                                initialLocation:
+                                    branch == navigationShell.currentIndex,
+                              ),
+                          onCreate: () => context.push(Routes.create),
+                          avatarUrl: authState.user?.avatarUrl,
+                        ),
+                  ),
                 ),
               );
             },
@@ -197,6 +156,15 @@ class AppRouter {
                       child: const FeedScreen(),
                     ),
               ),
+              GoRoute(
+                path: Routes.create,
+                name: 'CreatePost',
+                builder: (BuildContext context, GoRouterState state) =>
+                    BlocProvider<CreatePostCubit>(
+                      create: (_) => getIt<CreatePostCubit>(),
+                      child: const CreatePostScreen(),
+                    ),
+              ),
             ],
           ),
           StatefulShellBranch(
@@ -223,20 +191,6 @@ class AppRouter {
             ],
           ),
           StatefulShellBranch(
-            navigatorKey: _createNavigatorKey,
-            routes: <RouteBase>[
-              GoRoute(
-                path: Routes.create,
-                name: 'CreatePost',
-                builder: (BuildContext context, GoRouterState state) =>
-                    BlocProvider<CreatePostCubit>(
-                      create: (_) => getIt<CreatePostCubit>(),
-                      child: const CreatePostScreen(),
-                    ),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
             navigatorKey: _reelsNavigatorKey,
             routes: <RouteBase>[
               GoRoute(
@@ -246,20 +200,6 @@ class AppRouter {
                     BlocProvider<ReelsCubit>(
                       create: (_) => getIt<ReelsCubit>(),
                       child: const ReelsScreen(),
-                    ),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            navigatorKey: _activityNavigatorKey,
-            routes: <RouteBase>[
-              GoRoute(
-                path: Routes.activity,
-                name: 'Activity',
-                builder: (BuildContext context, GoRouterState state) =>
-                    BlocProvider<NotificationsCubit>.value(
-                      value: getIt<NotificationsCubit>(),
-                      child: const ActivityScreen(),
                     ),
               ),
             ],
@@ -283,6 +223,16 @@ class AppRouter {
             ],
           ),
         ],
+      ),
+      GoRoute(
+        path: Routes.activity,
+        name: 'Activity',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (BuildContext context, GoRouterState state) =>
+            BlocProvider<NotificationsCubit>.value(
+              value: getIt<NotificationsCubit>(),
+              child: const ActivityScreen(),
+            ),
       ),
       GoRoute(
         path: Routes.postDetail,
@@ -325,10 +275,17 @@ class AppRouter {
         builder: (BuildContext context, GoRouterState state) {
           final String uid = state.pathParameters['uid']!;
           final bool isMe = uid == getIt<AuthCubit>().state.user!.uid;
-          return BlocProvider<ProfileCubit>(
-            create: (_) => getIt<ProfileCubit>(
-              param1: ProfileArgs(uid: uid, isMe: isMe),
-            ),
+          // Top-level route sits outside the shell providers, but the
+          // own-profile path (isMe) reads AuthCubit for sign-out.
+          return MultiBlocProvider(
+            providers: <BlocProvider<dynamic>>[
+              BlocProvider<AuthCubit>.value(value: getIt<AuthCubit>()),
+              BlocProvider<ProfileCubit>(
+                create: (_) => getIt<ProfileCubit>(
+                  param1: ProfileArgs(uid: uid, isMe: isMe),
+                ),
+              ),
+            ],
             child: const ProfileScreen(),
           );
         },

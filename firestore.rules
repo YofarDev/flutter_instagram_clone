@@ -68,21 +68,37 @@ service cloud.firestore {
     match /reels/{reelId} {
       allow read: if signedIn();
       allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
-      // strangers may only flip likeCount
+      // strangers may only flip likeCount/commentCount
       allow update: if signedIn() && request.resource.data.diff(resource.data)
-          .affectedKeys().hasOnly(['likeCount']);
+          .affectedKeys().hasOnly(['likeCount', 'commentCount']);
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
 
       match /likes/{uid} {
         allow read: if signedIn();
         allow create, delete: if signedIn() && request.auth.uid == uid;
       }
+
+      match /comments/{commentId} {
+        allow read: if signedIn();
+        allow create: if signedIn() && request.resource.data.authorId == request.auth.uid;
+        allow update, delete: if false;
+      }
+    }
+
+    match /savedPosts/{id} {
+      // doc id is {uid}_{postId}; owner-only reads and writes
+      allow read, create, delete: if signedIn() &&
+          resource.data.uid == request.auth.uid;
+      allow update: if false;
     }
 
     match /notifications/{id} {
       allow read: if signedIn() && resource.data.ownerUid == request.auth.uid;
-      // ponytail: client-writable create is spoofable; server-side writes later
-      allow create: if signedIn();
+      // ponytail: still client-writable, but no impersonation (actorId must be
+      // the caller) and no self-notifications; server-side writes later
+      allow create: if signedIn() &&
+          request.resource.data.actorId == request.auth.uid &&
+          request.resource.data.ownerUid != request.auth.uid;
       allow update, delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
     }
 
@@ -94,12 +110,12 @@ service cloud.firestore {
            request.auth.uid in resource.data.participants);
       allow create: if signedIn() &&
           request.auth.uid in request.resource.data.participants;
-      // participants may only bump lastMessage/updatedAt and repair
-      // participantMeta (race-path merge-sets touch it)
+      // participants may only bump lastMessage/updatedAt, repair
+      // participantMeta (race-path merge-sets touch it), and flag typing
       allow update: if signedIn() &&
           request.auth.uid in resource.data.participants &&
           request.resource.data.diff(resource.data).affectedKeys()
-              .hasOnly(['lastMessage', 'updatedAt', 'participantMeta']);
+              .hasOnly(['lastMessage', 'updatedAt', 'participantMeta', 'typingUid']);
       allow delete: if false;
 
       match /messages/{mid} {

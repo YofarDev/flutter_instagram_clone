@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 
+import '../../../../core/models/comment.dart';
 import '../../../../core/models/failure.dart';
 import '../../domain/models/reel.dart';
 import '../../domain/repositories/reels_repository.dart';
@@ -44,13 +45,38 @@ class ReelsRepositoryImpl implements IReelsRepository {
   @override
   Future<Either<Failure, void>> toggleReelLike({
     required String reelId,
+    required String reelOwnerId,
     required bool currentlyLiked,
   }) async {
     try {
       return Right<Failure, void>(
         await _ds.toggleReelLike(
           reelId: reelId,
+          reelOwnerId: reelOwnerId,
           currentlyLiked: currentlyLiked,
+        ),
+      );
+    } catch (e) {
+      return Left<Failure, void>(_mapError(e));
+    }
+  }
+
+  @override
+  Stream<List<Comment>> watchReelComments({required String reelId}) =>
+      _ds.watchReelComments(reelId: reelId);
+
+  @override
+  Future<Either<Failure, void>> addReelComment({
+    required String reelId,
+    required String reelOwnerId,
+    required String text,
+  }) async {
+    try {
+      return Right<Failure, void>(
+        await _ds.addReelComment(
+          reelId: reelId,
+          reelOwnerId: reelOwnerId,
+          text: text,
         ),
       );
     } catch (e) {

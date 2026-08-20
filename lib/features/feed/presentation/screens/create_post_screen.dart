@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
+import '../../../../core/utils/haptics.dart';
 import '../bloc/create_post_cubit.dart';
 import '../bloc/create_post_state.dart';
 
@@ -35,6 +36,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             p.success != c.success || p.error != c.error,
         listener: (BuildContext context, CreatePostState state) {
           if (state.success) {
+            AppHaptics.success();
             context.pop();
           } else if (state.error != null) {
             ScaffoldMessenger.of(context)

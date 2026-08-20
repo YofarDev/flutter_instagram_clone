@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
+import '../../../../core/utils/haptics.dart';
 import '../bloc/create_story_cubit.dart';
 import '../bloc/create_story_state.dart';
 
@@ -22,6 +23,7 @@ class CreateStoryScreen extends StatelessWidget {
             p.success != c.success || p.error != c.error,
         listener: (BuildContext context, CreateStoryState state) {
           if (state.success) {
+            AppHaptics.success();
             context.pop();
           } else if (state.error != null) {
             ScaffoldMessenger.of(context)

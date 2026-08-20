@@ -46,6 +46,16 @@ void main() {
 
   setUp(() {
     repo = MockChatRepository();
+    when(
+      () => repo.watchTyping(conversationId: any(named: 'conversationId')),
+    ).thenAnswer((_) => const Stream<String?>.empty());
+    when(
+      () => repo.setTyping(
+        conversationId: any(named: 'conversationId'),
+        myUid: any(named: 'myUid'),
+        typing: any(named: 'typing'),
+      ),
+    ).thenAnswer((_) async => const Right<Failure, void>(null));
     when(() => repo.watchMessages(conversationId: 'c1')).thenAnswer(
       (_) => Stream<List<ChatMessage>>.value(<ChatMessage>[
         _message(id: 'm1', senderId: 'u1', text: 'hi'),

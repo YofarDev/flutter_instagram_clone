@@ -131,6 +131,7 @@ void main() {
       when(
         () => repo.toggleReelLike(
           reelId: any(named: 'reelId'),
+          reelOwnerId: any(named: 'reelOwnerId'),
           currentlyLiked: any(named: 'currentlyLiked'),
         ),
       ).thenAnswer((_) async => const Right<Failure, void>(null));
@@ -141,7 +142,11 @@ void main() {
     act: (ReelsCubit cubit) => cubit.toggleReelLike(r1),
     verify: (ReelsCubit cubit) {
       verify(
-        () => repo.toggleReelLike(reelId: 'r1', currentlyLiked: false),
+        () => repo.toggleReelLike(
+          reelId: 'r1',
+          reelOwnerId: any(named: 'reelOwnerId'),
+          currentlyLiked: false,
+        ),
       ).called(1);
     },
     expect: () => <ReelsState>[
@@ -163,6 +168,7 @@ void main() {
       when(
         () => repo.toggleReelLike(
           reelId: any(named: 'reelId'),
+          reelOwnerId: any(named: 'reelOwnerId'),
           currentlyLiked: any(named: 'currentlyLiked'),
         ),
       ).thenAnswer(

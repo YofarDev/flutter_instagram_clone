@@ -34,6 +34,8 @@ class FeedCubit extends Cubit<FeedState> {
   List<Post>? _allPosts;
   int _limit = _pageSize;
   int _gen = 0;
+  bool _fetchingMore = false;
+  Completer<void>? _refreshCompleter;
 
   // ponytail: client-side follow filter; Firestore 'in' caps at 10 —
   // server-side whereIn when the graph outgrows it
@@ -53,6 +55,7 @@ class FeedCubit extends Cubit<FeedState> {
           onError: (Object e) {
             if (isClosed) return;
             emit(state.copyWith(error: 'Failed to load feed'));
+            _completeRefresh();
           },
         );
   }
@@ -61,37 +64,63 @@ class FeedCubit extends Cubit<FeedState> {
     if (isClosed || gen != _gen) return;
     _allPosts = posts;
     await _emitFiltered(gen);
+    _completeRefresh();
+  }
+
+  void _completeRefresh() {
+    if (!(_refreshCompleter?.isCompleted ?? true)) {
+      _refreshCompleter!.complete();
+    }
   }
 
   Future<void> _emitFiltered(int gen) async {
     if (isClosed || gen != _gen) return;
     final List<Post> visible = _visiblePosts;
-    final Either<Failure, Set<String>> either = await _repository
-        .fetchLikedPostIds(postIds: visible.map((Post p) => p.id).toList());
+    final List<String> ids = visible.map((Post p) => p.id).toList();
+    final List<Either<Failure, Set<String>>> results =
+        await Future.wait(<Future<Either<Failure, Set<String>>>>[
+          _repository.fetchLikedPostIds(postIds: ids),
+          _repository.fetchSavedPostIds(postIds: ids),
+        ]);
     if (isClosed || gen != _gen) return;
-    either.fold(
-      (_) => emit(
-        state.copyWith(
-          status: FeedStatus.ready,
-          posts: visible,
-          hasMore: _allPosts!.length >= _limit,
-        ),
-      ), // ponytail: keep stale likedIds on hydration failure
-      (Set<String> ids) => emit(
-        state.copyWith(
-          status: FeedStatus.ready,
-          posts: visible,
-          likedIds: ids,
-          hasMore: _allPosts!.length >= _limit,
-        ),
+    _fetchingMore = false;
+    // ponytail: keep stale liked/saved ids on hydration failure
+    final Set<String>? liked = results[0].fold(
+      (Failure _) => null,
+      (Set<String> ids) => ids,
+    );
+    final Set<String>? saved = results[1].fold(
+      (Failure _) => null,
+      (Set<String> ids) => ids,
+    );
+    emit(
+      state.copyWith(
+        status: FeedStatus.ready,
+        posts: visible,
+        likedIds: liked ?? state.likedIds,
+        savedIds: saved ?? state.savedIds,
+        hasMore: _allPosts!.length >= _limit,
       ),
     );
   }
 
   void loadMore() {
-    if (!state.hasMore) return;
+    if (!state.hasMore || _fetchingMore) return;
+    _fetchingMore = true;
     _limit += _pageSize;
     _subscribe();
+  }
+
+  /// Pull-to-refresh: reset to the first page and complete once the
+  /// re-subscribed stream has emitted (or failed).
+  Future<void> refresh() {
+    if (!(_refreshCompleter?.isCompleted ?? true)) {
+      return _refreshCompleter!.future;
+    }
+    _refreshCompleter = Completer<void>();
+    _limit = _pageSize;
+    _subscribe();
+    return _refreshCompleter!.future;
   }
 
   Future<void> toggleLike(Post post) async {
@@ -130,6 +159,34 @@ class FeedCubit extends Cubit<FeedState> {
           likedIds: wasLiked
               ? <String>{...state.likedIds, post.id}
               : (<String>{...state.likedIds}..remove(post.id)),
+        ),
+      ),
+      (_) {},
+    );
+  }
+
+  Future<void> toggleSave(Post post) async {
+    final bool wasSaved = state.savedIds.contains(post.id);
+    // optimistic flip, rollback on failure — same discipline as toggleLike
+    emit(
+      state.copyWith(
+        savedIds: wasSaved
+            ? (<String>{...state.savedIds}..remove(post.id))
+            : <String>{...state.savedIds, post.id},
+      ),
+    );
+    final Either<Failure, void> either = await _repository.toggleSave(
+      post: post,
+      currentlySaved: wasSaved,
+    );
+    if (isClosed) return;
+    either.fold(
+      (Failure f) => emit(
+        state.copyWith(
+          error: f.message,
+          savedIds: wasSaved
+              ? <String>{...state.savedIds, post.id}
+              : (<String>{...state.savedIds}..remove(post.id)),
         ),
       ),
       (_) {},

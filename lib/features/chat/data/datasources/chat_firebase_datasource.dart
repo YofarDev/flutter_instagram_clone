@@ -24,6 +24,14 @@ abstract interface class IChatDataSource {
     required String otherUid,
     required String text,
   });
+
+  /// Live `typingUid` field on the conversation doc (null = nobody typing).
+  Stream<String?> watchTyping({required String conversationId});
+
+  Future<void> setTyping({
+    required String conversationId,
+    required String? typingUid,
+  });
 }
 
 class ChatFirebaseDataSource implements IChatDataSource {
@@ -153,4 +161,23 @@ class ChatFirebaseDataSource implements IChatDataSource {
     );
     await batch.commit();
   }
+
+  @override
+  Stream<String?> watchTyping({required String conversationId}) => _db
+      .collection('conversations')
+      .doc(conversationId)
+      .snapshots()
+      .map(
+        (DocumentSnapshot<Object?> snap) =>
+            (snap.data() as Map<String, dynamic>?)?['typingUid'] as String?,
+      );
+
+  @override
+  Future<void> setTyping({
+    required String conversationId,
+    required String? typingUid,
+  }) => _db.collection('conversations').doc(conversationId).set(
+    <String, dynamic>{'typingUid': typingUid},
+    SetOptions(merge: true),
+  );
 }

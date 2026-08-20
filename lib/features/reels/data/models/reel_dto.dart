@@ -9,6 +9,7 @@ class ReelDto {
     required this.caption,
     required this.createdAtMillis,
     required this.likeCount,
+    this.commentCount = 0,
   });
 
   factory ReelDto.fromMap(Map<String, dynamic> map) => ReelDto(
@@ -19,6 +20,7 @@ class ReelDto {
     caption: map['caption'] as String? ?? '',
     createdAtMillis: map['createdAt'] as int,
     likeCount: map['likeCount'] as int? ?? 0,
+    commentCount: map['commentCount'] as int? ?? 0,
   );
 
   final String uid;
@@ -28,6 +30,7 @@ class ReelDto {
   final String caption;
   final int createdAtMillis;
   final int likeCount;
+  final int commentCount;
 
   Map<String, dynamic> toMap() => <String, dynamic>{
     'uid': uid,
@@ -37,6 +40,7 @@ class ReelDto {
     'caption': caption,
     'createdAt': createdAtMillis,
     'likeCount': likeCount,
+    'commentCount': commentCount,
   };
 
   Reel toDomain(String id) => Reel(
@@ -48,5 +52,6 @@ class ReelDto {
     caption: caption,
     createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMillis),
     likeCount: likeCount,
+    commentCount: commentCount,
   );
 }

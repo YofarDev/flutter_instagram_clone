@@ -13,6 +13,8 @@ sealed class ProfileState with _$ProfileState {
     @Default(ProfileStatus.loading) ProfileStatus status,
     UserProfile? profile,
     @Default(<Post>[]) List<Post> posts,
+    @Default(<Post>[]) List<Post> savedPosts,
+    @Default(true) bool savedLoading,
     @Default(false) bool isFollowing,
     @Default(false) bool isMe,
     @Default(true) bool hasMore,

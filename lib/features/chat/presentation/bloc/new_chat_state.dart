@@ -10,6 +10,8 @@ sealed class NewChatState with _$NewChatState {
   const factory NewChatState({
     @Default('') String query,
     @Default(<AppUser>[]) List<AppUser> users,
+    @Default(<AppUser>[]) List<AppUser> suggestions,
+    @Default(true) bool suggestionsLoading,
     @Default(false) bool searching,
     @Default(false) bool opening,
     String? error,

@@ -12,6 +12,7 @@ sealed class FeedState with _$FeedState {
     @Default(FeedStatus.loading) FeedStatus status,
     @Default(<Post>[]) List<Post> posts,
     @Default(<String>{}) Set<String> likedIds,
+    @Default(<String>{}) Set<String> savedIds,
     @Default(true) bool hasMore,
     String? error,
   }) = _FeedState;

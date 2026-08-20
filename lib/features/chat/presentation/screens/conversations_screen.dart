@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/router/route_constants.dart';
 import '../../../../core/utils/time_ago.dart';
+import '../../../../core/widgets/skeleton/skeletons.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../domain/models/conversation.dart';
 import '../bloc/conversations_cubit.dart';
@@ -43,7 +44,12 @@ class ConversationsScreen extends StatelessWidget {
               p.status != c.status || p.conversations != c.conversations,
           builder: (BuildContext context, ConversationsState state) {
             if (state.status == ConversationsStatus.loading) {
-              return const Center(child: CircularProgressIndicator());
+              return ListView(
+                children: List<SkeletonListRow>.generate(
+                  8,
+                  (_) => const SkeletonListRow(),
+                ),
+              );
             }
             if (state.conversations.isEmpty) {
               return Center(child: Text(l10n.dmEmpty));

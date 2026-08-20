@@ -68,16 +68,21 @@ void main() {
   late MockIProfileRepository profileRepo;
   late StreamController<List<Post>> postsController;
   late StreamController<List<String>> followingController;
+  late Completer<Either<Failure, Set<String>>> likedGate;
 
   setUp(() {
     repo = MockIFeedRepository();
     profileRepo = MockIProfileRepository();
+    likedGate = Completer<Either<Failure, Set<String>>>();
     registerFallbackValue(p1);
     registerFallbackValue(<String>[]);
     // existing fixtures are authored by 'u1' — keep them visible via myUid
     when(
       () => profileRepo.watchFollowingIds(uid: any(named: 'uid')),
     ).thenAnswer((_) => const Stream<List<String>>.empty());
+    when(
+      () => repo.fetchSavedPostIds(postIds: any(named: 'postIds')),
+    ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
   });
 
   blocTest<FeedCubit, FeedState>(
@@ -265,6 +270,162 @@ void main() {
       verify(() => repo.watchFeed(limit: any(named: 'limit'))).called(1);
     },
     expect: () => const <FeedState>[],
+  );
+
+  blocTest<FeedCubit, FeedState>(
+    'initial load hydrates saved ids alongside liked ids',
+    build: () {
+      when(
+        () => repo.watchFeed(limit: any(named: 'limit')),
+      ).thenAnswer((_) => Stream<List<Post>>.value(<Post>[p1]));
+      when(
+        () => repo.fetchLikedPostIds(postIds: any(named: 'postIds')),
+      ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
+      when(
+        () => repo.fetchSavedPostIds(postIds: any(named: 'postIds')),
+      ).thenAnswer(
+        (_) async => const Right<Failure, Set<String>>(<String>{'p1'}),
+      );
+      return FeedCubit(repo, profileRepo, myUid: 'u1');
+    },
+    expect: () => <FeedState>[
+      FeedState(
+        status: FeedStatus.ready,
+        posts: <Post>[p1],
+        savedIds: const <String>{'p1'},
+        hasMore: false,
+      ),
+    ],
+  );
+
+  blocTest<FeedCubit, FeedState>(
+    'toggleSave optimistic flip on success',
+    build: () {
+      when(
+        () => repo.watchFeed(limit: any(named: 'limit')),
+      ).thenAnswer((_) => const Stream<List<Post>>.empty());
+      when(
+        () => repo.toggleSave(
+          post: any(named: 'post'),
+          currentlySaved: any(named: 'currentlySaved'),
+        ),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
+      return FeedCubit(repo, profileRepo, myUid: 'u1');
+    },
+    seed: () =>
+        FeedState(status: FeedStatus.ready, posts: <Post>[p1], hasMore: true),
+    act: (FeedCubit cubit) => cubit.toggleSave(p1),
+    expect: () => <FeedState>[
+      FeedState(
+        status: FeedStatus.ready,
+        posts: <Post>[p1],
+        savedIds: const <String>{'p1'},
+        hasMore: true,
+      ),
+    ],
+  );
+
+  blocTest<FeedCubit, FeedState>(
+    'toggleSave rolls back on failure',
+    build: () {
+      when(
+        () => repo.watchFeed(limit: any(named: 'limit')),
+      ).thenAnswer((_) => const Stream<List<Post>>.empty());
+      when(
+        () => repo.toggleSave(
+          post: any(named: 'post'),
+          currentlySaved: any(named: 'currentlySaved'),
+        ),
+      ).thenAnswer(
+        (_) async =>
+            const Left<Failure, void>(Failure.serverError(message: 'boom')),
+      );
+      return FeedCubit(repo, profileRepo, myUid: 'u1');
+    },
+    seed: () => FeedState(
+      status: FeedStatus.ready,
+      posts: <Post>[p1],
+      savedIds: const <String>{'p1'},
+      hasMore: true,
+    ),
+    act: (FeedCubit cubit) => cubit.toggleSave(p1),
+    expect: () => <FeedState>[
+      FeedState(status: FeedStatus.ready, posts: <Post>[p1], hasMore: true),
+      FeedState(
+        status: FeedStatus.ready,
+        posts: <Post>[p1],
+        savedIds: const <String>{'p1'},
+        hasMore: true,
+        error: 'boom',
+      ),
+    ],
+  );
+
+  blocTest<FeedCubit, FeedState>(
+    'loadMore ignored while the previous page hydration is in flight',
+    build: () {
+      when(
+        () => repo.watchFeed(limit: any(named: 'limit')),
+      ).thenAnswer((_) => Stream<List<Post>>.value(manyPosts));
+      when(
+        () => repo.fetchLikedPostIds(postIds: any(named: 'postIds')),
+      ).thenAnswer((_) => likedGate.future);
+      when(
+        () => profileRepo.watchFollowingIds(uid: any(named: 'uid')),
+      ).thenAnswer((_) => const Stream<List<String>>.empty());
+      return FeedCubit(repo, profileRepo, myUid: 'u1');
+    },
+    act: (FeedCubit cubit) async {
+      await Future<void>.delayed(Duration.zero);
+      cubit.loadMore();
+      cubit.loadMore(); // in flight — must be swallowed by the guard
+      await Future<void>.delayed(Duration.zero);
+      likedGate.complete(const Right<Failure, Set<String>>(<String>{}));
+      await Future<void>.delayed(Duration.zero);
+    },
+    verify: (FeedCubit cubit) {
+      verify(() => repo.watchFeed(limit: 20)).called(1);
+      verifyNever(() => repo.watchFeed(limit: 30));
+    },
+    // the stale limit-10 hydration is dropped by the generation guard, so
+    // only the final limit-20 emission surfaces
+    expect: () => <FeedState>[
+      FeedState(status: FeedStatus.ready, posts: manyPosts, hasMore: false),
+    ],
+  );
+
+  blocTest<FeedCubit, FeedState>(
+    'refresh resets to page one and completes once the stream emits',
+    build: () {
+      when(
+        () => repo.watchFeed(limit: any(named: 'limit')),
+      ).thenAnswer((_) => Stream<List<Post>>.value(manyPosts));
+      when(
+        () => repo.fetchLikedPostIds(postIds: any(named: 'postIds')),
+      ).thenAnswer((_) async => const Right<Failure, Set<String>>(<String>{}));
+      when(
+        () => profileRepo.watchFollowingIds(uid: any(named: 'uid')),
+      ).thenAnswer((_) => const Stream<List<String>>.empty());
+      return FeedCubit(repo, profileRepo, myUid: 'u1');
+    },
+    act: (FeedCubit cubit) async {
+      await Future<void>.delayed(Duration.zero);
+      cubit.loadMore();
+      await Future<void>.delayed(Duration.zero);
+      await cubit.refresh();
+    },
+    verify: (FeedCubit cubit) {
+      verifyInOrder(<dynamic Function()>[
+        () => repo.watchFeed(limit: 10),
+        () => repo.watchFeed(limit: 20),
+        () => repo.watchFeed(limit: 10), // back to page one
+      ]);
+    },
+    expect: () => <FeedState>[
+      FeedState(status: FeedStatus.ready, posts: manyPosts, hasMore: true),
+      FeedState(status: FeedStatus.ready, posts: manyPosts, hasMore: false),
+      FeedState(status: FeedStatus.ready, posts: manyPosts, hasMore: true),
+    ],
   );
 
   blocTest<FeedCubit, FeedState>(

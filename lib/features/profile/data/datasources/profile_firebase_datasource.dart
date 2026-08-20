@@ -19,6 +19,9 @@ abstract interface class IProfileDataSource {
   Future<List<AppUser>> fetchFollowers({required String uid});
   Future<List<AppUser>> fetchFollowing({required String uid});
   Stream<List<Post>> watchUserPosts({required String uid, required int limit});
+
+  /// Posts the given user has saved, newest first.
+  Stream<List<Post>> watchSavedPosts({required String uid});
 }
 
 class ProfileFirebaseDataSource implements IProfileDataSource {
@@ -208,4 +211,30 @@ class ProfileFirebaseDataSource implements IProfileDataSource {
             )
             .toList(),
       );
+
+  @override
+  Stream<List<Post>> watchSavedPosts({required String uid}) => _db
+      .collection('savedPosts')
+      .where('uid', isEqualTo: uid)
+      .orderBy('createdAt', descending: true)
+      .limit(60)
+      .snapshots()
+      .asyncMap((QuerySnapshot<Object?> snap) async {
+        // ponytail: per-doc gets instead of getAll (not exposed); posts that
+        // were deleted resolve to nothing and drop out of the tab
+        final List<DocumentSnapshot<Object?>> posts = await Future.wait(
+          snap.docs.map(
+            (QueryDocumentSnapshot<Object?> saved) =>
+                _db.collection('posts').doc(saved['postId'] as String).get(),
+          ),
+        );
+        return <Post>[
+          for (final DocumentSnapshot<Object?> p in posts)
+            if (p.exists)
+              PostDto.fromMap(
+                p.id,
+                p.data() as Map<String, dynamic>,
+              ).toDomain(p.id),
+        ];
+      });
 }

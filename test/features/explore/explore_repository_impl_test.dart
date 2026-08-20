@@ -102,4 +102,18 @@ void main() {
       expect(failure!.message, contains('boom'));
     });
   });
+
+  group('fetchSuggestedUsers', () {
+    test('forwards params and wraps the list', () async {
+      when(
+        () => ds.fetchSuggestedUsers(myUid: 'me', limit: 12),
+      ).thenAnswer((_) async => <AppUser>[]);
+
+      final Either<Failure, List<AppUser>> result = await repo
+          .fetchSuggestedUsers(myUid: 'me', limit: 12);
+
+      expect(result.isRight(), isTrue);
+      verify(() => ds.fetchSuggestedUsers(myUid: 'me', limit: 12)).called(1);
+    });
+  });
 }

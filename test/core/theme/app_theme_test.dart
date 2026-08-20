@@ -1,60 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_instagram_clone/core/theme/app_theme.dart';
+import 'package:flutter_instagram_clone/core/theme/ig_colors.dart';
 
-/// Tests for the AppTheme.
-///
-/// These tests verify that:
-/// - Light and dark themes are properly configured
-/// - Material 3 is enabled
-/// - Theme properties are correctly set
 void main() {
   group('AppTheme', () {
-    group('lightTheme', () {
-      test('uses Material 3', () {
-        expect(AppTheme.lightTheme.useMaterial3, isTrue);
-      });
-
-      test('has light brightness', () {
-        expect(AppTheme.lightTheme.brightness, Brightness.light);
-      });
-
-      test('has a color scheme', () {
-        expect(AppTheme.lightTheme.colorScheme, isNotNull);
-      });
-
-      test('primary color is derived from seed', () {
-        final ThemeData theme = AppTheme.lightTheme;
-        expect(theme.colorScheme.primary, isNotNull);
-      });
+    test('dark theme uses IG tokens', () {
+      final ThemeData t = AppTheme.darkTheme;
+      expect(t.scaffoldBackgroundColor, IgColors.black);
+      expect(t.colorScheme.onPrimary, IgColors.white);
+      expect(t.splashFactory, NoSplash.splashFactory);
     });
 
-    group('darkTheme', () {
-      test('uses Material 3', () {
-        expect(AppTheme.darkTheme.useMaterial3, isTrue);
-      });
-
-      test('has dark brightness', () {
-        expect(AppTheme.darkTheme.brightness, Brightness.dark);
-      });
-
-      test('has a color scheme', () {
-        expect(AppTheme.darkTheme.colorScheme, isNotNull);
-      });
-
-      test('primary color is derived from seed', () {
-        final ThemeData theme = AppTheme.darkTheme;
-        expect(theme.colorScheme.primary, isNotNull);
-      });
+    test('light theme uses IG tokens', () {
+      final ThemeData t = AppTheme.lightTheme;
+      expect(t.scaffoldBackgroundColor, IgColors.white);
+      expect(t.colorScheme.onPrimary, IgColors.white);
+      expect(t.splashFactory, NoSplash.splashFactory);
     });
 
-    group('consistency', () {
-      test('light and dark themes have different brightness', () {
-        expect(
-          AppTheme.lightTheme.brightness != AppTheme.darkTheme.brightness,
-          isTrue,
-        );
-      });
+    test('IG gradient ring is 4 stops warm-to-pink', () {
+      final List<Color> g = IgColors.gradientRing;
+      expect(g.length, 4);
+      expect(g.first, const Color(0xFFFEDA75));
+      expect(g.last, const Color(0xFFD62976));
     });
   });
 }

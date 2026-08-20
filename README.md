@@ -1,10 +1,16 @@
-# Flutter Instagram Clone
+# An Instagram clone, written entirely by AI agents
 
-A fully vibe-coded clone of the Instagram mobile app, built as a proof of concept with [opencode](https://opencode.ai) (GLM 5.3). No hand-written code — everything is AI-generated, piece by piece.
+[![CI](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml/badge.svg)](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Dart](https://img.shields.io/badge/dart-%5E3.12-0175C2?logo=dart&logoColor=white)](https://dart.dev)
+
+A working clone of Instagram, built to find out how far "vibe coding" gets you: every line was written by an AI agent (opencode / Claude Code on GLM 5.3), one feature at a time, with tests and reviews along the way. No hand-written Dart.
+
+**8 features · 240 tests · 2 locales · 0 hand-written lines.** Auth (email + Google), a home feed with images and video reels, stories that expire after 24h, likes, comments, follow graph, search over users and hashtags, notifications, and real-time direct messages. It runs against a real Firebase backend — no mocks, no fake latency.
 
 ## Screenshots
 
-Captured from the Android emulator with seeded demo data:
+From the Android emulator, running on seeded demo data (dark theme; the app follows the system theme and has a matching light one):
 
 | | |
 |---|---|
@@ -14,137 +20,114 @@ Captured from the Android emulator with seeded demo data:
 | ![Activity](assets/screenshots/07-activity.png) | ![Profile](assets/screenshots/08-profile.png) |
 | ![Post detail](assets/screenshots/09-post-detail.png) | ![Chat](assets/screenshots/10-chat.png) |
 
-## Stack
+## What works
 
-| Layer | Technology |
-|-------|------------|
-| Framework | Flutter |
-| State management | BLoC / Cubits (`flutter_bloc`) |
-| Navigation | `go_router` |
-| Models / immutability | `freezed` + `json_serializable` |
-| DI | `get_it` |
-| Functional error handling | `fpdart` (`Either`) |
-| Backend | Firebase — Auth, Cloud Firestore, Cloud Storage |
+| Area | Details |
+|------|---------|
+| **Auth** | Email + password, Google Sign-In, password reset, an onboarding gate that routes through the router redirect, logout |
+| **Feed** | Real-time following-filtered feed, optimistic likes with rollback, **double-tap to like with heart burst**, comments, **save/bookmark**, infinite scroll, pull-to-refresh, skeleton loading |
+| **Stories** | 24h expiry enforced in the query, IG gradient rings on unseen stories, segmented progress bars, tap-thirds navigation, create from gallery/camera |
+| **Reels** | Vertical pager with muted looping autoplay, pause on app lifecycle, double-tap like, **comments + owner notifications**, full create flow |
+| **Explore** | 3-column grid of posts from people you *don't* follow (IG's discovery semantics), infinite scroll, debounced user search, hashtag pages with accent-folding (#café → #cafe) |
+| **Chat** | Real-time 1:1 DMs over Firestore snapshots, deterministic conversation ids (sorted-uid pair), **typing indicators**, **suggested users** |
+| **Notifications** | Real-time like/comment/follow, unread badge on the heart, mark-all-read on open |
+| **Profile** | Edit avatar/username/bio (avatar downscaled + compressed on upload), follow graph, follower/following lists, Grid + **Saved** tabs, more-menu |
+| **Cross-cutting** | English + French (follows device locale), matched dark/light themes, hand-drawn icon set (zero icon-font dependency), haptic vocabulary, shimmer skeletons everywhere |
 
-## Feature Roadmap
+## Running it
 
-Built incrementally, one phase at a time:
-
-- [x] **Phase 1 — Foundation**: Firebase wiring, auth (email + Google), signup/login/onboarding, user profile creation
-- [x] **Phase 2 — Posts & Feed**: image posts (gallery/camera), home feed, like, comment
-- [x] **Phase 3 — Social Graph**: follow/unfollow, profile grid, followers/following lists
-- [x] **Phase 4 — Stories**: 24h stories, story creation, story viewer
-- [x] **Phase 5 — Explore & Search**: explore grid, user & hashtag search
-- [x] **Phase 6 — Notifications**: likes, comments, follows
-- [x] **Phase 7 — Reels**: short video posts, vertical feed
-- [x] **Phase 8 — Direct Messages**: 1:1 chat, real-time
-
-## Firebase Setup
-
-1. Create a project at [console.firebase.google.com](https://console.firebase.google.com)
-2. Enable **Authentication** (Email/Password + Google providers)
-3. Create a **Firestore** database (start in test mode for the POC)
-4. Enable **Cloud Storage**
-5. Configure the FlutterFire CLI:
+You need a Firebase project with **Authentication** (Email/Password + Google), **Firestore** and **Storage** enabled. Then:
 
 ```bash
-dart pub global activate flutterfire_cli
-flutterfire configure
-```
-
-This generates `lib/firebase_options.dart` (git-ignored) used by `main.dart`.
-
-## Architecture
-
-This project follows a **Feature-based Clean Architecture** pattern:
-
-- **Data Layer**: DTOs, Data Sources, and Repository implementations.
-- **Domain Layer**: Models, Repository interfaces, and Domain Services (Business Logic).
-- **Presentation Layer**: Cubits (State Management), Screens, and Widgets.
-
-Dependencies flow inward only: `presentation → domain ← data`.
-
-## Project Structure
-
-```text
-lib/
-├── main.dart              # runApp() only — no wiring, no logic
-├── app.dart               # MaterialApp.router configuration
-├── core/
-│   ├── di/
-│   │   └── service_locator.dart   # All DI wiring
-│   ├── router/
-│   │   ├── app_router.dart
-│   │   └── route_constants.dart
-│   ├── models/            # Shared domain models only (freezed)
-│   └── utils/
-└── features/
-    └── [feature_name]/
-        ├── data/
-        │   ├── datasources/       # Local/remote data sources
-        │   ├── models/            # DTOs (data transfer objects)
-        │   └── repositories/      # Repository implementations
-        ├── domain/
-        │   ├── models/            # Feature models (freezed)
-        │   ├── repositories/      # Repository interfaces
-        │   └── services/          # Domain coordination logic
-        └── presentation/
-            ├── bloc/               # Cubits + states
-            ├── screens/
-            └── widgets/
-```
-
-## CLI Tools
-
-The following utility scripts are available in the `scripts/` folder:
-
-| Script | Purpose |
-|--------|---------|
-| `./scripts/fgen.sh "name"` | **Generate New Feature**: Creates all Clean Architecture boilerplate and runs code generation. |
-| `./scripts/fstr.sh "key" "FR" "EN"` | **Add Localization**: Adds a new key to both French and English `.arb` files. |
-| `./scripts/fanal.sh` | **Audit**: Generates a code quality and architecture report. |
-| `./scripts/fdead.sh` | **Dead Code**: Identifies unused files in the project. |
-| `./scripts/fimp.sh` | **Fix Imports**: Automatically converts package imports to relative imports. |
-
-## Development Commands
-
-```bash
-# Install dependencies
 flutter pub get
-
-# Generate localization files
-flutter gen-l10n
-
-# Run code generation (Freezed/JSON)
-dart run build_runner build --delete-conflicting-outputs
-
-# Run tests
-flutter test
-
-# Run the app
+dart pub global activate flutterfire_cli
+flutterfire configure        # generates lib/firebase_options.dart (git-ignored)
 flutter run
 ```
 
-## Dummy Data
+Only want to run the tests? No Firebase needed — the suite runs against mocks:
 
-Seeds 6 demo users with posts, stories, reels, follows, notifications and a chat, wired to your account:
+```bash
+cp scripts/firebase_options_stub.dart lib/firebase_options.dart
+flutter test
+```
 
-1. Firebase console → Project settings → Service accounts → **Generate new private key** → save as `scripts/seed/serviceAccount.json` (git-ignored)
-2. Run:
+The security rules are in `firestore.rules` and `firebase.storage.rules` at the repo root — deploy them with `firebase deploy --only firestore:rules,storage` rather than running in test mode forever. They're field-level strict: strangers can only touch count fields, media writes are owner-scoped per folder, and notification creates must name the caller as actor.
+
+## Demo data
+
+The seeder fills the project with 12 users, 60 posts with real photos (picsum/pravatar, downloaded and cached in `scripts/seed/assets/`), stories, reels, comments, notifications and chat threads, all wired to your own account so your feed isn't empty:
 
 ```bash
 cd scripts/seed && npm install
-node seed.js --me=<your-uid>
+# Firebase console → Project settings → Service accounts → Generate new private key
+# save it as scripts/seed/serviceAccount.json (git-ignored)
+node seed.js --me=<your-uid>       # add --reset to wipe and reseed
 ```
 
-(`--reset` first wipes previously seeded data. Your uid is visible on your profile screen in the app, or in the Firebase console Authentication tab.)
+Your uid is in the Firebase console under Authentication. Re-runs are idempotent — every Firestore document id is deterministic, so nothing duplicates. (Storage uploads from re-runs are not yet garbage-collected; `--reset` wipes Firestore only.)
 
-## Adding a New Feature
+## How it's built
 
-To add a new feature, use the generation script:
+Feature-first clean architecture: each feature (`feed`, `stories`, `reels`, `chat`, …) owns its `data` / `domain` / `presentation` layers, and only `core/` is shared. Dependencies point inward — screens talk to cubits (`flutter_bloc`), cubits to repository interfaces, implementations live in data and are wired in a single `service_locator.dart`. Failures travel as `Either<Failure, T>` from `fpdart`, so error handling is a type, not a promise.
+
+```mermaid
+flowchart TD
+  subgraph feature["each feature — feed · stories · reels · chat · explore · notifications · profile · auth"]
+    presentation["presentation — screens · widgets · cubits"]
+    domain["domain — freezed models · repository interfaces"]
+    data["data — Firebase datasources · repository impls"]
+    presentation -->|depends on| domain
+    data -->|implements| domain
+  end
+  presentation --> core["core/ — get_it DI · go_router shell · IG theme tokens · custom icons · l10n"]
+  data --> firebase[(Firebase Auth · Firestore · Storage)]
+```
+
+A few decisions worth knowing about:
+
+- **go_router with an indexed StatefulShellRoute** — five tabs, each branch keeps its own navigator stack, so pushing a profile from search doesn't blow away your feed scroll position.
+- **The follow graph is client-side-filtered, page by page.** Firestore's `whereIn` caps at 10 items, so the feed pages posts server-side (`orderBy createdAt, limit 10`) and filters each page by your following set locally. Fine at demo scale; the comment in `feed_cubit.dart` marks where server-side filtering takes over. A fresh account follows nobody — the empty feed links to search so you can fix that.
+- **Counts are denormalized** onto user and post docs and mutated in transactions, because counting subcollections on read doesn't scale and Firestore can't do it in a query anyway.
+- **`ponytail:` is a convention, not a ponytail.** Every deliberate shortcut in the code is annotated inline with its rationale and its revisit condition ("extract on 4th consumer", "full ICU fold if other scripts matter"). There are 50 of them today — count them yourself:
 
 ```bash
-./scripts/fgen.sh my_new_feature
+grep -rn "ponytail:" lib | wc -l
 ```
 
-After generation, register your new classes in `lib/core/di/service_locator.dart` and add routes in `lib/core/router/app_router.dart`.
+## The receipts
+
+The "written entirely by AI agents" claim is checkable, not vibes:
+
+- **[docs/plans/](docs/plans)** — nine dated phase implementation plans (~3,000 lines), one per feature slice, each ending in a `chore: complete phase N` commit.
+- **The commit history** — 50+ conventional commits in a repeating rhythm: plan → per-layer feature slices → `fix: final review` pass → phase complete.
+- **[AGENTS.md](AGENTS.md) and [.claude/skills/](.claude/skills)** — the rules the agents operated under (freezed v3 gotchas, controller lifecycle bans, auto dart-fix hooks) and the five custom enforcement skills that kept the architecture honest.
+- **CI** — `flutter analyze` + all 240 tests on every push: [![CI](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml/badge.svg)](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml)
+
+## Scripts
+
+The agent tooling is part of the exhibit — this is the machinery that kept AI code honest:
+
+| Script | What it does |
+|--------|--------------|
+| `scripts/fgen.sh <name>` | Scaffolds a new feature (all three layers + tests) and runs codegen |
+| `scripts/fstr.sh <key> <fr> <en>` | Adds a localization key to both ARB files |
+| `scripts/fimp.sh` | Rewrites package imports to relative |
+| `scripts/fdead.sh` | Finds orphaned files |
+| `scripts/fanal.sh` | Architecture pre-analysis (feature map, DI wiring, cross-feature imports) |
+| `scripts/fcheck.sh` / `fbuild.sh` | Analyze + test gate / build runner wrapper |
+| `scripts/flutter_analyze_interceptor.py` | Hook: runs `dart fix` + format on every `.dart` edit |
+| `scripts/screenshots.sh` | Walks the app and captures the screenshots above |
+
+```bash
+dart run build_runner build --delete-conflicting-outputs   # after model changes
+flutter test                                               # 240 tests, ~10s
+```
+
+## Roadmap
+
+Everything above works end-to-end, including saved posts + the Saved profile tab, password reset, typing indicators, reel comments (with like/comment notifications) and suggested users. Next up, in wow-per-effort order: carousel posts, unread badges + read receipts, image messages / share-post-to-DM, story replies, FCM push.
+
+## License
+
+[MIT](LICENSE). Bundled fonts (Inter, Grand Hotel) are under their own SIL OFL 1.1 licenses, shipped next to the TTFs in `assets/fonts/`.

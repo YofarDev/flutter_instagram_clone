@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../domain/models/comment.dart';
+import '../../../../core/models/comment.dart';
 import '../../../../core/models/post.dart';
 
 part 'post_detail_state.freezed.dart';
@@ -13,6 +13,7 @@ sealed class PostDetailState with _$PostDetailState {
     Post? post,
     @Default(PostDetailStatus.loading) PostDetailStatus status,
     @Default(false) bool isLiked,
+    @Default(false) bool isSaved,
     @Default(<Comment>[]) List<Comment> comments,
     @Default(false) bool sending,
     String? error,

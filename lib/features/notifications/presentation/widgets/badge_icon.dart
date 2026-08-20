@@ -1,18 +1,28 @@
 import 'package:flutter/material.dart';
 
-class BadgeIcon extends StatelessWidget {
-  const BadgeIcon({required this.icon, required this.count, super.key});
+import '../../../../core/theme/ig_colors.dart';
+import '../../../../core/widgets/ig_icon.dart';
+import '../../../../core/widgets/ig_icons.dart';
 
-  final IconData icon;
+class BadgeIcon extends StatelessWidget {
+  const BadgeIcon({required this.igIcon, required this.count, super.key});
+
+  final IgIconData igIcon;
   final int count;
 
   @override
   Widget build(BuildContext context) {
-    if (count <= 0) return Icon(icon);
+    final Widget glyph = IgIcon(
+      igIcon,
+      color:
+          IconTheme.of(context).color ??
+          Theme.of(context).colorScheme.onSurface,
+    );
+    if (count <= 0) return glyph;
     return Stack(
       clipBehavior: Clip.none,
       children: <Widget>[
-        SizedBox(width: 24, height: 24, child: Icon(icon)),
+        SizedBox(width: 24, height: 24, child: glyph),
         Positioned(
           top: -4,
           right: -6,
@@ -21,7 +31,7 @@ class BadgeIcon extends StatelessWidget {
             constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
             alignment: Alignment.center,
             decoration: const BoxDecoration(
-              color: Colors.red,
+              color: IgColors.alertRed,
               shape: BoxShape.circle,
             ),
             child: FittedBox(
@@ -29,7 +39,7 @@ class BadgeIcon extends StatelessWidget {
                 '$count',
                 style: const TextStyle(
                   fontSize: 9,
-                  color: Colors.white,
+                  color: IgColors.white,
                   fontWeight: FontWeight.bold,
                 ),
               ),

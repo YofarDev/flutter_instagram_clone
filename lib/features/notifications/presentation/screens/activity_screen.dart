@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/router/route_constants.dart';
 import '../../../../core/utils/time_ago.dart';
+import '../../../../core/widgets/skeleton/skeletons.dart';
 import '../../domain/models/notification_item.dart';
 import '../bloc/notifications_cubit.dart';
 import '../bloc/notifications_state.dart';
@@ -44,7 +45,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
               p.status != c.status || p.items != c.items,
           builder: (BuildContext context, NotificationsState state) {
             if (state.status == NotificationsStatus.loading) {
-              return const Center(child: CircularProgressIndicator());
+              return ListView(
+                children: List<SkeletonListRow>.generate(
+                  8,
+                  (_) => const SkeletonListRow(),
+                ),
+              );
             }
             if (state.items.isEmpty) {
               return Center(child: Text(l10n.notifEmpty));

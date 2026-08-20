@@ -13,5 +13,6 @@ sealed class Reel with _$Reel {
     @Default('') String caption,
     required DateTime createdAt,
     @Default(0) int likeCount,
+    @Default(0) int commentCount,
   }) = _Reel;
 }

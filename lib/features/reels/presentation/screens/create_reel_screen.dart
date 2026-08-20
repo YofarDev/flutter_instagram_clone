@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
+import '../../../../core/utils/haptics.dart';
 import '../bloc/create_reel_cubit.dart';
 import '../bloc/create_reel_state.dart';
 
@@ -36,6 +37,7 @@ class _CreateReelScreenState extends State<CreateReelScreen> {
             p.success != c.success || p.error != c.error,
         listener: (BuildContext context, CreateReelState state) {
           if (state.success) {
+            AppHaptics.success();
             context.pop();
           } else if (state.error != null) {
             ScaffoldMessenger.of(context)
