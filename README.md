@@ -8,6 +8,12 @@ A working clone of Instagram, built to find out how far "vibe coding" gets you: 
 
 **8 features · 240 tests · 2 locales · 0 hand-written lines.** Auth (email + Google), a home feed with images and video reels, stories that expire after 24h, likes, comments, follow graph, search over users and hashtags, notifications, and real-time direct messages. It runs against a real Firebase backend — no mocks, no fake latency.
 
+## Demo
+
+A 40-second walkthrough on the Android emulator (seeded demo data): feed scroll and double-tap like, story viewer with tap-through, reels with double-tap like, profile with the saved-posts tab.
+
+![Demo walkthrough](assets/screenshots/demo.gif)
+
 ## Screenshots
 
 From the Android emulator, running on seeded demo data (dark theme; the app follows the system theme and has a matching light one):
