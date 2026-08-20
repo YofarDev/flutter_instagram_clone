@@ -6,7 +6,7 @@
 
 A working clone of Instagram, built to find out how far "vibe coding" gets you: every line was written by an AI agent (opencode / Claude Code on GLM 5.3), one feature at a time, with tests and reviews along the way. No hand-written Dart.
 
-**8 features · 213 tests · 2 locales · 0 hand-written lines.** Auth (email + Google), a home feed with images and video reels, stories that expire after 24h, likes, comments, follow graph, search over users and hashtags, notifications, and real-time direct messages. It runs against a real Firebase backend — no mocks, no fake latency.
+**8 features · 240 tests · 2 locales · 0 hand-written lines.** Auth (email + Google), a home feed with images and video reels, stories that expire after 24h, likes, comments, follow graph, search over users and hashtags, notifications, and real-time direct messages. It runs against a real Firebase backend — no mocks, no fake latency.
 
 ## Screenshots
 
@@ -24,14 +24,14 @@ From the Android emulator, running on seeded demo data (dark theme; the app foll
 
 | Area | Details |
 |------|---------|
-| **Auth** | Email + password, Google Sign-In, an onboarding gate that routes through the router redirect, logout |
-| **Feed** | Real-time following-filtered feed, optimistic likes with rollback, **double-tap to like with heart burst**, comments, infinite scroll, pull-to-refresh, skeleton loading |
+| **Auth** | Email + password, Google Sign-In, password reset, an onboarding gate that routes through the router redirect, logout |
+| **Feed** | Real-time following-filtered feed, optimistic likes with rollback, **double-tap to like with heart burst**, comments, **save/bookmark**, infinite scroll, pull-to-refresh, skeleton loading |
 | **Stories** | 24h expiry enforced in the query, IG gradient rings on unseen stories, segmented progress bars, tap-thirds navigation, create from gallery/camera |
-| **Reels** | Vertical pager with muted looping autoplay, pause on app lifecycle, double-tap like, full create flow |
+| **Reels** | Vertical pager with muted looping autoplay, pause on app lifecycle, double-tap like, **comments + owner notifications**, full create flow |
 | **Explore** | 3-column grid of posts from people you *don't* follow (IG's discovery semantics), infinite scroll, debounced user search, hashtag pages with accent-folding (#café → #cafe) |
-| **Chat** | Real-time 1:1 DMs over Firestore snapshots, deterministic conversation ids (sorted-uid pair) |
+| **Chat** | Real-time 1:1 DMs over Firestore snapshots, deterministic conversation ids (sorted-uid pair), **typing indicators**, **suggested users** |
 | **Notifications** | Real-time like/comment/follow, unread badge on the heart, mark-all-read on open |
-| **Profile** | Edit avatar/username/bio (avatar downscaled + compressed on upload), follow graph, follower/following lists, post grid, more-menu |
+| **Profile** | Edit avatar/username/bio (avatar downscaled + compressed on upload), follow graph, follower/following lists, Grid + **Saved** tabs, more-menu |
 | **Cross-cutting** | English + French (follows device locale), matched dark/light themes, hand-drawn icon set (zero icon-font dependency), haptic vocabulary, shimmer skeletons everywhere |
 
 ## Running it
@@ -102,7 +102,7 @@ The "written entirely by AI agents" claim is checkable, not vibes:
 - **[docs/plans/](docs/plans)** — nine dated phase implementation plans (~3,000 lines), one per feature slice, each ending in a `chore: complete phase N` commit.
 - **The commit history** — 50+ conventional commits in a repeating rhythm: plan → per-layer feature slices → `fix: final review` pass → phase complete.
 - **[AGENTS.md](AGENTS.md) and [.claude/skills/](.claude/skills)** — the rules the agents operated under (freezed v3 gotchas, controller lifecycle bans, auto dart-fix hooks) and the five custom enforcement skills that kept the architecture honest.
-- **CI** — `flutter analyze` + all 213 tests on every push: [![CI](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml/badge.svg)](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml)
+- **CI** — `flutter analyze` + all 240 tests on every push: [![CI](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml/badge.svg)](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml)
 
 ## Scripts
 
@@ -121,12 +121,12 @@ The agent tooling is part of the exhibit — this is the machinery that kept AI 
 
 ```bash
 dart run build_runner build --delete-conflicting-outputs   # after model changes
-flutter test                                               # 213 tests, ~10s
+flutter test                                               # 240 tests, ~10s
 ```
 
 ## Roadmap
 
-Everything above works end-to-end. Next up, in wow-per-effort order: saved posts + Saved tab (the bookmark icon is already drawn), carousel posts, typing indicators and read receipts, story replies, suggestions, reel comments, FCM push.
+Everything above works end-to-end, including saved posts + the Saved profile tab, password reset, typing indicators, reel comments (with like/comment notifications) and suggested users. Next up, in wow-per-effort order: carousel posts, unread badges + read receipts, image messages / share-post-to-DM, story replies, FCM push.
 
 ## License
 
