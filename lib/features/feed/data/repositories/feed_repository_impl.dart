@@ -1,7 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/models/failure.dart';
-import '../../domain/models/comment.dart';
+import '../../../../core/models/comment.dart';
 import '../../../../core/models/post.dart';
 import '../../domain/repositories/feed_repository.dart';
 import '../datasources/feed_firebase_datasource.dart';

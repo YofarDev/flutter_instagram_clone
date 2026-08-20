@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../domain/models/comment.dart';
+import '../../../../core/models/comment.dart';
 import '../../../../core/models/post.dart';
 
 part 'post_detail_state.freezed.dart';

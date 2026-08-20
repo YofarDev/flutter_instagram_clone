@@ -7,7 +7,7 @@ import '../../../../core/models/post.dart';
 import '../../../../core/router/route_constants.dart';
 import '../bloc/post_detail_cubit.dart';
 import '../bloc/post_detail_state.dart';
-import '../widgets/comment_tile.dart';
+import '../../../../core/widgets/comment_tile.dart';
 import '../widgets/post_card.dart';
 
 class PostDetailScreen extends StatefulWidget {

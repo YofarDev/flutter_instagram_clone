@@ -84,6 +84,7 @@ class ReelsCubit extends Cubit<ReelsState> {
     );
     final Either<Failure, void> either = await _repository.toggleReelLike(
       reelId: reel.id,
+      reelOwnerId: reel.uid,
       currentlyLiked: wasLiked,
     );
     if (isClosed) return;

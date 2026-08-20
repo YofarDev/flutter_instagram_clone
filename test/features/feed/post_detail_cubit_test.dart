@@ -4,7 +4,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:flutter_instagram_clone/core/models/failure.dart';
-import 'package:flutter_instagram_clone/features/feed/domain/models/comment.dart';
+import 'package:flutter_instagram_clone/core/models/comment.dart';
 import 'package:flutter_instagram_clone/core/models/post.dart';
 import 'package:flutter_instagram_clone/features/feed/domain/repositories/feed_repository.dart';
 import 'package:flutter_instagram_clone/features/feed/presentation/bloc/post_detail_cubit.dart';

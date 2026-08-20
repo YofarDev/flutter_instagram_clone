@@ -16,6 +16,7 @@ class ReelItem extends StatefulWidget {
     required this.isCurrent,
     required this.isLiked,
     required this.onLikeTap,
+    this.onCommentTap,
     this.forcePause = false,
     super.key,
   });
@@ -25,6 +26,7 @@ class ReelItem extends StatefulWidget {
   final bool forcePause;
   final bool isLiked;
   final VoidCallback onLikeTap;
+  final VoidCallback? onCommentTap;
 
   @override
   State<ReelItem> createState() => _ReelItemState();
@@ -174,6 +176,16 @@ class _ReelItemState extends State<ReelItem> {
                   '${widget.reel.likeCount}',
                   style: const TextStyle(color: Colors.white),
                 ),
+                if (widget.onCommentTap != null) ...<Widget>[
+                  IconButton(
+                    icon: IgIcon(IgIcons.comment, color: Colors.white),
+                    onPressed: widget.onCommentTap,
+                  ),
+                  Text(
+                    '${widget.reel.commentCount}',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ],
                 IconButton(
                   icon: Icon(
                     _controller.value.volume == 0

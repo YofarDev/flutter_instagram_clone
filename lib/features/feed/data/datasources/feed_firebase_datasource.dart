@@ -5,9 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-import '../../domain/models/comment.dart';
+import '../../../../core/models/comment.dart';
 import '../../../../core/models/post.dart';
-import '../models/comment_dto.dart';
+import '../../../../core/models/comment_dto.dart';
 import '../../../../core/models/post_dto.dart';
 
 /// #hashtag extraction: unicode word chars, Latin-1 accent fold, lowercase,

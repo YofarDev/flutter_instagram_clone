@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/di/service_locator.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/router/route_constants.dart';
 import '../../domain/models/reel.dart';
+import '../bloc/reel_comments_cubit.dart';
 import '../bloc/reels_cubit.dart';
 import '../bloc/reels_state.dart';
+import '../widgets/reel_comments_sheet.dart';
 import '../widgets/reel_item.dart';
 
 class ReelsScreen extends StatefulWidget {
@@ -20,6 +23,22 @@ class _ReelsScreenState extends State<ReelsScreen> with WidgetsBindingObserver {
   final PageController _pageController = PageController();
   int _current = 0;
   bool _appPaused = false;
+
+  void _openComments(Reel reel) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (BuildContext sheetContext) => BlocProvider<ReelCommentsCubit>(
+        create: (BuildContext context) =>
+            getIt<ReelCommentsCubit>(param1: reel),
+        child: const Padding(
+          padding: EdgeInsets.only(bottom: 8),
+          child: SizedBox(height: 420, child: ReelCommentsSheet()),
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -104,6 +123,7 @@ class _ReelsScreenState extends State<ReelsScreen> with WidgetsBindingObserver {
                       isLiked: state.likedIds.contains(reel.id),
                       onLikeTap: () =>
                           context.read<ReelsCubit>().toggleReelLike(reel),
+                      onCommentTap: () => _openComments(reel),
                     );
                   },
                 ),

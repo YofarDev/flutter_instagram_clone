@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/time_ago.dart';
-import '../../domain/models/comment.dart';
+import '../models/comment.dart';
 
 class CommentTile extends StatelessWidget {
   const CommentTile({required this.comment, super.key});

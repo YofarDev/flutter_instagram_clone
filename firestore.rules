@@ -68,14 +68,20 @@ service cloud.firestore {
     match /reels/{reelId} {
       allow read: if signedIn();
       allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
-      // strangers may only flip likeCount
+      // strangers may only flip likeCount/commentCount
       allow update: if signedIn() && request.resource.data.diff(resource.data)
-          .affectedKeys().hasOnly(['likeCount']);
+          .affectedKeys().hasOnly(['likeCount', 'commentCount']);
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
 
       match /likes/{uid} {
         allow read: if signedIn();
         allow create, delete: if signedIn() && request.auth.uid == uid;
+      }
+
+      match /comments/{commentId} {
+        allow read: if signedIn();
+        allow create: if signedIn() && request.resource.data.authorId == request.auth.uid;
+        allow update, delete: if false;
       }
     }
 

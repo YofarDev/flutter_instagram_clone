@@ -5,6 +5,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:flutter_instagram_clone/core/models/failure.dart';
 import 'package:flutter_instagram_clone/features/reels/data/datasources/reels_firebase_datasource.dart';
 import 'package:flutter_instagram_clone/features/reels/data/repositories/reels_repository_impl.dart';
+import 'package:flutter_instagram_clone/core/models/comment.dart';
 import 'package:flutter_instagram_clone/features/reels/domain/models/reel.dart';
 
 class MockReelsDataSource extends Mock implements IReelsDataSource {}
@@ -103,31 +104,77 @@ void main() {
   group('toggleReelLike', () {
     test('returns Right(null) and forwards params on success', () async {
       when(
-        () => ds.toggleReelLike(reelId: 'r1', currentlyLiked: false),
+        () => ds.toggleReelLike(
+          reelId: 'r1',
+          reelOwnerId: any(named: 'reelOwnerId'),
+          currentlyLiked: false,
+        ),
       ).thenAnswer((_) async {});
 
       final Either<Failure, void> result = await repo.toggleReelLike(
         reelId: 'r1',
+        reelOwnerId: 'u1',
         currentlyLiked: false,
       );
 
       expect(result, const Right<Failure, void>(null));
       verify(
-        () => ds.toggleReelLike(reelId: 'r1', currentlyLiked: false),
+        () => ds.toggleReelLike(
+          reelId: 'r1',
+          reelOwnerId: any(named: 'reelOwnerId'),
+          currentlyLiked: false,
+        ),
       ).called(1);
     });
 
     test('returns Left when datasource throws', () async {
       when(
-        () => ds.toggleReelLike(reelId: 'r1', currentlyLiked: true),
+        () => ds.toggleReelLike(
+          reelId: 'r1',
+          reelOwnerId: any(named: 'reelOwnerId'),
+          currentlyLiked: true,
+        ),
       ).thenThrow(Exception('tx failed'));
 
       final Either<Failure, void> result = await repo.toggleReelLike(
         reelId: 'r1',
+        reelOwnerId: 'u1',
         currentlyLiked: true,
       );
 
       expect(result.isLeft(), true);
+    });
+  });
+
+  group('reel comments', () {
+    test('watchReelComments passes datasource stream through', () async {
+      when(
+        () => ds.watchReelComments(reelId: 'r1'),
+      ).thenAnswer((_) => Stream<List<Comment>>.value(<Comment>[]));
+
+      final List<List<Comment>> emitted = await repo
+          .watchReelComments(reelId: 'r1')
+          .toList();
+
+      expect(emitted.length, 1);
+      verify(() => ds.watchReelComments(reelId: 'r1')).called(1);
+    });
+
+    test('addReelComment forwards and wraps failure', () async {
+      when(
+        () => ds.addReelComment(reelId: 'r1', reelOwnerId: 'u1', text: 'hey'),
+      ).thenThrow(Exception('boom'));
+
+      final Either<Failure, void> result = await repo.addReelComment(
+        reelId: 'r1',
+        reelOwnerId: 'u1',
+        text: 'hey',
+      );
+
+      expect(result.isLeft(), isTrue);
+      verify(
+        () => ds.addReelComment(reelId: 'r1', reelOwnerId: 'u1', text: 'hey'),
+      ).called(1);
     });
   });
 }

@@ -109,5 +109,6 @@
   "authResetTitle": "Reset password",
   "authResetSend": "Send link",
   "authResetSent": "Link sent — check your inbox",
-  "chatTyping": "typing…"
+  "chatTyping": "typing…",
+  "commentsEmpty": "No comments yet"
 }

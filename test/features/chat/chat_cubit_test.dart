@@ -150,18 +150,10 @@ void main() {
     },
     verify: (ChatCubit cubit) {
       verify(
-        () => repo.setTyping(
-          conversationId: 'c1',
-          myUid: 'me',
-          typing: true,
-        ),
+        () => repo.setTyping(conversationId: 'c1', myUid: 'me', typing: true),
       ).called(1);
       verify(
-        () => repo.setTyping(
-          conversationId: 'c1',
-          myUid: 'me',
-          typing: false,
-        ),
+        () => repo.setTyping(conversationId: 'c1', myUid: 'me', typing: false),
       ).called(1);
     },
   );
@@ -175,11 +167,7 @@ void main() {
     },
     verify: (ChatCubit cubit) {
       verify(
-        () => repo.setTyping(
-          conversationId: 'c1',
-          myUid: 'me',
-          typing: false,
-        ),
+        () => repo.setTyping(conversationId: 'c1', myUid: 'me', typing: false),
       ).called(1);
     },
   );
@@ -206,22 +194,14 @@ void main() {
     },
     verify: (ChatCubit cubit) {
       verifyInOrder(<dynamic Function()>[
-        () => repo.setTyping(
-              conversationId: 'c1',
-              myUid: 'me',
-              typing: true,
-            ),
-        () => repo.setTyping(
-              conversationId: 'c1',
-              myUid: 'me',
-              typing: false,
-            ),
+        () => repo.setTyping(conversationId: 'c1', myUid: 'me', typing: true),
+        () => repo.setTyping(conversationId: 'c1', myUid: 'me', typing: false),
         () => repo.sendMessage(
-              conversationId: 'c1',
-              myUid: 'me',
-              otherUid: 'u2',
-              text: 'hi',
-            ),
+          conversationId: 'c1',
+          myUid: 'me',
+          otherUid: 'u2',
+          text: 'hi',
+        ),
       ]);
     },
   );
@@ -229,9 +209,7 @@ void main() {
   blocTest<ChatCubit, ChatState>(
     'typing: other participant typing flips otherTyping',
     build: () {
-      when(
-        () => repo.watchTyping(conversationId: 'c1'),
-      ).thenAnswer(
+      when(() => repo.watchTyping(conversationId: 'c1')).thenAnswer(
         (_) => Stream<String?>.fromIterable(const <String?>['u2', null]),
       );
       when(

@@ -1,7 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/models/failure.dart';
-import '../models/comment.dart';
+import '../../../../core/models/comment.dart';
 import '../../../../core/models/post.dart';
 
 abstract interface class IFeedRepository {

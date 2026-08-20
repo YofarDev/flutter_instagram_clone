@@ -1,4 +1,4 @@
-import '../../domain/models/comment.dart';
+import 'comment.dart';
 
 class CommentDto {
   const CommentDto({

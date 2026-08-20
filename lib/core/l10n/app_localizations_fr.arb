@@ -79,5 +79,6 @@
   "authResetTitle": "Réinitialiser le mot de passe",
   "authResetSend": "Envoyer le lien",
   "authResetSent": "Lien envoyé — vérifie ta boîte mail",
-  "chatTyping": "en train d'écrire…"
+  "chatTyping": "en train d'écrire…",
+  "commentsEmpty": "Pas encore de commentaires"
 }
