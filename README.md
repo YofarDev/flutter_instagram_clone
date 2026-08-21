@@ -79,16 +79,16 @@ Your uid is in the Firebase console under Authentication. Re-runs are idempotent
 Feature-first clean architecture: each feature (`feed`, `stories`, `reels`, `chat`, …) owns its `data` / `domain` / `presentation` layers, and only `core/` is shared. Dependencies point inward — screens talk to cubits (`flutter_bloc`), cubits to repository interfaces, implementations live in data and are wired in a single `service_locator.dart`. Failures travel as `Either<Failure, T>` from `fpdart`, so error handling is a type, not a promise.
 
 ```mermaid
-flowchart td
-  subgraph feature["each feature — feed · stories · reels · chat · explore · notifications · profile · auth"]
-    presentation["presentation — screens · widgets · cubits"]
-    domain["domain — freezed models · repository interfaces"]
-    data["data — Firebase datasources · repository impls"]
-    presentation -->|depends on| domain
-    data -->|implements| domain
-  end
-  presentation --> core["core/ — get_it DI · go_router shell · IG theme tokens · custom icons · l10n"]
-  data --> firebase[(Firebase Auth · Firestore · Storage)]
+flowchart TD
+    subgraph FEATURE["Each feature module"]
+        P["Presentation (screens, widgets, cubits)"]
+        D["Domain (freezed models, repository interfaces)"]
+        DA["Data (Firebase datasources, repository impls)"]
+        P -->|depends on| D
+        DA -->|implements| D
+    end
+    P --> CORE["core/ (get_it DI, go_router shell, theme, icons, l10n)"]
+    DA --> FB["Firebase (Auth, Firestore, Storage)"]
 ```
 
 A few decisions worth knowing about:
