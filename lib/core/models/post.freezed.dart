@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Post {
 
- String get id; String get authorId; String get authorUsername; String? get authorAvatarUrl; String get imageUrl; String get caption; DateTime get createdAt; int get likeCount; int get commentCount; List<String> get tags;
+ String get id; String get authorId; String get authorUsername; String? get authorAvatarUrl; List<String> get imageUrls; String get caption; DateTime get createdAt; int get likeCount; int get commentCount; List<String> get tags;
 /// Create a copy of Post
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $PostCopyWith<Post> get copyWith => _$PostCopyWithImpl<Post>(this as Post, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Post&&(identical(other.id, id) || other.id == id)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.authorUsername, authorUsername) || other.authorUsername == authorUsername)&&(identical(other.authorAvatarUrl, authorAvatarUrl) || other.authorAvatarUrl == authorAvatarUrl)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.caption, caption) || other.caption == caption)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.likeCount, likeCount) || other.likeCount == likeCount)&&(identical(other.commentCount, commentCount) || other.commentCount == commentCount)&&const DeepCollectionEquality().equals(other.tags, tags));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Post&&(identical(other.id, id) || other.id == id)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.authorUsername, authorUsername) || other.authorUsername == authorUsername)&&(identical(other.authorAvatarUrl, authorAvatarUrl) || other.authorAvatarUrl == authorAvatarUrl)&&const DeepCollectionEquality().equals(other.imageUrls, imageUrls)&&(identical(other.caption, caption) || other.caption == caption)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.likeCount, likeCount) || other.likeCount == likeCount)&&(identical(other.commentCount, commentCount) || other.commentCount == commentCount)&&const DeepCollectionEquality().equals(other.tags, tags));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,authorId,authorUsername,authorAvatarUrl,imageUrl,caption,createdAt,likeCount,commentCount,const DeepCollectionEquality().hash(tags));
+int get hashCode => Object.hash(runtimeType,id,authorId,authorUsername,authorAvatarUrl,const DeepCollectionEquality().hash(imageUrls),caption,createdAt,likeCount,commentCount,const DeepCollectionEquality().hash(tags));
 
 @override
 String toString() {
-  return 'Post(id: $id, authorId: $authorId, authorUsername: $authorUsername, authorAvatarUrl: $authorAvatarUrl, imageUrl: $imageUrl, caption: $caption, createdAt: $createdAt, likeCount: $likeCount, commentCount: $commentCount, tags: $tags)';
+  return 'Post(id: $id, authorId: $authorId, authorUsername: $authorUsername, authorAvatarUrl: $authorAvatarUrl, imageUrls: $imageUrls, caption: $caption, createdAt: $createdAt, likeCount: $likeCount, commentCount: $commentCount, tags: $tags)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $PostCopyWith<$Res>  {
   factory $PostCopyWith(Post value, $Res Function(Post) _then) = _$PostCopyWithImpl;
 @useResult
 $Res call({
- String id, String authorId, String authorUsername, String? authorAvatarUrl, String imageUrl, String caption, DateTime createdAt, int likeCount, int commentCount, List<String> tags
+ String id, String authorId, String authorUsername, String? authorAvatarUrl, List<String> imageUrls, String caption, DateTime createdAt, int likeCount, int commentCount, List<String> tags
 });
 
 
@@ -62,14 +62,14 @@ class _$PostCopyWithImpl<$Res>
 
 /// Create a copy of Post
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? authorId = null,Object? authorUsername = null,Object? authorAvatarUrl = freezed,Object? imageUrl = null,Object? caption = null,Object? createdAt = null,Object? likeCount = null,Object? commentCount = null,Object? tags = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? authorId = null,Object? authorUsername = null,Object? authorAvatarUrl = freezed,Object? imageUrls = null,Object? caption = null,Object? createdAt = null,Object? likeCount = null,Object? commentCount = null,Object? tags = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,authorId: null == authorId ? _self.authorId : authorId // ignore: cast_nullable_to_non_nullable
 as String,authorUsername: null == authorUsername ? _self.authorUsername : authorUsername // ignore: cast_nullable_to_non_nullable
 as String,authorAvatarUrl: freezed == authorAvatarUrl ? _self.authorAvatarUrl : authorAvatarUrl // ignore: cast_nullable_to_non_nullable
-as String?,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
-as String,caption: null == caption ? _self.caption : caption // ignore: cast_nullable_to_non_nullable
+as String?,imageUrls: null == imageUrls ? _self.imageUrls : imageUrls // ignore: cast_nullable_to_non_nullable
+as List<String>,caption: null == caption ? _self.caption : caption // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,likeCount: null == likeCount ? _self.likeCount : likeCount // ignore: cast_nullable_to_non_nullable
 as int,commentCount: null == commentCount ? _self.commentCount : commentCount // ignore: cast_nullable_to_non_nullable
@@ -156,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String authorId,  String authorUsername,  String? authorAvatarUrl,  String imageUrl,  String caption,  DateTime createdAt,  int likeCount,  int commentCount,  List<String> tags)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String authorId,  String authorUsername,  String? authorAvatarUrl,  List<String> imageUrls,  String caption,  DateTime createdAt,  int likeCount,  int commentCount,  List<String> tags)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Post() when $default != null:
-return $default(_that.id,_that.authorId,_that.authorUsername,_that.authorAvatarUrl,_that.imageUrl,_that.caption,_that.createdAt,_that.likeCount,_that.commentCount,_that.tags);case _:
+return $default(_that.id,_that.authorId,_that.authorUsername,_that.authorAvatarUrl,_that.imageUrls,_that.caption,_that.createdAt,_that.likeCount,_that.commentCount,_that.tags);case _:
   return orElse();
 
 }
@@ -177,10 +177,10 @@ return $default(_that.id,_that.authorId,_that.authorUsername,_that.authorAvatarU
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String authorId,  String authorUsername,  String? authorAvatarUrl,  String imageUrl,  String caption,  DateTime createdAt,  int likeCount,  int commentCount,  List<String> tags)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String authorId,  String authorUsername,  String? authorAvatarUrl,  List<String> imageUrls,  String caption,  DateTime createdAt,  int likeCount,  int commentCount,  List<String> tags)  $default,) {final _that = this;
 switch (_that) {
 case _Post():
-return $default(_that.id,_that.authorId,_that.authorUsername,_that.authorAvatarUrl,_that.imageUrl,_that.caption,_that.createdAt,_that.likeCount,_that.commentCount,_that.tags);}
+return $default(_that.id,_that.authorId,_that.authorUsername,_that.authorAvatarUrl,_that.imageUrls,_that.caption,_that.createdAt,_that.likeCount,_that.commentCount,_that.tags);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -194,10 +194,10 @@ return $default(_that.id,_that.authorId,_that.authorUsername,_that.authorAvatarU
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String authorId,  String authorUsername,  String? authorAvatarUrl,  String imageUrl,  String caption,  DateTime createdAt,  int likeCount,  int commentCount,  List<String> tags)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String authorId,  String authorUsername,  String? authorAvatarUrl,  List<String> imageUrls,  String caption,  DateTime createdAt,  int likeCount,  int commentCount,  List<String> tags)?  $default,) {final _that = this;
 switch (_that) {
 case _Post() when $default != null:
-return $default(_that.id,_that.authorId,_that.authorUsername,_that.authorAvatarUrl,_that.imageUrl,_that.caption,_that.createdAt,_that.likeCount,_that.commentCount,_that.tags);case _:
+return $default(_that.id,_that.authorId,_that.authorUsername,_that.authorAvatarUrl,_that.imageUrls,_that.caption,_that.createdAt,_that.likeCount,_that.commentCount,_that.tags);case _:
   return null;
 
 }
@@ -208,15 +208,21 @@ return $default(_that.id,_that.authorId,_that.authorUsername,_that.authorAvatarU
 /// @nodoc
 
 
-class _Post implements Post {
-  const _Post({required this.id, required this.authorId, required this.authorUsername, this.authorAvatarUrl, required this.imageUrl, this.caption = '', required this.createdAt, this.likeCount = 0, this.commentCount = 0, final  List<String> tags = const <String>[]}): _tags = tags;
+class _Post extends Post {
+  const _Post({required this.id, required this.authorId, required this.authorUsername, this.authorAvatarUrl, required final  List<String> imageUrls, this.caption = '', required this.createdAt, this.likeCount = 0, this.commentCount = 0, final  List<String> tags = const <String>[]}): _imageUrls = imageUrls,_tags = tags,super._();
   
 
 @override final  String id;
 @override final  String authorId;
 @override final  String authorUsername;
 @override final  String? authorAvatarUrl;
-@override final  String imageUrl;
+ final  List<String> _imageUrls;
+@override List<String> get imageUrls {
+  if (_imageUrls is EqualUnmodifiableListView) return _imageUrls;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_imageUrls);
+}
+
 @override@JsonKey() final  String caption;
 @override final  DateTime createdAt;
 @override@JsonKey() final  int likeCount;
@@ -239,16 +245,16 @@ _$PostCopyWith<_Post> get copyWith => __$PostCopyWithImpl<_Post>(this, _$identit
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Post&&(identical(other.id, id) || other.id == id)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.authorUsername, authorUsername) || other.authorUsername == authorUsername)&&(identical(other.authorAvatarUrl, authorAvatarUrl) || other.authorAvatarUrl == authorAvatarUrl)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.caption, caption) || other.caption == caption)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.likeCount, likeCount) || other.likeCount == likeCount)&&(identical(other.commentCount, commentCount) || other.commentCount == commentCount)&&const DeepCollectionEquality().equals(other._tags, _tags));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Post&&(identical(other.id, id) || other.id == id)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.authorUsername, authorUsername) || other.authorUsername == authorUsername)&&(identical(other.authorAvatarUrl, authorAvatarUrl) || other.authorAvatarUrl == authorAvatarUrl)&&const DeepCollectionEquality().equals(other._imageUrls, _imageUrls)&&(identical(other.caption, caption) || other.caption == caption)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.likeCount, likeCount) || other.likeCount == likeCount)&&(identical(other.commentCount, commentCount) || other.commentCount == commentCount)&&const DeepCollectionEquality().equals(other._tags, _tags));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,authorId,authorUsername,authorAvatarUrl,imageUrl,caption,createdAt,likeCount,commentCount,const DeepCollectionEquality().hash(_tags));
+int get hashCode => Object.hash(runtimeType,id,authorId,authorUsername,authorAvatarUrl,const DeepCollectionEquality().hash(_imageUrls),caption,createdAt,likeCount,commentCount,const DeepCollectionEquality().hash(_tags));
 
 @override
 String toString() {
-  return 'Post(id: $id, authorId: $authorId, authorUsername: $authorUsername, authorAvatarUrl: $authorAvatarUrl, imageUrl: $imageUrl, caption: $caption, createdAt: $createdAt, likeCount: $likeCount, commentCount: $commentCount, tags: $tags)';
+  return 'Post(id: $id, authorId: $authorId, authorUsername: $authorUsername, authorAvatarUrl: $authorAvatarUrl, imageUrls: $imageUrls, caption: $caption, createdAt: $createdAt, likeCount: $likeCount, commentCount: $commentCount, tags: $tags)';
 }
 
 
@@ -259,7 +265,7 @@ abstract mixin class _$PostCopyWith<$Res> implements $PostCopyWith<$Res> {
   factory _$PostCopyWith(_Post value, $Res Function(_Post) _then) = __$PostCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String authorId, String authorUsername, String? authorAvatarUrl, String imageUrl, String caption, DateTime createdAt, int likeCount, int commentCount, List<String> tags
+ String id, String authorId, String authorUsername, String? authorAvatarUrl, List<String> imageUrls, String caption, DateTime createdAt, int likeCount, int commentCount, List<String> tags
 });
 
 
@@ -276,14 +282,14 @@ class __$PostCopyWithImpl<$Res>
 
 /// Create a copy of Post
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? authorId = null,Object? authorUsername = null,Object? authorAvatarUrl = freezed,Object? imageUrl = null,Object? caption = null,Object? createdAt = null,Object? likeCount = null,Object? commentCount = null,Object? tags = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? authorId = null,Object? authorUsername = null,Object? authorAvatarUrl = freezed,Object? imageUrls = null,Object? caption = null,Object? createdAt = null,Object? likeCount = null,Object? commentCount = null,Object? tags = null,}) {
   return _then(_Post(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,authorId: null == authorId ? _self.authorId : authorId // ignore: cast_nullable_to_non_nullable
 as String,authorUsername: null == authorUsername ? _self.authorUsername : authorUsername // ignore: cast_nullable_to_non_nullable
 as String,authorAvatarUrl: freezed == authorAvatarUrl ? _self.authorAvatarUrl : authorAvatarUrl // ignore: cast_nullable_to_non_nullable
-as String?,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
-as String,caption: null == caption ? _self.caption : caption // ignore: cast_nullable_to_non_nullable
+as String?,imageUrls: null == imageUrls ? _self._imageUrls : imageUrls // ignore: cast_nullable_to_non_nullable
+as List<String>,caption: null == caption ? _self.caption : caption // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,likeCount: null == likeCount ? _self.likeCount : likeCount // ignore: cast_nullable_to_non_nullable
 as int,commentCount: null == commentCount ? _self.commentCount : commentCount // ignore: cast_nullable_to_non_nullable

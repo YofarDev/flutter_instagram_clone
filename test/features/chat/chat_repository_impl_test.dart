@@ -177,4 +177,56 @@ void main() {
       expect(result.isLeft(), true);
     });
   });
+
+  group('sendImageMessage', () {
+    test('returns Right(null) and forwards the file path', () async {
+      when(
+        () => ds.sendImageMessage(
+          conversationId: 'u1_u2',
+          myUid: 'u1',
+          otherUid: 'u2',
+          filePath: '/tmp/img.jpg',
+        ),
+      ).thenAnswer((_) async {});
+
+      final Either<Failure, void> result = await repo.sendImageMessage(
+        conversationId: 'u1_u2',
+        myUid: 'u1',
+        otherUid: 'u2',
+        filePath: '/tmp/img.jpg',
+      );
+
+      expect(result, const Right<Failure, void>(null));
+      verify(
+        () => ds.sendImageMessage(
+          conversationId: 'u1_u2',
+          myUid: 'u1',
+          otherUid: 'u2',
+          filePath: '/tmp/img.jpg',
+        ),
+      ).called(1);
+    });
+
+    test('returns Left when datasource throws', () async {
+      when(
+        () => ds.sendImageMessage(
+          conversationId: 'u1_u2',
+          myUid: 'u1',
+          otherUid: 'u2',
+          filePath: any(named: 'filePath'),
+        ),
+      ).thenThrow(Exception('upload failed'));
+
+      final Either<Failure, void> result = await repo.sendImageMessage(
+        conversationId: 'u1_u2',
+        myUid: 'u1',
+        otherUid: 'u2',
+        filePath: '/tmp/img.jpg',
+      );
+
+      final Failure? failure = result.fold((Failure f) => f, (_) => null);
+      expect(failure, isNotNull);
+      expect(failure!.message, contains('upload failed'));
+    });
+  });
 }

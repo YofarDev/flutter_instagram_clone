@@ -33,6 +33,7 @@ class ConversationDto {
       ),
       lastMessageText: lastMessage?['text'] as String? ?? '',
       lastMessageSenderId: lastMessage?['senderId'] as String?,
+      lastMessageType: lastMessage?['type'] as String? ?? 'text',
       lastMessageAt: lastMessage == null
           ? null
           : DateTime.fromMillisecondsSinceEpoch(

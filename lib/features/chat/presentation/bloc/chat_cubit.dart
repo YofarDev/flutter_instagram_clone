@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/models/failure.dart';
 import '../../domain/models/chat_message.dart';
@@ -29,6 +30,7 @@ class ChatCubit extends Cubit<ChatState> {
           (List<ChatMessage> messages) {
             if (isClosed) return;
             emit(state.copyWith(messages: messages));
+            _markIncomingRead(messages);
           },
           onError: (Object e) {
             if (isClosed) return;
@@ -118,7 +120,50 @@ class ChatCubit extends Cubit<ChatState> {
     // ponytail: no optimistic append — live snapshot delivers
   }
 
+  /// Picks one image (camera or gallery) and sends it as an image message.
+  Future<void> pickAndSendImage(ImageSource source) async {
+    if (state.sending) return;
+    XFile? picked;
+    try {
+      picked = await ImagePicker().pickImage(
+        source: source,
+        maxWidth: 1080,
+        imageQuality: 70,
+      );
+    } catch (_) {
+      // ponytail: plugin cancel/permission errors — nothing sensible to show
+      return;
+    }
+    if (isClosed || picked == null) return;
+    _clearTyping();
+    emit(state.copyWith(sending: true, error: null));
+    final Either<Failure, void> either = await _repository.sendImageMessage(
+      conversationId: _conversation.id,
+      myUid: _myUid,
+      otherUid: _conversation.otherUser.uid,
+      filePath: picked.path,
+    );
+    if (isClosed) return;
+    either.fold(
+      (Failure f) => emit(state.copyWith(sending: false, error: f.message)),
+      (_) => emit(state.copyWith(sending: false)),
+    );
+  }
+
   void clearError() => emit(state.copyWith(error: null));
+
+  /// Read receipts: stamp every incoming unread message as read while this
+  /// screen is open. Failure is silent — the next emission retries.
+  void _markIncomingRead(List<ChatMessage> messages) {
+    final List<String> unread = messages
+        .where((ChatMessage m) => m.senderId != _myUid && m.readAt == null)
+        .map((ChatMessage m) => m.id)
+        .toList();
+    if (unread.isEmpty) return;
+    _repository
+        .markMessagesRead(conversationId: _conversation.id, messageIds: unread)
+        .then((_) {}, onError: (Object _) {});
+  }
 
   @override
   Future<void> close() {

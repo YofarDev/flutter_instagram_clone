@@ -14,7 +14,7 @@ final Post post = Post(
   id: 'p1',
   authorId: 'u1',
   authorUsername: 'yo',
-  imageUrl: 'http://img',
+  imageUrls: <String>['http://img'],
   createdAt: DateTime.fromMillisecondsSinceEpoch(0),
 );
 
@@ -54,12 +54,15 @@ void main() {
   group('createPost', () {
     test('returns Right(null) on success', () async {
       when(
-        () => ds.createPost(caption: 'cap', filePath: '/tmp/f.jpg'),
+        () => ds.createPost(
+          caption: 'cap',
+          filePaths: const <String>['/tmp/f.jpg'],
+        ),
       ).thenAnswer((_) async {});
 
       final Either<Failure, void> result = await repo.createPost(
         caption: 'cap',
-        filePath: '/tmp/f.jpg',
+        filePaths: const <String>['/tmp/f.jpg'],
       );
 
       expect(result, const Right<Failure, void>(null));
@@ -67,12 +70,15 @@ void main() {
 
     test('returns Left(Failure.serverError) when datasource throws', () async {
       when(
-        () => ds.createPost(caption: 'cap', filePath: '/tmp/f.jpg'),
+        () => ds.createPost(
+          caption: 'cap',
+          filePaths: const <String>['/tmp/f.jpg'],
+        ),
       ).thenThrow(Exception('boom'));
 
       final Either<Failure, void> result = await repo.createPost(
         caption: 'cap',
-        filePath: '/tmp/f.jpg',
+        filePaths: const <String>['/tmp/f.jpg'],
       );
 
       final Failure? failure = result.fold((Failure f) => f, (_) => null);

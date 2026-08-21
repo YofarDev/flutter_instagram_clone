@@ -25,7 +25,27 @@ void main() {
   );
 
   blocTest<CreatePostCubit, CreatePostState>(
-    'submit without image does nothing',
+    'removeImageAt drops the page and keeps order',
+    build: () => CreatePostCubit(repo),
+    seed: () => const CreatePostState(
+      pickedPaths: <String>['/a.jpg', '/b.jpg', '/c.jpg'],
+    ),
+    act: (CreatePostCubit cubit) => cubit.removeImageAt(1),
+    expect: () => const <CreatePostState>[
+      CreatePostState(pickedPaths: <String>['/a.jpg', '/c.jpg']),
+    ],
+  );
+
+  blocTest<CreatePostCubit, CreatePostState>(
+    'removeImageAt ignores out-of-range index',
+    build: () => CreatePostCubit(repo),
+    seed: () => const CreatePostState(pickedPaths: <String>['/a.jpg']),
+    act: (CreatePostCubit cubit) => cubit.removeImageAt(5),
+    expect: () => const <CreatePostState>[],
+  );
+
+  blocTest<CreatePostCubit, CreatePostState>(
+    'submit without images does nothing',
     build: () => CreatePostCubit(repo),
     seed: () => const CreatePostState(caption: 'hi'),
     act: (CreatePostCubit cubit) => cubit.submit(),
@@ -33,7 +53,7 @@ void main() {
       verifyNever(
         () => repo.createPost(
           caption: any(named: 'caption'),
-          filePath: any(named: 'filePath'),
+          filePaths: any(named: 'filePaths'),
         ),
       );
     },
@@ -41,32 +61,37 @@ void main() {
   );
 
   blocTest<CreatePostCubit, CreatePostState>(
-    'submit success emits submitting then success',
+    'submit success emits submitting then success with trimmed caption',
     build: () {
       when(
         () => repo.createPost(
           caption: any(named: 'caption'),
-          filePath: any(named: 'filePath'),
+          filePaths: any(named: 'filePaths'),
         ),
       ).thenAnswer((_) async => const Right<Failure, void>(null));
       return CreatePostCubit(repo);
     },
-    seed: () =>
-        const CreatePostState(pickedPath: '/tmp/img.jpg', caption: ' hi '),
+    seed: () => const CreatePostState(
+      pickedPaths: <String>['/tmp/img.jpg'],
+      caption: ' hi ',
+    ),
     act: (CreatePostCubit cubit) => cubit.submit(),
     verify: (_) {
       verify(
-        () => repo.createPost(caption: 'hi', filePath: '/tmp/img.jpg'),
+        () => repo.createPost(
+          caption: 'hi',
+          filePaths: const <String>['/tmp/img.jpg'],
+        ),
       ).called(1);
     },
     expect: () => const <CreatePostState>[
       CreatePostState(
-        pickedPath: '/tmp/img.jpg',
+        pickedPaths: <String>['/tmp/img.jpg'],
         caption: ' hi ',
         submitting: true,
       ),
       CreatePostState(
-        pickedPath: '/tmp/img.jpg',
+        pickedPaths: <String>['/tmp/img.jpg'],
         caption: ' hi ',
         submitting: false,
         success: true,
@@ -80,7 +105,7 @@ void main() {
       when(
         () => repo.createPost(
           caption: any(named: 'caption'),
-          filePath: any(named: 'filePath'),
+          filePaths: any(named: 'filePaths'),
         ),
       ).thenAnswer(
         (_) async =>
@@ -88,11 +113,11 @@ void main() {
       );
       return CreatePostCubit(repo);
     },
-    seed: () => const CreatePostState(pickedPath: '/tmp/img.jpg'),
+    seed: () => const CreatePostState(pickedPaths: <String>['/tmp/img.jpg']),
     act: (CreatePostCubit cubit) => cubit.submit(),
     expect: () => const <CreatePostState>[
-      CreatePostState(pickedPath: '/tmp/img.jpg', submitting: true),
-      CreatePostState(pickedPath: '/tmp/img.jpg', error: 'boom'),
+      CreatePostState(pickedPaths: <String>['/tmp/img.jpg'], submitting: true),
+      CreatePostState(pickedPaths: <String>['/tmp/img.jpg'], error: 'boom'),
     ],
   );
 }

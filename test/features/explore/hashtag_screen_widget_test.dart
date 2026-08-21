@@ -26,7 +26,7 @@ void main() {
           id: 'p1',
           authorId: 'u1',
           authorUsername: 'alice',
-          imageUrl: 'http://img/sunset',
+          imageUrls: <String>['http://img/sunset'],
           createdAt: DateTime(2026, 1, 1),
         ),
       ]),

@@ -14,7 +14,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Conversation {
 
- String get id; AppUser get otherUser; String get lastMessageText; String? get lastMessageSenderId; DateTime? get lastMessageAt;
+ String get id; AppUser get otherUser; String get lastMessageText; String? get lastMessageSenderId; DateTime? get lastMessageAt;/// 'text' or 'image' — image previews render a localized "Photo".
+ String get lastMessageType;
 /// Create a copy of Conversation
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +26,16 @@ $ConversationCopyWith<Conversation> get copyWith => _$ConversationCopyWithImpl<C
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Conversation&&(identical(other.id, id) || other.id == id)&&(identical(other.otherUser, otherUser) || other.otherUser == otherUser)&&(identical(other.lastMessageText, lastMessageText) || other.lastMessageText == lastMessageText)&&(identical(other.lastMessageSenderId, lastMessageSenderId) || other.lastMessageSenderId == lastMessageSenderId)&&(identical(other.lastMessageAt, lastMessageAt) || other.lastMessageAt == lastMessageAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Conversation&&(identical(other.id, id) || other.id == id)&&(identical(other.otherUser, otherUser) || other.otherUser == otherUser)&&(identical(other.lastMessageText, lastMessageText) || other.lastMessageText == lastMessageText)&&(identical(other.lastMessageSenderId, lastMessageSenderId) || other.lastMessageSenderId == lastMessageSenderId)&&(identical(other.lastMessageAt, lastMessageAt) || other.lastMessageAt == lastMessageAt)&&(identical(other.lastMessageType, lastMessageType) || other.lastMessageType == lastMessageType));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,otherUser,lastMessageText,lastMessageSenderId,lastMessageAt);
+int get hashCode => Object.hash(runtimeType,id,otherUser,lastMessageText,lastMessageSenderId,lastMessageAt,lastMessageType);
 
 @override
 String toString() {
-  return 'Conversation(id: $id, otherUser: $otherUser, lastMessageText: $lastMessageText, lastMessageSenderId: $lastMessageSenderId, lastMessageAt: $lastMessageAt)';
+  return 'Conversation(id: $id, otherUser: $otherUser, lastMessageText: $lastMessageText, lastMessageSenderId: $lastMessageSenderId, lastMessageAt: $lastMessageAt, lastMessageType: $lastMessageType)';
 }
 
 
@@ -45,7 +46,7 @@ abstract mixin class $ConversationCopyWith<$Res>  {
   factory $ConversationCopyWith(Conversation value, $Res Function(Conversation) _then) = _$ConversationCopyWithImpl;
 @useResult
 $Res call({
- String id, AppUser otherUser, String lastMessageText, String? lastMessageSenderId, DateTime? lastMessageAt
+ String id, AppUser otherUser, String lastMessageText, String? lastMessageSenderId, DateTime? lastMessageAt, String lastMessageType
 });
 
 
@@ -62,14 +63,15 @@ class _$ConversationCopyWithImpl<$Res>
 
 /// Create a copy of Conversation
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? otherUser = null,Object? lastMessageText = null,Object? lastMessageSenderId = freezed,Object? lastMessageAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? otherUser = null,Object? lastMessageText = null,Object? lastMessageSenderId = freezed,Object? lastMessageAt = freezed,Object? lastMessageType = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,otherUser: null == otherUser ? _self.otherUser : otherUser // ignore: cast_nullable_to_non_nullable
 as AppUser,lastMessageText: null == lastMessageText ? _self.lastMessageText : lastMessageText // ignore: cast_nullable_to_non_nullable
 as String,lastMessageSenderId: freezed == lastMessageSenderId ? _self.lastMessageSenderId : lastMessageSenderId // ignore: cast_nullable_to_non_nullable
 as String?,lastMessageAt: freezed == lastMessageAt ? _self.lastMessageAt : lastMessageAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as DateTime?,lastMessageType: null == lastMessageType ? _self.lastMessageType : lastMessageType // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 /// Create a copy of Conversation
@@ -160,10 +162,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  AppUser otherUser,  String lastMessageText,  String? lastMessageSenderId,  DateTime? lastMessageAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  AppUser otherUser,  String lastMessageText,  String? lastMessageSenderId,  DateTime? lastMessageAt,  String lastMessageType)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Conversation() when $default != null:
-return $default(_that.id,_that.otherUser,_that.lastMessageText,_that.lastMessageSenderId,_that.lastMessageAt);case _:
+return $default(_that.id,_that.otherUser,_that.lastMessageText,_that.lastMessageSenderId,_that.lastMessageAt,_that.lastMessageType);case _:
   return orElse();
 
 }
@@ -181,10 +183,10 @@ return $default(_that.id,_that.otherUser,_that.lastMessageText,_that.lastMessage
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  AppUser otherUser,  String lastMessageText,  String? lastMessageSenderId,  DateTime? lastMessageAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  AppUser otherUser,  String lastMessageText,  String? lastMessageSenderId,  DateTime? lastMessageAt,  String lastMessageType)  $default,) {final _that = this;
 switch (_that) {
 case _Conversation():
-return $default(_that.id,_that.otherUser,_that.lastMessageText,_that.lastMessageSenderId,_that.lastMessageAt);}
+return $default(_that.id,_that.otherUser,_that.lastMessageText,_that.lastMessageSenderId,_that.lastMessageAt,_that.lastMessageType);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -198,10 +200,10 @@ return $default(_that.id,_that.otherUser,_that.lastMessageText,_that.lastMessage
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  AppUser otherUser,  String lastMessageText,  String? lastMessageSenderId,  DateTime? lastMessageAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  AppUser otherUser,  String lastMessageText,  String? lastMessageSenderId,  DateTime? lastMessageAt,  String lastMessageType)?  $default,) {final _that = this;
 switch (_that) {
 case _Conversation() when $default != null:
-return $default(_that.id,_that.otherUser,_that.lastMessageText,_that.lastMessageSenderId,_that.lastMessageAt);case _:
+return $default(_that.id,_that.otherUser,_that.lastMessageText,_that.lastMessageSenderId,_that.lastMessageAt,_that.lastMessageType);case _:
   return null;
 
 }
@@ -212,8 +214,8 @@ return $default(_that.id,_that.otherUser,_that.lastMessageText,_that.lastMessage
 /// @nodoc
 
 
-class _Conversation implements Conversation {
-  const _Conversation({required this.id, required this.otherUser, this.lastMessageText = '', this.lastMessageSenderId, this.lastMessageAt});
+class _Conversation extends Conversation {
+  const _Conversation({required this.id, required this.otherUser, this.lastMessageText = '', this.lastMessageSenderId, this.lastMessageAt, this.lastMessageType = 'text'}): super._();
   
 
 @override final  String id;
@@ -221,6 +223,8 @@ class _Conversation implements Conversation {
 @override@JsonKey() final  String lastMessageText;
 @override final  String? lastMessageSenderId;
 @override final  DateTime? lastMessageAt;
+/// 'text' or 'image' — image previews render a localized "Photo".
+@override@JsonKey() final  String lastMessageType;
 
 /// Create a copy of Conversation
 /// with the given fields replaced by the non-null parameter values.
@@ -232,16 +236,16 @@ _$ConversationCopyWith<_Conversation> get copyWith => __$ConversationCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Conversation&&(identical(other.id, id) || other.id == id)&&(identical(other.otherUser, otherUser) || other.otherUser == otherUser)&&(identical(other.lastMessageText, lastMessageText) || other.lastMessageText == lastMessageText)&&(identical(other.lastMessageSenderId, lastMessageSenderId) || other.lastMessageSenderId == lastMessageSenderId)&&(identical(other.lastMessageAt, lastMessageAt) || other.lastMessageAt == lastMessageAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Conversation&&(identical(other.id, id) || other.id == id)&&(identical(other.otherUser, otherUser) || other.otherUser == otherUser)&&(identical(other.lastMessageText, lastMessageText) || other.lastMessageText == lastMessageText)&&(identical(other.lastMessageSenderId, lastMessageSenderId) || other.lastMessageSenderId == lastMessageSenderId)&&(identical(other.lastMessageAt, lastMessageAt) || other.lastMessageAt == lastMessageAt)&&(identical(other.lastMessageType, lastMessageType) || other.lastMessageType == lastMessageType));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,otherUser,lastMessageText,lastMessageSenderId,lastMessageAt);
+int get hashCode => Object.hash(runtimeType,id,otherUser,lastMessageText,lastMessageSenderId,lastMessageAt,lastMessageType);
 
 @override
 String toString() {
-  return 'Conversation(id: $id, otherUser: $otherUser, lastMessageText: $lastMessageText, lastMessageSenderId: $lastMessageSenderId, lastMessageAt: $lastMessageAt)';
+  return 'Conversation(id: $id, otherUser: $otherUser, lastMessageText: $lastMessageText, lastMessageSenderId: $lastMessageSenderId, lastMessageAt: $lastMessageAt, lastMessageType: $lastMessageType)';
 }
 
 
@@ -252,7 +256,7 @@ abstract mixin class _$ConversationCopyWith<$Res> implements $ConversationCopyWi
   factory _$ConversationCopyWith(_Conversation value, $Res Function(_Conversation) _then) = __$ConversationCopyWithImpl;
 @override @useResult
 $Res call({
- String id, AppUser otherUser, String lastMessageText, String? lastMessageSenderId, DateTime? lastMessageAt
+ String id, AppUser otherUser, String lastMessageText, String? lastMessageSenderId, DateTime? lastMessageAt, String lastMessageType
 });
 
 
@@ -269,14 +273,15 @@ class __$ConversationCopyWithImpl<$Res>
 
 /// Create a copy of Conversation
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? otherUser = null,Object? lastMessageText = null,Object? lastMessageSenderId = freezed,Object? lastMessageAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? otherUser = null,Object? lastMessageText = null,Object? lastMessageSenderId = freezed,Object? lastMessageAt = freezed,Object? lastMessageType = null,}) {
   return _then(_Conversation(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,otherUser: null == otherUser ? _self.otherUser : otherUser // ignore: cast_nullable_to_non_nullable
 as AppUser,lastMessageText: null == lastMessageText ? _self.lastMessageText : lastMessageText // ignore: cast_nullable_to_non_nullable
 as String,lastMessageSenderId: freezed == lastMessageSenderId ? _self.lastMessageSenderId : lastMessageSenderId // ignore: cast_nullable_to_non_nullable
 as String?,lastMessageAt: freezed == lastMessageAt ? _self.lastMessageAt : lastMessageAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as DateTime?,lastMessageType: null == lastMessageType ? _self.lastMessageType : lastMessageType // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 

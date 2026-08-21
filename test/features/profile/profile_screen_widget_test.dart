@@ -35,7 +35,7 @@ Post _post() => Post(
   id: 'p1',
   authorId: 'u1',
   authorUsername: 'yo',
-  imageUrl: 'http://x',
+  imageUrls: <String>['http://x'],
   caption: 'hello',
   createdAt: DateTime(2026, 1, 1),
   likeCount: 3,

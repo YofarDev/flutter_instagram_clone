@@ -81,5 +81,9 @@
   "authResetSent": "Lien envoyé — vérifie ta boîte mail",
   "chatTyping": "en train d'écrire…",
   "commentsEmpty": "Pas encore de commentaires",
-  "newDmSuggestions": "Suggestions"
+  "newDmSuggestions": "Suggestions",
+  "postAddMore": "Ajouter des photos",
+  "chatSendPhoto": "Envoyer une photo",
+  "chatPhotoPreview": "Photo",
+  "chatSeen": "Vu"
 }

@@ -111,5 +111,9 @@
   "authResetSent": "Link sent — check your inbox",
   "chatTyping": "typing…",
   "commentsEmpty": "No comments yet",
-  "newDmSuggestions": "Suggested"
+  "newDmSuggestions": "Suggested",
+  "postAddMore": "Add more",
+  "chatSendPhoto": "Send a photo",
+  "chatPhotoPreview": "Photo",
+  "chatSeen": "Seen"
 }

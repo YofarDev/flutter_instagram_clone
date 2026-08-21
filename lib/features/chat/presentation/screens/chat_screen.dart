@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/models/app_user.dart';
@@ -18,6 +19,77 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
+/// Image message: rounded thumbnail, tap opens a fullscreen viewer.
+class _ImageBubble extends StatelessWidget {
+  const _ImageBubble({required this.message, required this.mine});
+
+  final ChatMessage message;
+  final bool mine;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => _ImageViewer(url: message.imageUrl!),
+        ),
+      ),
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.65,
+          maxHeight: 320,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Image.network(
+          message.imageUrl!,
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) => const SizedBox(
+            width: 120,
+            height: 120,
+            child: Icon(Icons.broken_image_outlined),
+          ),
+          loadingBuilder: (_, Widget child, ImageChunkEvent? progress) =>
+              progress == null
+              ? child
+              : const SizedBox(
+                  width: 120,
+                  height: 120,
+                  child: Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Black fullscreen viewer; pinch-zooms, tap anywhere to close.
+class _ImageViewer extends StatelessWidget {
+  const _ImageViewer({required this.url});
+
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: InteractiveViewer(
+          maxScale: 4,
+          child: Center(child: Image.network(url, fit: BoxFit.contain)),
+        ),
+      ),
+    );
+  }
+}
+
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
 
@@ -32,6 +104,32 @@ class _ChatScreenState extends State<ChatScreen> {
     if (text.isEmpty) return;
     context.read<ChatCubit>().send(text);
     _controller.clear();
+  }
+
+  Future<void> _pickImage() async {
+    final ImageSource? source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (BuildContext sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: Text(AppLocalizations.of(sheetContext).postAddPhoto),
+              onTap: () => Navigator.pop(sheetContext, ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined),
+              title: Text(AppLocalizations.of(sheetContext).postTakePhoto),
+              onTap: () => Navigator.pop(sheetContext, ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source != null) {
+      await context.read<ChatCubit>().pickAndSendImage(source);
+    }
   }
 
   @override
@@ -107,31 +205,73 @@ class _ChatScreenState extends State<ChatScreen> {
                             final ChatMessage message = state
                                 .messages[state.messages.length - 1 - index];
                             final bool mine = message.senderId == myUid;
+                            // "Seen" rides under the newest own message only
+                            ChatMessage? lastOwn;
+                            for (final ChatMessage m in state.messages) {
+                              if (m.senderId == myUid) lastOwn = m;
+                            }
+                            final bool showSeen =
+                                lastOwn != null &&
+                                message.id == lastOwn.id &&
+                                message.readAt != null;
                             return Align(
                               alignment: mine
                                   ? Alignment.centerRight
                                   : Alignment.centerLeft,
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(vertical: 4),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                                constraints: BoxConstraints(
-                                  maxWidth:
-                                      MediaQuery.of(context).size.width * 0.75,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: mine
-                                      ? Theme.of(
-                                          context,
-                                        ).colorScheme.primaryContainer
-                                      : Theme.of(
-                                          context,
-                                        ).colorScheme.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(message.text),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: mine
+                                    ? CrossAxisAlignment.end
+                                    : CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  if (message.isImage)
+                                    _ImageBubble(message: message, mine: mine)
+                                  else
+                                    Container(
+                                      margin: const EdgeInsets.symmetric(
+                                        vertical: 4,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 8,
+                                      ),
+                                      constraints: BoxConstraints(
+                                        maxWidth:
+                                            MediaQuery.of(context).size.width *
+                                            0.75,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: mine
+                                            ? Theme.of(
+                                                context,
+                                              ).colorScheme.primaryContainer
+                                            : Theme.of(context)
+                                                  .colorScheme
+                                                  .surfaceContainerHighest,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(message.text),
+                                    ),
+                                  if (showSeen)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        right: 4,
+                                        bottom: 2,
+                                      ),
+                                      child: Text(
+                                        l10n.chatSeen,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface
+                                                  .withValues(alpha: 0.5),
+                                            ),
+                                      ),
+                                    ),
+                                ],
                               ),
                             );
                           },
@@ -155,6 +295,11 @@ class _ChatScreenState extends State<ChatScreen> {
                           ),
                         Row(
                           children: <Widget>[
+                            IconButton(
+                              icon: const Icon(Icons.photo_camera_outlined),
+                              tooltip: l10n.chatSendPhoto,
+                              onPressed: _pickImage,
+                            ),
                             Expanded(
                               child: TextField(
                                 controller: _controller,

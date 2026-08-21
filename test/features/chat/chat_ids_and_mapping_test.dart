@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_instagram_clone/features/chat/data/datasources/chat_firebase_datasource.dart';
+import 'package:flutter_instagram_clone/features/chat/data/models/chat_message_dto.dart';
 import 'package:flutter_instagram_clone/features/chat/data/models/conversation_dto.dart';
+import 'package:flutter_instagram_clone/features/chat/domain/models/chat_message.dart';
 import 'package:flutter_instagram_clone/features/chat/domain/models/conversation.dart';
 
 void main() {
@@ -52,6 +54,54 @@ void main() {
       expect(conv.lastMessageText, '');
       expect(conv.lastMessageSenderId, isNull);
       expect(conv.lastMessageAt, isNull);
+    });
+
+    test('image lastMessage parses the type and empty preview text', () {
+      final Conversation conv = ConversationDto.fromMap('c3', <String, dynamic>{
+        'participants': <String>['u1', 'u2'],
+        'lastMessage': <String, dynamic>{
+          'text': '',
+          'type': 'image',
+          'senderId': 'u2',
+          'createdAt': 7,
+        },
+        'updatedAt': 7,
+      }, 'u1');
+
+      expect(conv.lastMessageIsImage, true);
+      expect(conv.lastMessageText, '');
+    });
+  });
+
+  group('ChatMessageDto', () {
+    test('image message round-trips type and imageUrl', () {
+      final ChatMessageDto dto = ChatMessageDto.fromMap(<String, dynamic>{
+        'senderId': 'u1',
+        'text': '',
+        'createdAt': 5,
+        'type': 'image',
+        'imageUrl': 'http://img',
+      });
+      final Map<String, dynamic> map = dto.toMap();
+
+      expect(map['type'], 'image');
+      expect(map['imageUrl'], 'http://img');
+
+      final ChatMessage domain = dto.toDomain('m1', 'c1');
+      expect(domain.isImage, true);
+      expect(domain.imageUrl, 'http://img');
+    });
+
+    test('legacy text-only docs default to type text without imageUrl', () {
+      final ChatMessageDto dto = ChatMessageDto.fromMap(<String, dynamic>{
+        'senderId': 'u1',
+        'text': 'hi',
+        'createdAt': 5,
+      });
+
+      expect(dto.type, 'text');
+      expect(dto.toMap().containsKey('imageUrl'), false);
+      expect(dto.toDomain('m1', 'c1').isImage, false);
     });
   });
 }

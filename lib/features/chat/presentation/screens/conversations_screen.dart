@@ -81,7 +81,7 @@ class ConversationsScreen extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
-                    '$prefix${conversation.lastMessageText}',
+                    '$prefix${conversation.lastMessageIsImage ? AppLocalizations.of(context).chatPhotoPreview : conversation.lastMessageText}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

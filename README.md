@@ -6,7 +6,7 @@
 
 A working clone of Instagram, built to find out how far "vibe coding" gets you: every line was written by an AI agent (opencode / Claude Code on GLM 5.3), one feature at a time, with tests and reviews along the way. No hand-written Dart.
 
-**8 features · 240 tests · 2 locales · 0 hand-written lines.** Auth (email + Google), a home feed with images and video reels, stories that expire after 24h, likes, comments, follow graph, search over users and hashtags, notifications, and real-time direct messages. It runs against a real Firebase backend — no mocks, no fake latency.
+**8 features · 258 tests · 2 locales · 0 hand-written lines.** Auth (email + Google), a home feed with images and video reels, stories that expire after 24h, likes, comments, follow graph, search over users and hashtags, notifications, and real-time direct messages. It runs against a real Firebase backend — no mocks, no fake latency.
 
 ## Demo
 
@@ -31,11 +31,11 @@ From the Android emulator, running on seeded demo data (dark theme; the app foll
 | Area | Details |
 |------|---------|
 | **Auth** | Email + password, Google Sign-In, password reset, an onboarding gate that routes through the router redirect, logout |
-| **Feed** | Real-time following-filtered feed, optimistic likes with rollback, **double-tap to like with heart burst**, comments, **save/bookmark**, infinite scroll, pull-to-refresh, skeleton loading |
+| **Feed** | Real-time following-filtered feed, optimistic likes with rollback, **double-tap to like with heart burst**, **multi-image carousels** (swipe + counter + dots, legacy single-image posts still read), comments, **save/bookmark**, infinite scroll, pull-to-refresh, skeleton loading |
 | **Stories** | 24h expiry enforced in the query, IG gradient rings on unseen stories, segmented progress bars, tap-thirds navigation, create from gallery/camera |
 | **Reels** | Vertical pager with muted looping autoplay, pause on app lifecycle, double-tap like, **comments + owner notifications**, full create flow |
 | **Explore** | 3-column grid of posts from people you *don't* follow (IG's discovery semantics), infinite scroll, debounced user search, hashtag pages with accent-folding (#café → #cafe) |
-| **Chat** | Real-time 1:1 DMs over Firestore snapshots, deterministic conversation ids (sorted-uid pair), **typing indicators**, **suggested users** |
+| **Chat** | Real-time 1:1 DMs over Firestore snapshots, deterministic conversation ids (sorted-uid pair), **typing indicators**, **image messages** (upload + pinch-zoom viewer + "Photo" previews), **read receipts** (rule-restricted readAt stamps + Seen label), **suggested users** |
 | **Notifications** | Real-time like/comment/follow, unread badge on the heart, mark-all-read on open |
 | **Profile** | Edit avatar/username/bio (avatar downscaled + compressed on upload), follow graph, follower/following lists, Grid + **Saved** tabs, more-menu |
 | **Cross-cutting** | English + French (follows device locale), matched dark/light themes, hand-drawn icon set (zero icon-font dependency), haptic vocabulary, shimmer skeletons everywhere |

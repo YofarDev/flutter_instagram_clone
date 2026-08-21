@@ -55,8 +55,46 @@ class ChatRepositoryImpl implements IChatRepository {
   }
 
   @override
+  Future<Either<Failure, void>> sendImageMessage({
+    required String conversationId,
+    required String myUid,
+    required String otherUid,
+    required String filePath,
+  }) async {
+    try {
+      return Right<Failure, void>(
+        await _ds.sendImageMessage(
+          conversationId: conversationId,
+          myUid: myUid,
+          otherUid: otherUid,
+          filePath: filePath,
+        ),
+      );
+    } catch (e) {
+      return Left<Failure, void>(_mapError(e));
+    }
+  }
+
+  @override
   Stream<String?> watchTyping({required String conversationId}) =>
       _ds.watchTyping(conversationId: conversationId);
+
+  @override
+  Future<Either<Failure, void>> markMessagesRead({
+    required String conversationId,
+    required List<String> messageIds,
+  }) async {
+    try {
+      return Right<Failure, void>(
+        await _ds.markMessagesRead(
+          conversationId: conversationId,
+          messageIds: messageIds,
+        ),
+      );
+    } catch (e) {
+      return Left<Failure, void>(_mapError(e));
+    }
+  }
 
   @override
   Future<Either<Failure, void>> setTyping({

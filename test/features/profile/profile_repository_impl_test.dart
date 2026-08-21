@@ -26,14 +26,14 @@ void main() {
     id: 'p1',
     authorId: 'u1',
     authorUsername: 'yo',
-    imageUrl: 'http://x/1.jpg',
+    imageUrls: <String>['http://x/1.jpg'],
     createdAt: DateTime(2026, 1, 1),
   );
   final Post postB = Post(
     id: 'p2',
     authorId: 'u1',
     authorUsername: 'yo',
-    imageUrl: 'http://x/2.jpg',
+    imageUrls: <String>['http://x/2.jpg'],
     createdAt: DateTime(2026, 1, 2),
   );
 
