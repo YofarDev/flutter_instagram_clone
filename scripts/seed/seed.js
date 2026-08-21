@@ -13,8 +13,9 @@
 // Usage: node seed.js --me=<yourUid> [--reset] [--bucket=<storageBucket>]
 // Re-runs are idempotent: every doc id is deterministic and all writes are merge-sets.
 //
-// Scale: 12 users, 60 posts (5/user), 12 stories, 6 reels, ~12 notifications,
-// 4 conversations. All randomness is seeded (mulberry32) so runs are stable.
+// Scale: 12 users, 60 posts (5/user, 5 of them 3-image carousels), 12 stories,
+// 6 reels, ~12 notifications, 4 conversations (image messages + read receipts).
+// All randomness is seeded (mulberry32) so runs are stable.
 
 'use strict';
 
@@ -248,6 +249,22 @@ const postLikers = (i) =>
 const postCommenters = (i) =>
   NAMES.filter((n) => n !== postAuthor(i))
     .filter((n, k) => k < 2 + (i % 3));
+
+// Recent posts from followed authors become 3-image carousels (jack ×3,
+// iris ×2 — the first things on the demo feed). Extra pages reuse the same
+// author's other photos so every carousel page has real media.
+const CAROUSEL_POSTS = [50, 48, 46, 45, 43];
+const postPageNum = (i) => ((i - 1) % POSTS_PER_USER) + 1;
+const carouselPages = (i) =>
+  CAROUSEL_POSTS.includes(i)
+    ? [2, 4].map(
+        (j) =>
+          `insta-${postAuthor(i)}-${((postPageNum(i) - 1 - j + 2 * POSTS_PER_USER) % POSTS_PER_USER) + 1}.jpg`,
+      )
+    : [];
+
+// Saved posts for --me (Saved tab demo; carousels included on purpose).
+const SAVED_POSTS = [50, 43, 27, 33, 8];
 const commentText = (i, k) =>
   COMMENT_TEXTS[Math.floor(mulberry32(i * 97 + k * 13)() * COMMENT_TEXTS.length)];
 
@@ -263,18 +280,23 @@ const REELS = [
   { name: 'kate', file: 'r6', caption: 'Fit check, city edition #streetstyle #fashion #ootd', likes: ['chloe', 'grace'], at: now - 6 * HOUR },
 ];
 
+// Message shape: { from, text?, image? (asset file → image message),
+//   at, readAt? (recipient read it — feeds the Seen receipt) }
 const CONVERSATIONS = [
   {
     partner: 'alice',
     messages: [
-      { from: 'alice', text: 'Hey! Saw you liked my golden hour shot 😊', at: now - 2 * DAY + 1 * HOUR },
-      { from: 'me', text: 'That sky was unreal. Where was it?', at: now - 2 * DAY + 2 * HOUR },
-      { from: 'alice', text: 'Rooftop bar downtown, ten minute walk from mine', at: now - 2 * DAY + 3 * HOUR },
-      { from: 'me', text: 'Adding it to my list for Friday', at: now - 2 * DAY + 4 * HOUR },
-      { from: 'alice', text: 'Go at 7:15, the light is perfect for like ten minutes', at: now - 1 * DAY },
-      { from: 'me', text: 'Booking the reminder now lol', at: now - 6 * HOUR },
-      { from: 'alice', text: 'Bring the film camera, you will thank me', at: now - 1 * HOUR },
-      { from: 'me', text: 'Say less 📷', at: now - 20 * MIN },
+      { from: 'alice', text: 'Hey! Saw you liked my golden hour shot 😊', at: now - 2 * DAY + 1 * HOUR, readAt: now - 2 * DAY + 2 * HOUR },
+      { from: 'me', text: 'That sky was unreal. Where was it?', at: now - 2 * DAY + 2 * HOUR, readAt: now - 2 * DAY + 3 * HOUR },
+      { from: 'alice', image: 'insta-alice-2.jpg', at: now - 2 * DAY + 3 * HOUR, readAt: now - 2 * DAY + 4 * HOUR },
+      { from: 'alice', text: 'Rooftop bar downtown, ten minute walk from mine', at: now - 2 * DAY + 4 * HOUR, readAt: now - 2 * DAY + 5 * HOUR },
+      { from: 'me', text: 'Adding it to my list for Friday', at: now - 1 * DAY, readAt: now - 1 * DAY + 2 * HOUR },
+      { from: 'alice', text: 'Go at 7:15, the light is perfect for like ten minutes', at: now - 1 * DAY + 3 * HOUR, readAt: now - 1 * DAY + 4 * HOUR },
+      { from: 'me', image: 'insta-iris-2.jpg', at: now - 8 * HOUR, readAt: now - 7 * HOUR },
+      { from: 'alice', text: 'Okay now I am jealous, that market 😮', at: now - 6 * HOUR, readAt: now - 5 * HOUR },
+      { from: 'me', text: 'Booking the reminder now lol', at: now - 4 * HOUR, readAt: now - 3 * HOUR },
+      { from: 'alice', text: 'Bring the film camera, you will thank me', at: now - 1 * HOUR, readAt: now - 50 * MIN },
+      { from: 'me', text: 'Say less 📷', at: now - 20 * MIN, readAt: now - 10 * MIN },
     ],
   },
   {
@@ -300,7 +322,9 @@ const CONVERSATIONS = [
       { from: 'eve', text: 'Obviously. New place near the pier', at: now - 2 * DAY + 6 * HOUR },
       { from: 'me', text: 'The one with the sourdough?', at: now - 1 * DAY - 10 * HOUR },
       { from: 'eve', text: 'That\'s the one 🥐', at: now - 1 * DAY - 8 * HOUR },
-      { from: 'me', text: 'Sold. See you at 6:15', at: now - 1 * DAY - 7 * HOUR },
+      { from: 'me', text: 'Sold. See you at 6:15', at: now - 1 * DAY - 7 * HOUR, readAt: now - 1 * DAY - 6 * HOUR },
+      // ends on an image → the conversations list shows a "Photo" preview
+      { from: 'eve', image: 'insta-eve-2.jpg', at: now - 6 * HOUR },
     ],
   },
   {
@@ -370,7 +394,35 @@ async function uploadAssets() {
   await mapLimit(REELS, 8, async (r) => {
     reelUrls[r.file] = await upload(`reels/${r.file}.mp4`, `reels/${uidOf(r.name)}/${r.at}.mp4`);
   });
-  return { avatarUrls, postUrls, storyUrls, reelUrls };
+
+  // Carousel pages land next to the cover (posts/{uid}/{millis}-{j}.jpg,
+  // mirroring the app's multi-upload paths).
+  const carouselUrls = {};
+  const pageJobs = CAROUSEL_POSTS.flatMap((i) =>
+    carouselPages(i).map((local, j) => ({ i, local, j })),
+  );
+  await mapLimit(pageJobs, 8, async ({ i, local, j }) => {
+    carouselUrls[`${i}-${j}`] = await upload(
+      `posts/${local}`,
+      `posts/${uidOf(postAuthor(i))}/${postMillis(i)}-${j + 1}.jpg`,
+    );
+  });
+
+  // DM images: chats/{senderUid}/{millis}.jpg, same shape the app uploads.
+  // URL hangs off the message object so the write phase finds it.
+  if (me) {
+    const dmJobs = [];
+    for (const c of CONVERSATIONS) {
+      for (const m of c.messages) {
+        if (m.image) dmJobs.push({ c, m });
+      }
+    }
+    await mapLimit(dmJobs, 8, async ({ c, m }) => {
+      const sender = m.from === 'me' ? me : uidOf(c.partner);
+      m.url = await upload(`posts/${m.image}`, `chats/${sender}/${m.at}.jpg`);
+    });
+  }
+  return { avatarUrls, postUrls, storyUrls, reelUrls, carouselUrls };
 }
 
 // Firestore batches cap at 500 ops — auto-chunk queued writes/deletes.
@@ -452,11 +504,16 @@ async function reset() {
   if (me) {
     for (const c of CONVERSATIONS) {
       const conv = db.collection('conversations').doc(convIdFor(me, uidOf(c.partner)));
-      for (let k = 1; k <= 10; k++) {
+      for (let k = 1; k <= 16; k++) {
         batch.delete(conv.collection('messages').doc(`seed_msg_${k}`));
       }
       batch.delete(conv);
     }
+    // only the seeded ones — real saves the user made survive a re-seed
+    const saved = await db.collection('savedPosts').where('uid', '==', me).get();
+    saved.forEach((d) => {
+      if ((d.data().postId || '').startsWith('seed_post_')) batch.delete(d.ref);
+    });
   }
   for (const n of NAMES) {
     const userRef = db.collection('users').doc(uidOf(n));
@@ -471,7 +528,7 @@ async function reset() {
   console.log('Reset done.');
 }
 
-async function seed({ avatarUrls, postUrls, storyUrls, reelUrls }) {
+async function seed({ avatarUrls, postUrls, storyUrls, reelUrls, carouselUrls }) {
   let meProfile = { username: 'you', avatarUrl: null };
   if (me) {
     const snap = await db.collection('users').doc(me).get();
@@ -546,13 +603,19 @@ async function seed({ avatarUrls, postUrls, storyUrls, reelUrls }) {
   for (let i = 1; i <= POST_COUNT; i++) {
     const author = postAuthor(i);
     const ref = db.collection('posts').doc(postId(i));
+    const isCarousel = CAROUSEL_POSTS.includes(i);
+    const imageUrls = isCarousel
+      ? [postUrls[i], carouselUrls[`${i}-0`], carouselUrls[`${i}-1`]]
+      : null;
     batch.set(
       ref,
       {
         authorId: uidOf(author),
         authorUsername: author,
         authorAvatarUrl: avatarUrls[author],
+        // cover scalar + imageUrls array, exactly what the app's PostDto writes
         imageUrl: postUrls[i],
+        ...(imageUrls && { imageUrls }),
         caption: CAPTIONS[i - 1],
         createdAt: postMillis(i),
         likeCount: postLikeCount(i),
@@ -655,7 +718,14 @@ async function seed({ avatarUrls, postUrls, storyUrls, reelUrls }) {
       c.messages.forEach((m, k) => {
         batch.set(
           convRef.collection('messages').doc(`seed_msg_${k + 1}`),
-          { senderId: senderOf(m.from), text: m.text, createdAt: m.at },
+          {
+            senderId: senderOf(m.from),
+            text: m.image ? '' : m.text,
+            type: m.image ? 'image' : 'text',
+            ...(m.image && { imageUrl: m.url }),
+            createdAt: m.at,
+            ...(m.readAt && { readAt: m.readAt }),
+          },
           { merge: true },
         );
       });
@@ -668,7 +738,12 @@ async function seed({ avatarUrls, postUrls, storyUrls, reelUrls }) {
             [me]: { username: meProfile.username, avatarUrl: meProfile.avatarUrl },
             [uidOf(c.partner)]: { username: c.partner, avatarUrl: avatarUrls[c.partner] },
           },
-          lastMessage: { text: last.text, senderId: senderOf(last.from), createdAt: last.at },
+          lastMessage: {
+            text: last.image ? '' : last.text,
+            type: last.image ? 'image' : 'text',
+            senderId: senderOf(last.from),
+            createdAt: last.at,
+          },
           updatedAt: last.at,
         },
         { merge: true },
@@ -676,12 +751,23 @@ async function seed({ avatarUrls, postUrls, storyUrls, reelUrls }) {
     }
   }
 
+  // -- saved posts for --me (Saved tab; carousels show their covers)
+  if (me) {
+    SAVED_POSTS.forEach((i, k) => {
+      batch.set(
+        db.collection('savedPosts').doc(`${me}_${postId(i)}`),
+        { uid: me, postId: postId(i), createdAt: now - (k + 1) * 3 * HOUR },
+        { merge: true },
+      );
+    });
+  }
+
   await batch.commit();
   const commentTotal = Array.from({ length: POST_COUNT }, (_, k) => k + 1)
     .reduce((sum, i) => sum + postCommenters(i).length, 0);
   console.log(
-    `Seeded ${NAMES.length} users, ${POST_COUNT} posts (${commentTotal} comments), 12 stories, ${REELS.length} reels` +
-      `${me ? `, 12 notifications, ${CONVERSATIONS.length} conversations` : ''}.`,
+    `Seeded ${NAMES.length} users, ${POST_COUNT} posts (${commentTotal} comments, ${CAROUSEL_POSTS.length} carousels), 12 stories, ${REELS.length} reels` +
+      `${me ? `, 12 notifications, ${CONVERSATIONS.length} conversations, ${SAVED_POSTS.length} saved` : ''}.`,
   );
   console.log('Sample post media URL:', postUrls[POST_COUNT]);
 
