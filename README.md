@@ -108,7 +108,7 @@ The "written entirely by AI agents" claim is checkable, not vibes:
 - **[docs/plans/](docs/plans)** — nine dated phase implementation plans (~3,000 lines), one per feature slice, each ending in a `chore: complete phase N` commit.
 - **The commit history** — 50+ conventional commits in a repeating rhythm: plan → per-layer feature slices → `fix: final review` pass → phase complete.
 - **[AGENTS.md](AGENTS.md) and [.claude/skills/](.claude/skills)** — the rules the agents operated under (freezed v3 gotchas, controller lifecycle bans, auto dart-fix hooks) and the five custom enforcement skills that kept the architecture honest.
-- **CI** — `flutter analyze` + all 240 tests on every push: [![CI](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml/badge.svg)](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml)
+- **CI** — `flutter analyze` + all 258 tests on every push: [![CI](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml/badge.svg)](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml)
 
 ## Scripts
 
@@ -127,7 +127,7 @@ The agent tooling is part of the exhibit — this is the machinery that kept AI 
 
 ```bash
 dart run build_runner build --delete-conflicting-outputs   # after model changes
-flutter test                                               # 240 tests, ~10s
+flutter test                                               # 258 tests, ~10s
 ```
 
 ## Roadmap
