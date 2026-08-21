@@ -20,15 +20,13 @@ Why? To find out how far "vibe coding" really gets you — and to leave behind r
 
 ## Screenshots
 
-Android emulator, seeded demo data. Dark theme first — the app follows the system theme, light shots at the end.
+Android emulator, seeded demo data. Dark theme; the app follows the system theme (light shot bottom-right).
 
 | | | |
 |---|---|---|
-| ![Feed with carousel](assets/screenshots/02-feed-carousel.png) | ![Carousel page 2](assets/screenshots/03-carousel-page2.png) | ![Story viewer](assets/screenshots/04-stories.png) |
-| ![Reels](assets/screenshots/07-reels.png) | ![Explore](assets/screenshots/06-explore.png) | ![Search](assets/screenshots/05-search.png) |
-| ![Activity](assets/screenshots/08-activity.png) | ![Chat list](assets/screenshots/12-chat-list.png) | ![Image DMs + Seen](assets/screenshots/13-chat-images.png) |
-| ![Profile](assets/screenshots/09-profile.png) | ![Saved tab](assets/screenshots/10-saved.png) | ![Post detail](assets/screenshots/11-post-detail.png) |
-| ![Login](assets/screenshots/01-login.png) | ![Light feed](assets/screenshots/14-light-feed.png) | ![Light profile](assets/screenshots/15-light-profile.png) |
+| ![Feed with carousel](assets/screenshots/02-feed-carousel.png) | ![Story viewer](assets/screenshots/04-stories.png) | ![Reels](assets/screenshots/07-reels.png) |
+| ![Explore](assets/screenshots/06-explore.png) | ![Image DMs + Seen](assets/screenshots/13-chat-images.png) | ![Profile](assets/screenshots/09-profile.png) |
+| ![Saved tab](assets/screenshots/10-saved.png) | ![Post detail](assets/screenshots/11-post-detail.png) | ![Light theme](assets/screenshots/14-light-feed.png) |
 
 ## What works
 
