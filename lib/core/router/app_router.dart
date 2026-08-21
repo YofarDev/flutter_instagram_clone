@@ -247,7 +247,9 @@ class AppRouter {
             create: (_) => extra is Post
                 ? getIt<PostDetailCubit>(param1: extra)
                 : getIt<PostDetailCubit>(param2: extra),
-            child: const PostDetailScreen(),
+            child: PostDetailScreen(
+              heroTag: state.uri.queryParameters['hero'],
+            ),
           );
         },
       ),
@@ -417,6 +419,19 @@ class AppRouter {
                 param1: getIt<AuthCubit>().state.user!.uid,
               ),
               child: const NewChatScreen(),
+            ),
+      ),
+      GoRoute(
+        path: Routes.sharePost,
+        name: 'SharePost',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (BuildContext context, GoRouterState state) =>
+            BlocProvider<NewChatCubit>(
+              create: (_) => getIt<NewChatCubit>(
+                param1: getIt<AuthCubit>().state.user!.uid,
+                param2: state.extra is Post ? state.extra as Post : null,
+              ),
+              child: const NewChatScreen(shareMode: true),
             ),
       ),
       GoRoute(

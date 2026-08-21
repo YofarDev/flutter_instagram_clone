@@ -12,5 +12,9 @@ sealed class StoryViewerState with _$StoryViewerState {
     @Default(0) int storyIndex,
     @Default(<String>{}) Set<String> viewedIds,
     @Default(false) bool finished,
+
+    /// Story replies: last reply landed (drives the Sent toast).
+    @Default(false) bool replySent,
+    String? error,
   }) = _StoryViewerState;
 }

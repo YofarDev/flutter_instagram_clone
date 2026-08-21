@@ -3,8 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nested/nested.dart';
 
+import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/utils/time_ago.dart';
+import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../domain/models/story.dart';
 import '../../domain/models/story_tray.dart';
 import '../bloc/story_viewer_cubit.dart';
@@ -19,6 +22,7 @@ class StoryViewerScreen extends StatefulWidget {
 
 class _StoryViewerScreenState extends State<StoryViewerScreen> {
   late final StoryViewerCubit _cubit;
+  final TextEditingController _replyController = TextEditingController();
   Timer? _timer;
 
   @override
@@ -26,6 +30,13 @@ class _StoryViewerScreenState extends State<StoryViewerScreen> {
     super.initState();
     _cubit = context.read<StoryViewerCubit>()..init();
     _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _replyController.dispose();
+    super.dispose();
   }
 
   void _startTimer() {
@@ -39,18 +50,46 @@ class _StoryViewerScreenState extends State<StoryViewerScreen> {
     _startTimer();
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
+  void _sendReply(String text) {
+    if (text.trim().isEmpty) return;
+    _cubit.reply(text);
+    _resetTimer();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<StoryViewerCubit, StoryViewerState>(
-      listenWhen: (StoryViewerState p, StoryViewerState c) =>
-          !p.finished && c.finished,
-      listener: (BuildContext context, StoryViewerState state) => context.pop(),
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final String myUid = context.watch<AuthCubit>().state.user!.uid;
+    return MultiBlocListener(
+      listeners: <SingleChildWidget>[
+        BlocListener<StoryViewerCubit, StoryViewerState>(
+          listenWhen: (StoryViewerState p, StoryViewerState c) =>
+              !p.finished && c.finished,
+          listener: (BuildContext context, StoryViewerState state) =>
+              context.pop(),
+        ),
+        BlocListener<StoryViewerCubit, StoryViewerState>(
+          listenWhen: (StoryViewerState p, StoryViewerState c) =>
+              p.replySent != c.replySent && c.replySent,
+          listener: (BuildContext context, StoryViewerState state) {
+            _replyController.clear();
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(content: Text(l10n.storyReplySent)));
+            _cubit.clearReplySent();
+          },
+        ),
+        BlocListener<StoryViewerCubit, StoryViewerState>(
+          listenWhen: (StoryViewerState p, StoryViewerState c) =>
+              p.error != c.error && c.error != null,
+          listener: (BuildContext context, StoryViewerState state) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(content: Text(state.error!)));
+            _cubit.clearError();
+          },
+        ),
+      ],
       child: BlocBuilder<StoryViewerCubit, StoryViewerState>(
         buildWhen: (StoryViewerState p, StoryViewerState c) =>
             p.trayIndex != c.trayIndex || p.storyIndex != c.storyIndex,
@@ -115,10 +154,16 @@ class _StoryViewerScreenState extends State<StoryViewerScreen> {
                             ),
                           ),
                         ),
-                        Text(
-                          timeAgo(story.createdAt),
-                          style: const TextStyle(color: Colors.white70),
-                        ),
+                         Text(
+                           timeAgo(
+                             story.createdAt,
+                             locale:
+                                 Localizations.localeOf(
+                                   context,
+                                 ).languageCode,
+                           ),
+                           style: const TextStyle(color: Colors.white70),
+                         ),
                         IconButton(
                           icon: const Icon(Icons.close, color: Colors.white),
                           onPressed: () => context.pop(),
@@ -165,6 +210,48 @@ class _StoryViewerScreenState extends State<StoryViewerScreen> {
                       ),
                     ),
                   ),
+                  if (tray.uid != myUid)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
+                      child: Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: TextField(
+                              controller: _replyController,
+                              minLines: 1,
+                              maxLines: 3,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                isDense: true,
+                                hintText: l10n.storyReplyHint(
+                                  tray.username,
+                                ),
+                                hintStyle: const TextStyle(
+                                  color: Colors.white54,
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(24),
+                                  borderSide: const BorderSide(
+                                    color: Colors.white24,
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 10,
+                                ),
+                              ),
+                              onSubmitted: _sendReply,
+                              textInputAction: TextInputAction.send,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.send, color: Colors.white),
+                            onPressed: () =>
+                                _sendReply(_replyController.text),
+                          ),
+                        ],
+                      ),
+                    ),
                 ],
               ),
             ),

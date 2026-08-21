@@ -142,8 +142,10 @@ Future<void> setupServiceLocator() async {
   getIt.registerFactoryParam<StoryViewerCubit, StoryViewerArgs, void>(
     (StoryViewerArgs args, _) => StoryViewerCubit(
       getIt<IStoriesRepository>(),
+      getIt<IChatRepository>(),
       trays: args.trays,
       initialTrayIndex: args.initialTrayIndex,
+      myUid: getIt<AuthCubit>().state.user!.uid,
     ),
   );
 
@@ -173,11 +175,12 @@ Future<void> setupServiceLocator() async {
       myUid: args.myUid,
     ),
   );
-  getIt.registerFactoryParam<NewChatCubit, String, void>(
-    (String uid, _) => NewChatCubit(
+  getIt.registerFactoryParam<NewChatCubit, String, Post?>(
+    (String uid, Post? sharedPost) => NewChatCubit(
       getIt<IExploreRepository>(),
       getIt<IChatRepository>(),
       myUid: uid,
+      sharedPost: sharedPost,
     ),
   );
 

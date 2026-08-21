@@ -281,6 +281,7 @@ const REELS = [
 ];
 
 // Message shape: { from, text?, image? (asset file → image message),
+//   post? (post number → shared-post message), story? (name → story reply),
 //   at, readAt? (recipient read it — feeds the Seen receipt) }
 const CONVERSATIONS = [
   {
@@ -297,6 +298,8 @@ const CONVERSATIONS = [
       { from: 'me', text: 'Booking the reminder now lol', at: now - 4 * HOUR, readAt: now - 3 * HOUR },
       { from: 'alice', text: 'Bring the film camera, you will thank me', at: now - 1 * HOUR, readAt: now - 50 * MIN },
       { from: 'me', text: 'Say less 📷', at: now - 20 * MIN, readAt: now - 10 * MIN },
+      // ends on a shared post → the conversations list shows a "Post" preview
+      { from: 'me', post: 6, at: now - 15 * MIN, readAt: now - 5 * MIN },
     ],
   },
   {
@@ -325,6 +328,8 @@ const CONVERSATIONS = [
       { from: 'me', text: 'Sold. See you at 6:15', at: now - 1 * DAY - 7 * HOUR, readAt: now - 1 * DAY - 6 * HOUR },
       // ends on an image → the conversations list shows a "Photo" preview
       { from: 'eve', image: 'insta-eve-2.jpg', at: now - 6 * HOUR },
+      // story reply → quoted story bubble with the reply text beneath
+      { from: 'me', story: 'eve', text: 'This wave is unreal 🌊', at: now - 5 * HOUR, readAt: now - 4 * HOUR },
     ],
   },
   {
@@ -720,9 +725,14 @@ async function seed({ avatarUrls, postUrls, storyUrls, reelUrls, carouselUrls })
           convRef.collection('messages').doc(`seed_msg_${k + 1}`),
           {
             senderId: senderOf(m.from),
-            text: m.image ? '' : m.text,
-            type: m.image ? 'image' : 'text',
+            text: m.image || m.post ? '' : m.text,
+            type: m.image ? 'image' : m.post ? 'post' : m.story ? 'story' : 'text',
             ...(m.image && { imageUrl: m.url }),
+            ...(m.post && { postId: postId(m.post), imageUrl: postUrls[m.post] }),
+            ...(m.story && {
+              postId: `seed_story_${NAMES.indexOf(m.story) + 1}`,
+              imageUrl: storyUrls[m.story],
+            }),
             createdAt: m.at,
             ...(m.readAt && { readAt: m.readAt }),
           },
@@ -730,6 +740,8 @@ async function seed({ avatarUrls, postUrls, storyUrls, reelUrls, carouselUrls })
         );
       });
       const last = c.messages[c.messages.length - 1];
+      // partner messages with no readAt → my unread badge count
+      const unreadFromPartner = c.messages.filter((m) => m.from !== 'me' && !m.readAt).length;
       batch.set(
         convRef,
         {
@@ -739,12 +751,13 @@ async function seed({ avatarUrls, postUrls, storyUrls, reelUrls, carouselUrls })
             [uidOf(c.partner)]: { username: c.partner, avatarUrl: avatarUrls[c.partner] },
           },
           lastMessage: {
-            text: last.image ? '' : last.text,
-            type: last.image ? 'image' : 'text',
+            text: last.image || last.post ? '' : last.text,
+            type: last.image ? 'image' : last.post ? 'post' : last.story ? 'story' : 'text',
             senderId: senderOf(last.from),
             createdAt: last.at,
           },
           updatedAt: last.at,
+          unread: { [me]: unreadFromPartner },
         },
         { merge: true },
       );

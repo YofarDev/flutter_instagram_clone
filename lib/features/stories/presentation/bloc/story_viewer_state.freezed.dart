@@ -14,7 +14,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$StoryViewerState {
 
- List<StoryTray> get trays; int get trayIndex; int get storyIndex; Set<String> get viewedIds; bool get finished;
+ List<StoryTray> get trays; int get trayIndex; int get storyIndex; Set<String> get viewedIds; bool get finished;/// Story replies: last reply landed (drives the Sent toast).
+ bool get replySent; String? get error;
 /// Create a copy of StoryViewerState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +26,16 @@ $StoryViewerStateCopyWith<StoryViewerState> get copyWith => _$StoryViewerStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is StoryViewerState&&const DeepCollectionEquality().equals(other.trays, trays)&&(identical(other.trayIndex, trayIndex) || other.trayIndex == trayIndex)&&(identical(other.storyIndex, storyIndex) || other.storyIndex == storyIndex)&&const DeepCollectionEquality().equals(other.viewedIds, viewedIds)&&(identical(other.finished, finished) || other.finished == finished));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is StoryViewerState&&const DeepCollectionEquality().equals(other.trays, trays)&&(identical(other.trayIndex, trayIndex) || other.trayIndex == trayIndex)&&(identical(other.storyIndex, storyIndex) || other.storyIndex == storyIndex)&&const DeepCollectionEquality().equals(other.viewedIds, viewedIds)&&(identical(other.finished, finished) || other.finished == finished)&&(identical(other.replySent, replySent) || other.replySent == replySent)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(trays),trayIndex,storyIndex,const DeepCollectionEquality().hash(viewedIds),finished);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(trays),trayIndex,storyIndex,const DeepCollectionEquality().hash(viewedIds),finished,replySent,error);
 
 @override
 String toString() {
-  return 'StoryViewerState(trays: $trays, trayIndex: $trayIndex, storyIndex: $storyIndex, viewedIds: $viewedIds, finished: $finished)';
+  return 'StoryViewerState(trays: $trays, trayIndex: $trayIndex, storyIndex: $storyIndex, viewedIds: $viewedIds, finished: $finished, replySent: $replySent, error: $error)';
 }
 
 
@@ -45,7 +46,7 @@ abstract mixin class $StoryViewerStateCopyWith<$Res>  {
   factory $StoryViewerStateCopyWith(StoryViewerState value, $Res Function(StoryViewerState) _then) = _$StoryViewerStateCopyWithImpl;
 @useResult
 $Res call({
- List<StoryTray> trays, int trayIndex, int storyIndex, Set<String> viewedIds, bool finished
+ List<StoryTray> trays, int trayIndex, int storyIndex, Set<String> viewedIds, bool finished, bool replySent, String? error
 });
 
 
@@ -62,14 +63,16 @@ class _$StoryViewerStateCopyWithImpl<$Res>
 
 /// Create a copy of StoryViewerState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? trays = null,Object? trayIndex = null,Object? storyIndex = null,Object? viewedIds = null,Object? finished = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? trays = null,Object? trayIndex = null,Object? storyIndex = null,Object? viewedIds = null,Object? finished = null,Object? replySent = null,Object? error = freezed,}) {
   return _then(_self.copyWith(
 trays: null == trays ? _self.trays : trays // ignore: cast_nullable_to_non_nullable
 as List<StoryTray>,trayIndex: null == trayIndex ? _self.trayIndex : trayIndex // ignore: cast_nullable_to_non_nullable
 as int,storyIndex: null == storyIndex ? _self.storyIndex : storyIndex // ignore: cast_nullable_to_non_nullable
 as int,viewedIds: null == viewedIds ? _self.viewedIds : viewedIds // ignore: cast_nullable_to_non_nullable
 as Set<String>,finished: null == finished ? _self.finished : finished // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,replySent: null == replySent ? _self.replySent : replySent // ignore: cast_nullable_to_non_nullable
+as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -151,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<StoryTray> trays,  int trayIndex,  int storyIndex,  Set<String> viewedIds,  bool finished)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<StoryTray> trays,  int trayIndex,  int storyIndex,  Set<String> viewedIds,  bool finished,  bool replySent,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _StoryViewerState() when $default != null:
-return $default(_that.trays,_that.trayIndex,_that.storyIndex,_that.viewedIds,_that.finished);case _:
+return $default(_that.trays,_that.trayIndex,_that.storyIndex,_that.viewedIds,_that.finished,_that.replySent,_that.error);case _:
   return orElse();
 
 }
@@ -172,10 +175,10 @@ return $default(_that.trays,_that.trayIndex,_that.storyIndex,_that.viewedIds,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<StoryTray> trays,  int trayIndex,  int storyIndex,  Set<String> viewedIds,  bool finished)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<StoryTray> trays,  int trayIndex,  int storyIndex,  Set<String> viewedIds,  bool finished,  bool replySent,  String? error)  $default,) {final _that = this;
 switch (_that) {
 case _StoryViewerState():
-return $default(_that.trays,_that.trayIndex,_that.storyIndex,_that.viewedIds,_that.finished);}
+return $default(_that.trays,_that.trayIndex,_that.storyIndex,_that.viewedIds,_that.finished,_that.replySent,_that.error);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -189,10 +192,10 @@ return $default(_that.trays,_that.trayIndex,_that.storyIndex,_that.viewedIds,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<StoryTray> trays,  int trayIndex,  int storyIndex,  Set<String> viewedIds,  bool finished)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<StoryTray> trays,  int trayIndex,  int storyIndex,  Set<String> viewedIds,  bool finished,  bool replySent,  String? error)?  $default,) {final _that = this;
 switch (_that) {
 case _StoryViewerState() when $default != null:
-return $default(_that.trays,_that.trayIndex,_that.storyIndex,_that.viewedIds,_that.finished);case _:
+return $default(_that.trays,_that.trayIndex,_that.storyIndex,_that.viewedIds,_that.finished,_that.replySent,_that.error);case _:
   return null;
 
 }
@@ -204,7 +207,7 @@ return $default(_that.trays,_that.trayIndex,_that.storyIndex,_that.viewedIds,_th
 
 
 class _StoryViewerState implements StoryViewerState {
-  const _StoryViewerState({required final  List<StoryTray> trays, this.trayIndex = 0, this.storyIndex = 0, final  Set<String> viewedIds = const <String>{}, this.finished = false}): _trays = trays,_viewedIds = viewedIds;
+  const _StoryViewerState({required final  List<StoryTray> trays, this.trayIndex = 0, this.storyIndex = 0, final  Set<String> viewedIds = const <String>{}, this.finished = false, this.replySent = false, this.error}): _trays = trays,_viewedIds = viewedIds;
   
 
  final  List<StoryTray> _trays;
@@ -224,6 +227,9 @@ class _StoryViewerState implements StoryViewerState {
 }
 
 @override@JsonKey() final  bool finished;
+/// Story replies: last reply landed (drives the Sent toast).
+@override@JsonKey() final  bool replySent;
+@override final  String? error;
 
 /// Create a copy of StoryViewerState
 /// with the given fields replaced by the non-null parameter values.
@@ -235,16 +241,16 @@ _$StoryViewerStateCopyWith<_StoryViewerState> get copyWith => __$StoryViewerStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StoryViewerState&&const DeepCollectionEquality().equals(other._trays, _trays)&&(identical(other.trayIndex, trayIndex) || other.trayIndex == trayIndex)&&(identical(other.storyIndex, storyIndex) || other.storyIndex == storyIndex)&&const DeepCollectionEquality().equals(other._viewedIds, _viewedIds)&&(identical(other.finished, finished) || other.finished == finished));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StoryViewerState&&const DeepCollectionEquality().equals(other._trays, _trays)&&(identical(other.trayIndex, trayIndex) || other.trayIndex == trayIndex)&&(identical(other.storyIndex, storyIndex) || other.storyIndex == storyIndex)&&const DeepCollectionEquality().equals(other._viewedIds, _viewedIds)&&(identical(other.finished, finished) || other.finished == finished)&&(identical(other.replySent, replySent) || other.replySent == replySent)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_trays),trayIndex,storyIndex,const DeepCollectionEquality().hash(_viewedIds),finished);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_trays),trayIndex,storyIndex,const DeepCollectionEquality().hash(_viewedIds),finished,replySent,error);
 
 @override
 String toString() {
-  return 'StoryViewerState(trays: $trays, trayIndex: $trayIndex, storyIndex: $storyIndex, viewedIds: $viewedIds, finished: $finished)';
+  return 'StoryViewerState(trays: $trays, trayIndex: $trayIndex, storyIndex: $storyIndex, viewedIds: $viewedIds, finished: $finished, replySent: $replySent, error: $error)';
 }
 
 
@@ -255,7 +261,7 @@ abstract mixin class _$StoryViewerStateCopyWith<$Res> implements $StoryViewerSta
   factory _$StoryViewerStateCopyWith(_StoryViewerState value, $Res Function(_StoryViewerState) _then) = __$StoryViewerStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<StoryTray> trays, int trayIndex, int storyIndex, Set<String> viewedIds, bool finished
+ List<StoryTray> trays, int trayIndex, int storyIndex, Set<String> viewedIds, bool finished, bool replySent, String? error
 });
 
 
@@ -272,14 +278,16 @@ class __$StoryViewerStateCopyWithImpl<$Res>
 
 /// Create a copy of StoryViewerState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? trays = null,Object? trayIndex = null,Object? storyIndex = null,Object? viewedIds = null,Object? finished = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? trays = null,Object? trayIndex = null,Object? storyIndex = null,Object? viewedIds = null,Object? finished = null,Object? replySent = null,Object? error = freezed,}) {
   return _then(_StoryViewerState(
 trays: null == trays ? _self._trays : trays // ignore: cast_nullable_to_non_nullable
 as List<StoryTray>,trayIndex: null == trayIndex ? _self.trayIndex : trayIndex // ignore: cast_nullable_to_non_nullable
 as int,storyIndex: null == storyIndex ? _self.storyIndex : storyIndex // ignore: cast_nullable_to_non_nullable
 as int,viewedIds: null == viewedIds ? _self._viewedIds : viewedIds // ignore: cast_nullable_to_non_nullable
 as Set<String>,finished: null == finished ? _self.finished : finished // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,replySent: null == replySent ? _self.replySent : replySent // ignore: cast_nullable_to_non_nullable
+as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

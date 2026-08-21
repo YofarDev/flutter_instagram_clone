@@ -7,6 +7,7 @@ class ChatMessageDto {
     required this.createdAtMillis,
     this.type = 'text',
     this.imageUrl,
+    this.postId,
     this.readAtMillis,
   });
 
@@ -16,6 +17,7 @@ class ChatMessageDto {
     createdAtMillis: map['createdAt'] as int,
     type: map['type'] as String? ?? 'text',
     imageUrl: map['imageUrl'] as String?,
+    postId: map['postId'] as String?,
     readAtMillis: map['readAt'] as int?,
   );
 
@@ -24,6 +26,7 @@ class ChatMessageDto {
   final int createdAtMillis;
   final String type;
   final String? imageUrl;
+  final String? postId;
   final int? readAtMillis;
 
   Map<String, dynamic> toMap() => <String, dynamic>{
@@ -32,6 +35,7 @@ class ChatMessageDto {
     'createdAt': createdAtMillis,
     'type': type,
     if (imageUrl != null) 'imageUrl': imageUrl,
+    if (postId != null) 'postId': postId,
   };
 
   ChatMessage toDomain(String id, String conversationId) => ChatMessage(
@@ -42,6 +46,7 @@ class ChatMessageDto {
     createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMillis),
     type: type,
     imageUrl: imageUrl,
+    postId: postId,
     readAt: readAtMillis == null
         ? null
         : DateTime.fromMillisecondsSinceEpoch(readAtMillis!),

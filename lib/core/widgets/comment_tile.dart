@@ -24,7 +24,10 @@ class CommentTile extends StatelessWidget {
         ),
       ),
       trailing: Text(
-        timeAgo(comment.createdAt),
+        timeAgo(
+          comment.createdAt,
+          locale: Localizations.localeOf(context).languageCode,
+        ),
         style: Theme.of(context).textTheme.bodySmall,
       ),
     );

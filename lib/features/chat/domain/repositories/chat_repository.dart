@@ -26,12 +26,33 @@ abstract interface class IChatRepository {
     required String filePath,
   });
 
+  /// Shares a feed post (cover + id) into the conversation.
+  Future<Either<Failure, void>> sendPostMessage({
+    required String conversationId,
+    required String myUid,
+    required String otherUid,
+    required String postId,
+    required String imageUrl,
+  });
+
+  /// Story reply: sends [text] quoting the story.
+  Future<Either<Failure, void>> sendStoryReply({
+    required String conversationId,
+    required String myUid,
+    required String otherUid,
+    required String text,
+    required String storyId,
+    required String imageUrl,
+  });
+
   /// Live uid of whoever is typing in this conversation (null = nobody).
   Stream<String?> watchTyping({required String conversationId});
 
-  /// Stamps readAt on incoming messages (read receipts).
+  /// Stamps readAt on incoming messages (read receipts) and resets my
+  /// unread badge counter.
   Future<Either<Failure, void>> markMessagesRead({
     required String conversationId,
+    required String myUid,
     required List<String> messageIds,
   });
 

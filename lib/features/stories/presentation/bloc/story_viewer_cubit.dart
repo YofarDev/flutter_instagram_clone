@@ -1,7 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fpdart/fpdart.dart';
 
+import '../../../chat/domain/models/conversation.dart';
+import '../../../chat/domain/repositories/chat_repository.dart';
+import '../../../../core/models/failure.dart';
 import '../../domain/models/story.dart';
 import '../../domain/models/story_tray.dart';
 import '../../domain/repositories/stories_repository.dart';
@@ -16,12 +20,16 @@ class StoryViewerArgs {
 
 class StoryViewerCubit extends Cubit<StoryViewerState> {
   StoryViewerCubit(
-    this._repository, {
+    this._repository,
+    this._chatRepository, {
     required List<StoryTray> trays,
     required int initialTrayIndex,
+    required this._myUid,
   }) : super(StoryViewerState(trays: trays, trayIndex: initialTrayIndex));
 
   final IStoriesRepository _repository;
+  final IChatRepository _chatRepository;
+  final String _myUid;
 
   Story? get currentStory {
     if (state.trayIndex >= state.trays.length) return null;
@@ -65,4 +73,42 @@ class StoryViewerCubit extends Cubit<StoryViewerState> {
     unawaited(_repository.markViewed(storyId: story.id));
     emit(state.copyWith(viewedIds: <String>{...state.viewedIds, story.id}));
   }
+
+  /// Sends [text] as a DM quoting the current story to its author.
+  Future<void> reply(String text) async {
+    final Story? story = currentStory;
+    final String trimmed = text.trim();
+    if (story == null || trimmed.isEmpty || state.replySent) return;
+    final String authorUid = state.trays[state.trayIndex].uid;
+    String? failure;
+    Conversation? conversation;
+    (await _chatRepository.getOrCreateConversation(
+      myUid: _myUid,
+      otherUid: authorUid,
+    )).fold((Failure f) => failure = f.message, (Conversation c) {
+      conversation = c;
+    });
+    if (isClosed) return;
+    if (conversation == null) {
+      emit(state.copyWith(error: failure));
+      return;
+    }
+    final Either<Failure, void> either = await _chatRepository.sendStoryReply(
+      conversationId: conversation!.id,
+      myUid: _myUid,
+      otherUid: authorUid,
+      text: trimmed,
+      storyId: story.id,
+      imageUrl: story.imageUrl,
+    );
+    if (isClosed) return;
+    either.fold(
+      (Failure f) => emit(state.copyWith(error: f.message)),
+      (_) => emit(state.copyWith(replySent: true)),
+    );
+  }
+
+  void clearError() => emit(state.copyWith(error: null));
+
+  void clearReplySent() => emit(state.copyWith(replySent: false));
 }

@@ -100,6 +100,17 @@ void main() {
     expect(find.text('alice'), findsOneWidget);
     expect(find.text('You: hello'), findsOneWidget);
     expect(find.text('now'), findsOneWidget);
+    expect(find.byType(Badge), findsNothing);
+  });
+
+  testWidgets('unread conversations render a count badge', (
+    WidgetTester tester,
+  ) async {
+    conversation = _conversation().copyWith(unreadCount: 3);
+    await pumpSubject(tester);
+
+    expect(find.byType(Badge), findsOneWidget);
+    expect(find.text('3'), findsOneWidget);
   });
 
   testWidgets('tap row pushes chat route with conversation as extra', (

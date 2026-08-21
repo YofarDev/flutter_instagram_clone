@@ -132,6 +132,8 @@ class FeedScreen extends StatelessWidget {
                                 Routes.postDetailPath(post.id),
                                 extra: post,
                               ),
+                              onShareTap: () =>
+                                  context.push(Routes.sharePost, extra: post),
                               onUsernameTap: () =>
                                   context.push(Routes.userPath(post.authorId)),
                             );

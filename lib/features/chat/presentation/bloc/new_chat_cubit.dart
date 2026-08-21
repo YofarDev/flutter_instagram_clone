@@ -5,6 +5,7 @@ import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/models/app_user.dart';
 import '../../../../core/models/failure.dart';
+import '../../../../core/models/post.dart';
 import '../../../explore/domain/repositories/explore_repository.dart';
 import '../../domain/models/conversation.dart';
 import '../../domain/repositories/chat_repository.dart';
@@ -15,6 +16,7 @@ class NewChatCubit extends Cubit<NewChatState> {
     this._exploreRepository,
     this._chatRepository, {
     required this._myUid,
+    this._sharedPost,
   }) : super(const NewChatState()) {
     loadSuggestions();
   }
@@ -22,6 +24,9 @@ class NewChatCubit extends Cubit<NewChatState> {
   final IExploreRepository _exploreRepository;
   final IChatRepository _chatRepository;
   final String _myUid;
+
+  /// When set, picking a user shares this post instead of opening the chat.
+  final Post? _sharedPost;
 
   // ponytail: Timer debounce in cubit, mirrors SearchCubit
   Timer? _debounce;
@@ -59,6 +64,25 @@ class NewChatCubit extends Cubit<NewChatState> {
       (Failure f) => emit(state.copyWith(opening: false, error: f.message)),
       (Conversation conversation) =>
           emit(state.copyWith(opening: false, opened: conversation)),
+    );
+  }
+
+  /// Share mode: drops the pending post into [conversation]. The screen
+  /// reacts to `shared` with a Sent toast and pops.
+  Future<void> shareTo(Conversation conversation) async {
+    final Post? post = _sharedPost;
+    if (post == null || state.shared) return;
+    final Either<Failure, void> either = await _chatRepository.sendPostMessage(
+      conversationId: conversation.id,
+      myUid: _myUid,
+      otherUid: conversation.otherUser.uid,
+      postId: post.id,
+      imageUrl: post.imageUrl,
+    );
+    if (isClosed) return;
+    either.fold(
+      (Failure f) => emit(state.copyWith(error: f.message)),
+      (_) => emit(state.copyWith(shared: true)),
     );
   }
 

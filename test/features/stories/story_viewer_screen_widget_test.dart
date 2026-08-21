@@ -4,9 +4,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:nested/nested.dart';
 
 import 'package:flutter_instagram_clone/core/l10n/generated/app_localizations.dart';
+import 'package:flutter_instagram_clone/core/models/app_user.dart';
 import 'package:flutter_instagram_clone/core/models/failure.dart';
+import 'package:flutter_instagram_clone/features/auth/domain/repositories/auth_repository.dart';
+import 'package:flutter_instagram_clone/features/auth/presentation/bloc/auth_cubit.dart';
+import 'package:flutter_instagram_clone/features/chat/domain/repositories/chat_repository.dart';
 import 'package:flutter_instagram_clone/core/router/route_constants.dart';
 import 'package:flutter_instagram_clone/features/stories/domain/models/story.dart';
 import 'package:flutter_instagram_clone/features/stories/domain/models/story_tray.dart';
@@ -15,6 +20,10 @@ import 'package:flutter_instagram_clone/features/stories/presentation/bloc/story
 import 'package:flutter_instagram_clone/features/stories/presentation/screens/story_viewer_screen.dart';
 
 class MockIStoriesRepository extends Mock implements IStoriesRepository {}
+
+class MockIAuthRepository extends Mock implements IAuthRepository {}
+
+class MockIChatRepositoryForViewer extends Mock implements IChatRepository {}
 
 final Story a1 = Story(
   id: 'a1',
@@ -54,11 +63,42 @@ void main() {
     ).thenAnswer((_) async => const Right<Failure, void>(null));
   });
 
+  // AuthCubit state must be hydrated before the screen's first build: the
+  // reply bar reads `state.user!.uid` to hide itself on your own stories.
+  Future<AuthCubit> authedCubit() async {
+    final MockIAuthRepository authRepo = MockIAuthRepository();
+    when(
+      () => authRepo.authStateChanges,
+    ).thenAnswer(
+      (_) => Stream<AppUser?>.value(
+        AppUser(uid: 'me', email: 'me@x.com', username: 'me'),
+      ),
+    );
+    when(
+      () => authRepo.findProfile(
+        uid: any(named: 'uid'),
+        email: any(named: 'email'),
+      ),
+    ).thenAnswer(
+      (_) async => Right<Failure, AppUser?>(
+        AppUser(uid: 'me', email: 'me@x.com', username: 'me'),
+      ),
+    );
+    final AuthCubit cubit = AuthCubit(authRepo);
+    for (int i = 0; i < 20; i++) {
+      await Future<void>.value();
+    }
+    return cubit;
+  }
+
   testWidgets('tap right zone advances story', (WidgetTester tester) async {
+    final AuthCubit authCubit = await authedCubit();
     final StoryViewerCubit cubit = StoryViewerCubit(
       repo,
+      MockIChatRepositoryForViewer(),
       trays: trays,
       initialTrayIndex: 0,
+      myUid: 'me',
     );
     addTearDown(cubit.close);
 
@@ -66,8 +106,11 @@ void main() {
       MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: BlocProvider<StoryViewerCubit>.value(
-          value: cubit,
+        home: MultiBlocProvider(
+          providers: <SingleChildWidget>[
+            BlocProvider<AuthCubit>.value(value: authCubit),
+            BlocProvider<StoryViewerCubit>.value(value: cubit),
+          ],
           child: const StoryViewerScreen(),
         ),
       ),
@@ -86,10 +129,13 @@ void main() {
   });
 
   testWidgets('finishing all stories pops back', (WidgetTester tester) async {
+    final AuthCubit authCubit = await authedCubit();
     final StoryViewerCubit cubit = StoryViewerCubit(
       repo,
+      MockIChatRepositoryForViewer(),
       trays: trays,
       initialTrayIndex: 0,
+      myUid: 'me',
     );
     addTearDown(cubit.close);
 
@@ -102,10 +148,14 @@ void main() {
         ),
         GoRoute(
           path: Routes.storyViewer,
-          builder: (_, _) => BlocProvider<StoryViewerCubit>.value(
-            value: cubit,
-            child: const StoryViewerScreen(),
-          ),
+          builder: (BuildContext ctx, _) =>
+              BlocProvider<StoryViewerCubit>.value(
+                value: cubit,
+                child: BlocProvider<AuthCubit>.value(
+                  value: authCubit,
+                  child: const StoryViewerScreen(),
+                ),
+              ),
         ),
       ],
     );

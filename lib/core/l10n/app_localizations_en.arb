@@ -115,5 +115,11 @@
   "postAddMore": "Add more",
   "chatSendPhoto": "Send a photo",
   "chatPhotoPreview": "Photo",
-  "chatSeen": "Seen"
+  "chatSeen": "Seen",
+  "shareToTitle": "Send to",
+  "chatPostSent": "Sent",
+  "chatPostPreview": "Post",
+  "chatStoryPreview": "Story",
+  "storyReplyHint": "Reply to {username}…",
+  "storyReplySent": "Reply sent"
 }

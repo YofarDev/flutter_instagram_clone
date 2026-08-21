@@ -343,9 +343,10 @@ class _Header extends StatelessWidget {
 }
 
 class _PostsGrid extends StatelessWidget {
-  const _PostsGrid({required this.posts});
+  const _PostsGrid({required this.posts, this.heroPrefix = 'profile'});
 
   final List<Post> posts;
+  final String heroPrefix;
 
   @override
   Widget build(BuildContext context) {
@@ -359,13 +360,19 @@ class _PostsGrid extends StatelessWidget {
       itemCount: posts.length,
       itemBuilder: (BuildContext context, int index) {
         final Post post = posts[index];
+        final String heroTag = '$heroPrefix-${post.id}';
         return InkWell(
-          onTap: () =>
-              context.push(Routes.postDetailPath(post.id), extra: post),
-          child: Image.network(
-            post.imageUrl,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => Container(color: Colors.grey),
+          onTap: () => context.push(
+            Routes.postDetailPath(post.id, heroTag: heroTag),
+            extra: post,
+          ),
+          child: Hero(
+            tag: heroTag,
+            child: Image.network(
+              post.imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => Container(color: Colors.grey),
+            ),
           ),
         );
       },
@@ -398,6 +405,6 @@ class _SavedTab extends StatelessWidget {
     if (posts.isEmpty) {
       return Center(child: Text(l10n.savedEmpty));
     }
-    return _PostsGrid(posts: posts);
+    return _PostsGrid(posts: posts, heroPrefix: 'saved');
   }
 }

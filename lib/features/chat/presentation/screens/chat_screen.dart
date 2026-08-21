@@ -69,6 +69,121 @@ class _ImageBubble extends StatelessWidget {
   }
 }
 
+/// Shared-post message: cover image with a Post chip, tap opens the post.
+class _PostBubble extends StatelessWidget {
+  const _PostBubble({required this.message});
+
+  final ChatMessage message;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push(Routes.postDetailPath(message.postId!)),
+      child: Stack(
+        children: <Widget>[
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.65,
+              maxHeight: 320,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Image.network(
+              message.imageUrl ?? '',
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => const SizedBox(
+                width: 120,
+                height: 120,
+                child: Icon(Icons.broken_image_outlined),
+              ),
+              loadingBuilder: (_, Widget child, ImageChunkEvent? progress) =>
+                  progress == null
+                  ? child
+                  : const SizedBox(
+                      width: 120,
+                      height: 120,
+                      child: Center(
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+            ),
+          ),
+          Positioned(
+            left: 8,
+            bottom: 8,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                AppLocalizations.of(context).chatPostPreview,
+                style: const TextStyle(color: Colors.white, fontSize: 12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Story reply: quoted story image with the reply text beneath it.
+class _StoryBubble extends StatelessWidget {
+  const _StoryBubble({required this.message});
+
+  final ChatMessage message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.of(context).size.width * 0.65,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Image.network(
+            message.imageUrl ?? '',
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => const SizedBox(
+              width: 120,
+              height: 120,
+              child: Icon(Icons.broken_image_outlined),
+            ),
+            loadingBuilder: (_, Widget child, ImageChunkEvent? progress) =>
+                progress == null
+                ? child
+                : const SizedBox(
+                    width: 120,
+                    height: 120,
+                    child: Center(
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Text(message.text),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Black fullscreen viewer; pinch-zooms, tap anywhere to close.
 class _ImageViewer extends StatelessWidget {
   const _ImageViewer({required this.url});
@@ -224,7 +339,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                     ? CrossAxisAlignment.end
                                     : CrossAxisAlignment.start,
                                 children: <Widget>[
-                                  if (message.isImage)
+                                  if (message.isPost)
+                                    _PostBubble(message: message)
+                                  else if (message.isStory)
+                                    _StoryBubble(message: message)
+                                  else if (message.isImage)
                                     _ImageBubble(message: message, mine: mine)
                                   else
                                     Container(

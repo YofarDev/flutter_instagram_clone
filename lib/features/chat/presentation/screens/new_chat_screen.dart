@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nested/nested.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/models/app_user.dart';
@@ -9,7 +10,11 @@ import '../bloc/new_chat_cubit.dart';
 import '../bloc/new_chat_state.dart';
 
 class NewChatScreen extends StatefulWidget {
-  const NewChatScreen({super.key});
+  const NewChatScreen({this.shareMode = false, super.key});
+
+  /// Share-post-to-DM mode: picking a user sends the pending post instead
+  /// of opening the conversation.
+  final bool shareMode;
 
   @override
   State<NewChatScreen> createState() => _NewChatScreenState();
@@ -28,21 +33,43 @@ class _NewChatScreenState extends State<NewChatScreen> {
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.newDmTitle)),
-      body: BlocListener<NewChatCubit, NewChatState>(
-        listenWhen: (NewChatState p, NewChatState c) =>
-            p.opened != c.opened || p.error != c.error,
-        listener: (BuildContext context, NewChatState state) {
-          if (state.opened != null) {
-            context.push(Routes.chat, extra: state.opened);
-            context.read<NewChatCubit>().clearOpened();
-          } else if (state.error != null) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(SnackBar(content: Text(state.error!)));
-            context.read<NewChatCubit>().clearError();
-          }
-        },
+      appBar: AppBar(
+        title: Text(widget.shareMode ? l10n.shareToTitle : l10n.newDmTitle),
+      ),
+      body: MultiBlocListener(
+        listeners: <SingleChildWidget>[
+          BlocListener<NewChatCubit, NewChatState>(
+            listenWhen: (NewChatState p, NewChatState c) =>
+                p.shared != c.shared,
+            listener: (BuildContext context, NewChatState state) {
+              if (state.shared) {
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(SnackBar(content: Text(l10n.chatPostSent)));
+                context.pop();
+              }
+            },
+          ),
+          BlocListener<NewChatCubit, NewChatState>(
+            listenWhen: (NewChatState p, NewChatState c) =>
+                p.opened != c.opened || p.error != c.error,
+            listener: (BuildContext context, NewChatState state) {
+              if (state.opened != null) {
+                if (widget.shareMode) {
+                  context.read<NewChatCubit>().shareTo(state.opened!);
+                } else {
+                  context.push(Routes.chat, extra: state.opened);
+                }
+                context.read<NewChatCubit>().clearOpened();
+              } else if (state.error != null) {
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(SnackBar(content: Text(state.error!)));
+                context.read<NewChatCubit>().clearError();
+              }
+            },
+          ),
+        ],
         child: Column(
           children: <Widget>[
             Padding(

@@ -43,13 +43,19 @@ class HashtagScreen extends StatelessWidget {
               itemCount: state.posts.length,
               itemBuilder: (BuildContext context, int index) {
                 final Post post = state.posts[index];
+                final String heroTag = 'hashtag-$tag-${post.id}';
                 return InkWell(
-                  onTap: () =>
-                      context.push(Routes.postDetailPath(post.id), extra: post),
-                  child: Image.network(
-                    post.imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Container(color: Colors.grey),
+                  onTap: () => context.push(
+                    Routes.postDetailPath(post.id, heroTag: heroTag),
+                    extra: post,
+                  ),
+                  child: Hero(
+                    tag: heroTag,
+                    child: Image.network(
+                      post.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Container(color: Colors.grey),
+                    ),
                   ),
                 );
               },

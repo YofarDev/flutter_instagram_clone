@@ -14,7 +14,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$NewChatState {
 
- String get query; List<AppUser> get users; List<AppUser> get suggestions; bool get suggestionsLoading; bool get searching; bool get opening; String? get error; Conversation? get opened;
+ String get query; List<AppUser> get users; List<AppUser> get suggestions; bool get suggestionsLoading; bool get searching; bool get opening;/// Share mode: the shared post landed in the opened conversation.
+ bool get shared; String? get error; Conversation? get opened;
 /// Create a copy of NewChatState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +26,16 @@ $NewChatStateCopyWith<NewChatState> get copyWith => _$NewChatStateCopyWithImpl<N
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NewChatState&&(identical(other.query, query) || other.query == query)&&const DeepCollectionEquality().equals(other.users, users)&&const DeepCollectionEquality().equals(other.suggestions, suggestions)&&(identical(other.suggestionsLoading, suggestionsLoading) || other.suggestionsLoading == suggestionsLoading)&&(identical(other.searching, searching) || other.searching == searching)&&(identical(other.opening, opening) || other.opening == opening)&&(identical(other.error, error) || other.error == error)&&(identical(other.opened, opened) || other.opened == opened));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NewChatState&&(identical(other.query, query) || other.query == query)&&const DeepCollectionEquality().equals(other.users, users)&&const DeepCollectionEquality().equals(other.suggestions, suggestions)&&(identical(other.suggestionsLoading, suggestionsLoading) || other.suggestionsLoading == suggestionsLoading)&&(identical(other.searching, searching) || other.searching == searching)&&(identical(other.opening, opening) || other.opening == opening)&&(identical(other.shared, shared) || other.shared == shared)&&(identical(other.error, error) || other.error == error)&&(identical(other.opened, opened) || other.opened == opened));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,query,const DeepCollectionEquality().hash(users),const DeepCollectionEquality().hash(suggestions),suggestionsLoading,searching,opening,error,opened);
+int get hashCode => Object.hash(runtimeType,query,const DeepCollectionEquality().hash(users),const DeepCollectionEquality().hash(suggestions),suggestionsLoading,searching,opening,shared,error,opened);
 
 @override
 String toString() {
-  return 'NewChatState(query: $query, users: $users, suggestions: $suggestions, suggestionsLoading: $suggestionsLoading, searching: $searching, opening: $opening, error: $error, opened: $opened)';
+  return 'NewChatState(query: $query, users: $users, suggestions: $suggestions, suggestionsLoading: $suggestionsLoading, searching: $searching, opening: $opening, shared: $shared, error: $error, opened: $opened)';
 }
 
 
@@ -45,7 +46,7 @@ abstract mixin class $NewChatStateCopyWith<$Res>  {
   factory $NewChatStateCopyWith(NewChatState value, $Res Function(NewChatState) _then) = _$NewChatStateCopyWithImpl;
 @useResult
 $Res call({
- String query, List<AppUser> users, List<AppUser> suggestions, bool suggestionsLoading, bool searching, bool opening, String? error, Conversation? opened
+ String query, List<AppUser> users, List<AppUser> suggestions, bool suggestionsLoading, bool searching, bool opening, bool shared, String? error, Conversation? opened
 });
 
 
@@ -62,7 +63,7 @@ class _$NewChatStateCopyWithImpl<$Res>
 
 /// Create a copy of NewChatState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? query = null,Object? users = null,Object? suggestions = null,Object? suggestionsLoading = null,Object? searching = null,Object? opening = null,Object? error = freezed,Object? opened = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? query = null,Object? users = null,Object? suggestions = null,Object? suggestionsLoading = null,Object? searching = null,Object? opening = null,Object? shared = null,Object? error = freezed,Object? opened = freezed,}) {
   return _then(_self.copyWith(
 query: null == query ? _self.query : query // ignore: cast_nullable_to_non_nullable
 as String,users: null == users ? _self.users : users // ignore: cast_nullable_to_non_nullable
@@ -70,6 +71,7 @@ as List<AppUser>,suggestions: null == suggestions ? _self.suggestions : suggesti
 as List<AppUser>,suggestionsLoading: null == suggestionsLoading ? _self.suggestionsLoading : suggestionsLoading // ignore: cast_nullable_to_non_nullable
 as bool,searching: null == searching ? _self.searching : searching // ignore: cast_nullable_to_non_nullable
 as bool,opening: null == opening ? _self.opening : opening // ignore: cast_nullable_to_non_nullable
+as bool,shared: null == shared ? _self.shared : shared // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,opened: freezed == opened ? _self.opened : opened // ignore: cast_nullable_to_non_nullable
 as Conversation?,
@@ -166,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String query,  List<AppUser> users,  List<AppUser> suggestions,  bool suggestionsLoading,  bool searching,  bool opening,  String? error,  Conversation? opened)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String query,  List<AppUser> users,  List<AppUser> suggestions,  bool suggestionsLoading,  bool searching,  bool opening,  bool shared,  String? error,  Conversation? opened)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _NewChatState() when $default != null:
-return $default(_that.query,_that.users,_that.suggestions,_that.suggestionsLoading,_that.searching,_that.opening,_that.error,_that.opened);case _:
+return $default(_that.query,_that.users,_that.suggestions,_that.suggestionsLoading,_that.searching,_that.opening,_that.shared,_that.error,_that.opened);case _:
   return orElse();
 
 }
@@ -187,10 +189,10 @@ return $default(_that.query,_that.users,_that.suggestions,_that.suggestionsLoadi
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String query,  List<AppUser> users,  List<AppUser> suggestions,  bool suggestionsLoading,  bool searching,  bool opening,  String? error,  Conversation? opened)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String query,  List<AppUser> users,  List<AppUser> suggestions,  bool suggestionsLoading,  bool searching,  bool opening,  bool shared,  String? error,  Conversation? opened)  $default,) {final _that = this;
 switch (_that) {
 case _NewChatState():
-return $default(_that.query,_that.users,_that.suggestions,_that.suggestionsLoading,_that.searching,_that.opening,_that.error,_that.opened);}
+return $default(_that.query,_that.users,_that.suggestions,_that.suggestionsLoading,_that.searching,_that.opening,_that.shared,_that.error,_that.opened);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -204,10 +206,10 @@ return $default(_that.query,_that.users,_that.suggestions,_that.suggestionsLoadi
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String query,  List<AppUser> users,  List<AppUser> suggestions,  bool suggestionsLoading,  bool searching,  bool opening,  String? error,  Conversation? opened)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String query,  List<AppUser> users,  List<AppUser> suggestions,  bool suggestionsLoading,  bool searching,  bool opening,  bool shared,  String? error,  Conversation? opened)?  $default,) {final _that = this;
 switch (_that) {
 case _NewChatState() when $default != null:
-return $default(_that.query,_that.users,_that.suggestions,_that.suggestionsLoading,_that.searching,_that.opening,_that.error,_that.opened);case _:
+return $default(_that.query,_that.users,_that.suggestions,_that.suggestionsLoading,_that.searching,_that.opening,_that.shared,_that.error,_that.opened);case _:
   return null;
 
 }
@@ -219,7 +221,7 @@ return $default(_that.query,_that.users,_that.suggestions,_that.suggestionsLoadi
 
 
 class _NewChatState implements NewChatState {
-  const _NewChatState({this.query = '', final  List<AppUser> users = const <AppUser>[], final  List<AppUser> suggestions = const <AppUser>[], this.suggestionsLoading = true, this.searching = false, this.opening = false, this.error, this.opened}): _users = users,_suggestions = suggestions;
+  const _NewChatState({this.query = '', final  List<AppUser> users = const <AppUser>[], final  List<AppUser> suggestions = const <AppUser>[], this.suggestionsLoading = true, this.searching = false, this.opening = false, this.shared = false, this.error, this.opened}): _users = users,_suggestions = suggestions;
   
 
 @override@JsonKey() final  String query;
@@ -240,6 +242,8 @@ class _NewChatState implements NewChatState {
 @override@JsonKey() final  bool suggestionsLoading;
 @override@JsonKey() final  bool searching;
 @override@JsonKey() final  bool opening;
+/// Share mode: the shared post landed in the opened conversation.
+@override@JsonKey() final  bool shared;
 @override final  String? error;
 @override final  Conversation? opened;
 
@@ -253,16 +257,16 @@ _$NewChatStateCopyWith<_NewChatState> get copyWith => __$NewChatStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NewChatState&&(identical(other.query, query) || other.query == query)&&const DeepCollectionEquality().equals(other._users, _users)&&const DeepCollectionEquality().equals(other._suggestions, _suggestions)&&(identical(other.suggestionsLoading, suggestionsLoading) || other.suggestionsLoading == suggestionsLoading)&&(identical(other.searching, searching) || other.searching == searching)&&(identical(other.opening, opening) || other.opening == opening)&&(identical(other.error, error) || other.error == error)&&(identical(other.opened, opened) || other.opened == opened));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NewChatState&&(identical(other.query, query) || other.query == query)&&const DeepCollectionEquality().equals(other._users, _users)&&const DeepCollectionEquality().equals(other._suggestions, _suggestions)&&(identical(other.suggestionsLoading, suggestionsLoading) || other.suggestionsLoading == suggestionsLoading)&&(identical(other.searching, searching) || other.searching == searching)&&(identical(other.opening, opening) || other.opening == opening)&&(identical(other.shared, shared) || other.shared == shared)&&(identical(other.error, error) || other.error == error)&&(identical(other.opened, opened) || other.opened == opened));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,query,const DeepCollectionEquality().hash(_users),const DeepCollectionEquality().hash(_suggestions),suggestionsLoading,searching,opening,error,opened);
+int get hashCode => Object.hash(runtimeType,query,const DeepCollectionEquality().hash(_users),const DeepCollectionEquality().hash(_suggestions),suggestionsLoading,searching,opening,shared,error,opened);
 
 @override
 String toString() {
-  return 'NewChatState(query: $query, users: $users, suggestions: $suggestions, suggestionsLoading: $suggestionsLoading, searching: $searching, opening: $opening, error: $error, opened: $opened)';
+  return 'NewChatState(query: $query, users: $users, suggestions: $suggestions, suggestionsLoading: $suggestionsLoading, searching: $searching, opening: $opening, shared: $shared, error: $error, opened: $opened)';
 }
 
 
@@ -273,7 +277,7 @@ abstract mixin class _$NewChatStateCopyWith<$Res> implements $NewChatStateCopyWi
   factory _$NewChatStateCopyWith(_NewChatState value, $Res Function(_NewChatState) _then) = __$NewChatStateCopyWithImpl;
 @override @useResult
 $Res call({
- String query, List<AppUser> users, List<AppUser> suggestions, bool suggestionsLoading, bool searching, bool opening, String? error, Conversation? opened
+ String query, List<AppUser> users, List<AppUser> suggestions, bool suggestionsLoading, bool searching, bool opening, bool shared, String? error, Conversation? opened
 });
 
 
@@ -290,7 +294,7 @@ class __$NewChatStateCopyWithImpl<$Res>
 
 /// Create a copy of NewChatState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? query = null,Object? users = null,Object? suggestions = null,Object? suggestionsLoading = null,Object? searching = null,Object? opening = null,Object? error = freezed,Object? opened = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? query = null,Object? users = null,Object? suggestions = null,Object? suggestionsLoading = null,Object? searching = null,Object? opening = null,Object? shared = null,Object? error = freezed,Object? opened = freezed,}) {
   return _then(_NewChatState(
 query: null == query ? _self.query : query // ignore: cast_nullable_to_non_nullable
 as String,users: null == users ? _self._users : users // ignore: cast_nullable_to_non_nullable
@@ -298,6 +302,7 @@ as List<AppUser>,suggestions: null == suggestions ? _self._suggestions : suggest
 as List<AppUser>,suggestionsLoading: null == suggestionsLoading ? _self.suggestionsLoading : suggestionsLoading // ignore: cast_nullable_to_non_nullable
 as bool,searching: null == searching ? _self.searching : searching // ignore: cast_nullable_to_non_nullable
 as bool,opening: null == opening ? _self.opening : opening // ignore: cast_nullable_to_non_nullable
+as bool,shared: null == shared ? _self.shared : shared // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,opened: freezed == opened ? _self.opened : opened // ignore: cast_nullable_to_non_nullable
 as Conversation?,

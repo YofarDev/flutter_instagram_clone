@@ -23,6 +23,8 @@ class ConversationDto {
         meta[otherUid] as Map<String, dynamic>? ?? <String, dynamic>{};
     final Map<String, dynamic>? lastMessage =
         map['lastMessage'] as Map<String, dynamic>?;
+    final Map<String, dynamic> unread =
+        map['unread'] as Map<String, dynamic>? ?? <String, dynamic>{};
     return Conversation(
       id: id,
       otherUser: AppUser(
@@ -39,6 +41,7 @@ class ConversationDto {
           : DateTime.fromMillisecondsSinceEpoch(
               lastMessage['createdAt'] as int,
             ),
+      unreadCount: (unread[myUid] as num?)?.toInt() ?? 0,
     );
   }
 }

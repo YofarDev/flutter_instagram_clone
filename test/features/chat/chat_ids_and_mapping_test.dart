@@ -71,6 +71,63 @@ void main() {
       expect(conv.lastMessageIsImage, true);
       expect(conv.lastMessageText, '');
     });
+
+    test('post lastMessage flags lastMessageIsPost', () {
+      final Conversation conv = ConversationDto.fromMap('c7', <String, dynamic>{
+        'participants': <String>['u1', 'u2'],
+        'lastMessage': <String, dynamic>{
+          'text': '',
+          'type': 'post',
+          'senderId': 'u2',
+          'createdAt': 9,
+        },
+        'updatedAt': 9,
+      }, 'u1');
+
+      expect(conv.lastMessageIsPost, true);
+      expect(conv.lastMessageIsImage, false);
+    });
+
+    test('story reply round-trips type, storyId on postId and text', () {
+      final ChatMessageDto dto = ChatMessageDto.fromMap(<String, dynamic>{
+        'senderId': 'u1',
+        'text': 'sick wave',
+        'createdAt': 11,
+        'type': 'story',
+        'postId': 'seed_story_5',
+        'imageUrl': 'http://story',
+      });
+
+      final ChatMessage domain = dto.toDomain('m1', 'c1');
+      expect(domain.isStory, true);
+      expect(domain.isPost, false);
+      expect(domain.text, 'sick wave');
+      expect(domain.postId, 'seed_story_5');
+      expect(domain.imageUrl, 'http://story');
+      expect(dto.toMap()['postId'], 'seed_story_5');
+    });
+
+    test('unread counter maps per-participant and defaults to 0', () {
+      final Map<String, dynamic> base = <String, dynamic>{
+        'participants': <String>['u1', 'u2'],
+        'unread': <String, dynamic>{'u1': 4},
+      };
+      expect(
+        ConversationDto.fromMap('c4', base, 'u1').unreadCount,
+        4,
+      );
+      expect(
+        ConversationDto.fromMap('c5', <String, dynamic>{
+          'participants': <String>['u1', 'u2'],
+        }, 'u1').unreadCount,
+        0,
+      );
+      // partner's counter, not mine
+      expect(
+        ConversationDto.fromMap('c6', base, 'u2').unreadCount,
+        0,
+      );
+    });
   });
 
   group('ChatMessageDto', () {
@@ -102,6 +159,28 @@ void main() {
       expect(dto.type, 'text');
       expect(dto.toMap().containsKey('imageUrl'), false);
       expect(dto.toDomain('m1', 'c1').isImage, false);
+    });
+
+    test('shared-post message round-trips type, postId and cover', () {
+      final ChatMessageDto dto = ChatMessageDto.fromMap(<String, dynamic>{
+        'senderId': 'u1',
+        'text': '',
+        'createdAt': 9,
+        'type': 'post',
+        'postId': 'p_9',
+        'imageUrl': 'http://cover',
+      });
+      final Map<String, dynamic> map = dto.toMap();
+
+      expect(map['type'], 'post');
+      expect(map['postId'], 'p_9');
+      expect(map['imageUrl'], 'http://cover');
+
+      final ChatMessage domain = dto.toDomain('m1', 'c1');
+      expect(domain.isPost, true);
+      expect(domain.isImage, false);
+      expect(domain.postId, 'p_9');
+      expect(domain.imageUrl, 'http://cover');
     });
   });
 }

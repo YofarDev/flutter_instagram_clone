@@ -161,7 +161,11 @@ class ChatCubit extends Cubit<ChatState> {
         .toList();
     if (unread.isEmpty) return;
     _repository
-        .markMessagesRead(conversationId: _conversation.id, messageIds: unread)
+        .markMessagesRead(
+          conversationId: _conversation.id,
+          myUid: _myUid,
+          messageIds: unread,
+        )
         .then((_) {}, onError: (Object _) {});
   }
 

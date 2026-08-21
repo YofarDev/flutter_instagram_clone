@@ -17,7 +17,14 @@ sealed class Conversation with _$Conversation {
 
     /// 'text' or 'image' — image previews render a localized "Photo".
     @Default('text') String lastMessageType,
+
+    /// Messages from the other user I haven't read yet (denormalized).
+    @Default(0) int unreadCount,
   }) = _Conversation;
 
   bool get lastMessageIsImage => lastMessageType == 'image';
+
+  bool get lastMessageIsPost => lastMessageType == 'post';
+
+  bool get lastMessageIsStory => lastMessageType == 'story';
 }
