@@ -22,12 +22,17 @@ abstract final class Routes {
   static const String chat = '/chat';
   static const String newChat = '/new-chat';
 
+  /// Share-post-to-DM picker (extra: Post).
+  static const String sharePost = '/share';
+
   static String userPath(String uid) => user.replaceFirst(':uid', uid);
   static String userFollowersPath(String uid) =>
       userFollowers.replaceFirst(':uid', uid);
   static String userFollowingPath(String uid) =>
       userFollowing.replaceFirst(':uid', uid);
-  static String postDetailPath(String id) => postDetail.replaceFirst(':id', id);
+  static String postDetailPath(String id, {String? heroTag}) =>
+      (heroTag == null ? postDetail : '$postDetail?hero=$heroTag')
+          .replaceFirst(':id', id);
   static String hashtagPath(String tag) =>
       '/hashtag/${Uri.encodeComponent(tag)}';
 }

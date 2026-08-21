@@ -11,7 +11,10 @@ import '../../../../core/widgets/comment_tile.dart';
 import '../widgets/post_card.dart';
 
 class PostDetailScreen extends StatefulWidget {
-  const PostDetailScreen({super.key});
+  const PostDetailScreen({this.heroTag, super.key});
+
+  /// Matches the source grid's Hero tag so the image flies in.
+  final String? heroTag;
 
   @override
   State<PostDetailScreen> createState() => _PostDetailScreenState();
@@ -69,6 +72,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   child: SingleChildScrollView(
                     child: PostCard(
                       post: post,
+                      heroTag: widget.heroTag,
                       isLiked: state.isLiked,
                       onLikeTap: () =>
                           context.read<PostDetailCubit>().toggleLike(),
@@ -77,6 +81,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                           context.read<PostDetailCubit>().toggleSave(),
                       onUsernameTap: () =>
                           context.push(Routes.userPath(post.authorId)),
+                      onShareTap: () =>
+                          context.push(Routes.sharePost, extra: post),
                     ),
                   ),
                 ),

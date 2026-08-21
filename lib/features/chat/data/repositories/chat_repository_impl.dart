@@ -76,18 +76,68 @@ class ChatRepositoryImpl implements IChatRepository {
   }
 
   @override
+  Future<Either<Failure, void>> sendPostMessage({
+    required String conversationId,
+    required String myUid,
+    required String otherUid,
+    required String postId,
+    required String imageUrl,
+  }) async {
+    try {
+      return Right<Failure, void>(
+        await _ds.sendPostMessage(
+          conversationId: conversationId,
+          myUid: myUid,
+          otherUid: otherUid,
+          postId: postId,
+          imageUrl: imageUrl,
+        ),
+      );
+    } catch (e) {
+      return Left<Failure, void>(_mapError(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> sendStoryReply({
+    required String conversationId,
+    required String myUid,
+    required String otherUid,
+    required String text,
+    required String storyId,
+    required String imageUrl,
+  }) async {
+    try {
+      return Right<Failure, void>(
+        await _ds.sendStoryReply(
+          conversationId: conversationId,
+          myUid: myUid,
+          otherUid: otherUid,
+          text: text,
+          storyId: storyId,
+          imageUrl: imageUrl,
+        ),
+      );
+    } catch (e) {
+      return Left<Failure, void>(_mapError(e));
+    }
+  }
+
+  @override
   Stream<String?> watchTyping({required String conversationId}) =>
       _ds.watchTyping(conversationId: conversationId);
 
   @override
   Future<Either<Failure, void>> markMessagesRead({
     required String conversationId,
+    required String myUid,
     required List<String> messageIds,
   }) async {
     try {
       return Right<Failure, void>(
         await _ds.markMessagesRead(
           conversationId: conversationId,
+          myUid: myUid,
           messageIds: messageIds,
         ),
       );

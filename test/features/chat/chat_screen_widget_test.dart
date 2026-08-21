@@ -63,6 +63,7 @@ void main() {
     when(
       () => repo.markMessagesRead(
         conversationId: any(named: 'conversationId'),
+        myUid: any(named: 'myUid'),
         messageIds: any(named: 'messageIds'),
       ),
     ).thenAnswer((_) async => const Right<Failure, void>(null));

@@ -14,6 +14,9 @@ sealed class NewChatState with _$NewChatState {
     @Default(true) bool suggestionsLoading,
     @Default(false) bool searching,
     @Default(false) bool opening,
+
+    /// Share mode: the shared post landed in the opened conversation.
+    @Default(false) bool shared,
     String? error,
     Conversation? opened,
   }) = _NewChatState;

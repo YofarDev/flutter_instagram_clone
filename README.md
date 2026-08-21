@@ -3,14 +3,14 @@
 [![CI](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml/badge.svg)](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Dart](https://img.shields.io/badge/dart-%5E3.12-0175C2?logo=dart&logoColor=white)](https://dart.dev)
-[![Tests](https://img.shields.io/badge/tests-258-brightgreen)](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-270-brightgreen)](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml)
 [![Stars](https://img.shields.io/github/stars/YofarDev/flutter_instagram_clone?style=social)](https://github.com/YofarDev/flutter_instagram_clone/stargazers)
 
 **A working Instagram clone where zero lines of Dart were written by a human.** Every feature, test, rule and commit came out of an AI agent session (opencode / Claude Code on GLM 5.3) — one feature slice at a time, with plans, tests and review passes along the way. It runs against a real Firebase backend: no mocks, no fake latency, actual Firestore snapshots driving actual UI.
 
 Why? To find out how far "vibe coding" really gets you — and to leave behind receipts you can check, not claims you have to trust. See [The receipts](#the-receipts).
 
-**8 features · 258 tests · 2 locales · 0 hand-written lines.**
+**8 features · 270 tests · 2 locales · 0 hand-written lines.**
 
 ## Demo
 
@@ -33,13 +33,13 @@ Android emulator, seeded demo data. Dark theme; the app follows the system theme
 |------|---------|
 | **Auth** | Email + password, Google Sign-In, password reset, an onboarding gate that routes through the router redirect, logout |
 | **Feed** | Real-time following-filtered feed, optimistic likes with rollback, **double-tap to like with heart burst**, **multi-image carousels** (swipe + counter + dots, legacy single-image posts still read), comments, **save/bookmark**, infinite scroll, pull-to-refresh, skeleton loading |
-| **Stories** | 24h expiry enforced in the query, IG gradient rings on unseen stories, segmented progress bars, tap-thirds navigation, create from gallery/camera |
+| **Stories** | 24h expiry enforced in the query, IG gradient rings on unseen stories, segmented progress bars, tap-thirds navigation, create from gallery/camera, **story replies** (reply bar → quoted-story DM) |
 | **Reels** | Vertical pager with muted looping autoplay, pause on app lifecycle, double-tap like, **comments + owner notifications**, full create flow |
 | **Explore** | 3-column grid of posts from people you *don't* follow (IG's discovery semantics), infinite scroll, debounced user search, hashtag pages with accent-folding (#café → #cafe) |
-| **Chat** | Real-time 1:1 DMs over Firestore snapshots, deterministic conversation ids (sorted-uid pair), **typing indicators**, **image messages** (upload + pinch-zoom viewer + "Photo" previews), **read receipts** (rule-restricted readAt stamps + Seen label), **suggested users** |
+| **Chat** | Real-time 1:1 DMs over Firestore snapshots, deterministic conversation ids (sorted-uid pair), **typing indicators**, **image messages** (upload + pinch-zoom viewer + "Photo" previews), **share post-to-DM** (send-to sheet + tappable post bubbles), **read receipts** (rule-restricted readAt stamps + Seen label), **unread badges** on the DM list (denormalized per-participant counters), **suggested users** |
 | **Notifications** | Real-time like/comment/follow, unread badge on the heart, mark-all-read on open |
 | **Profile** | Edit avatar/username/bio (avatar downscaled + compressed on upload), follow graph, follower/following lists, Grid + **Saved** tabs, more-menu |
-| **Cross-cutting** | English + French (follows device locale), matched dark/light themes, hand-drawn icon set (zero icon-font dependency), haptic vocabulary, shimmer skeletons everywhere |
+| **Cross-cutting** | English + French (follows device locale), matched dark/light themes, hand-drawn icon set (zero icon-font dependency), haptic vocabulary, shimmer skeletons everywhere, Hero shared-element flights from every grid into post detail |
 
 ## Running it
 
@@ -109,7 +109,11 @@ The "written entirely by AI agents" claim is checkable, not vibes:
 - **[docs/plans/](docs/plans)** — nine dated phase implementation plans (~3,000 lines), one per feature slice, each ending in a `chore: complete phase N` commit.
 - **The commit history** — 60+ conventional commits in a repeating rhythm: plan → per-layer feature slices → `fix: final review` pass → phase complete.
 - **[AGENTS.md](AGENTS.md) and [.claude/skills/](.claude/skills)** — the rules the agents operated under (freezed v3 gotchas, controller lifecycle bans, auto dart-fix hooks) and the five custom enforcement skills that kept the architecture honest.
-- **CI** — `flutter analyze` + all 258 tests on every push: [![CI](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml/badge.svg)](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml)
+- **CI** — `flutter analyze` + all 270 tests on every push: [![CI](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml/badge.svg)](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml)
+
+## What the human did
+
+The agents wrote every line of Dart — but none of the judgment. Per phase I wrote the spec and the acceptance criteria, set the architectural constraints (feature-first clean architecture, cubits over blocs, `Either` failures, DI rules), reviewed each slice against them, and sent it back when it drifted. The tooling is mine too: the enforcement skills, the edit hooks, the scripts below, and the `ponytail:` convention that forces every shortcut to name its own revisit condition. Orchestrating, reviewing and constraining agents turned out to be most of the work — which is exactly what the experiment was testing.
 
 ## Scripts
 
@@ -128,12 +132,12 @@ The agent tooling is part of the exhibit — this is the machinery that kept AI 
 
 ```bash
 dart run build_runner build --delete-conflicting-outputs   # after model changes
-flutter test                                               # 258 tests, ~10s
+flutter test                                               # 270 tests, ~10s
 ```
 
 ## Roadmap
 
-Everything above works end-to-end, including carousels, image DMs and read receipts. Next up, in wow-per-effort order: unread badges on the DM list, story replies, share-post-to-DM, FCM push, group chats.
+Everything above works end-to-end, including carousels, image DMs, read receipts, DM unread badges, share-post-to-DM and story replies. Next up, in wow-per-effort order: FCM push, group chats.
 
 ## Star history
 

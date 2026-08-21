@@ -63,6 +63,7 @@ class ConversationsScreen extends StatelessWidget {
                 final String prefix = conversation.lastMessageSenderId == myUid
                     ? l10n.dmYouPrefix
                     : '';
+                final bool unread = conversation.unreadCount > 0;
                 return ListTile(
                   leading: CircleAvatar(
                     backgroundImage: conversation.otherUser.avatarUrl != null
@@ -81,13 +82,38 @@ class ConversationsScreen extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
-                    '$prefix${conversation.lastMessageIsImage ? AppLocalizations.of(context).chatPhotoPreview : conversation.lastMessageText}',
+                    '$prefix${conversation.lastMessageIsImage ? AppLocalizations.of(context).chatPhotoPreview : conversation.lastMessageIsPost ? AppLocalizations.of(context).chatPostPreview : conversation.lastMessageIsStory ? AppLocalizations.of(context).chatStoryPreview : conversation.lastMessageText}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                    style: unread
+                        ? const TextStyle(fontWeight: FontWeight.w600)
+                        : null,
                   ),
                   trailing: conversation.lastMessageAt == null
                       ? null
-                      : Text(timeAgo(conversation.lastMessageAt!)),
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: <Widget>[
+                            Text(
+                              timeAgo(
+                                conversation.lastMessageAt!,
+                                locale:
+                                    Localizations.localeOf(
+                                      context,
+                                    ).languageCode,
+                              ),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            if (unread)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Badge.count(
+                                  count: conversation.unreadCount,
+                                ),
+                              ),
+                          ],
+                        ),
                   onTap: () => context.push(Routes.chat, extra: conversation),
                 );
               },

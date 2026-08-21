@@ -114,7 +114,10 @@ class _NotificationRow extends StatelessWidget {
                     Text(message),
                     const SizedBox(height: 2),
                     Text(
-                      timeAgo(item.createdAt),
+                      timeAgo(
+                        item.createdAt,
+                        locale: Localizations.localeOf(context).languageCode,
+                      ),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],

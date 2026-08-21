@@ -7,6 +7,7 @@ import 'package:mocktail/mocktail.dart';
 
 import 'package:flutter_instagram_clone/core/models/app_user.dart';
 import 'package:flutter_instagram_clone/core/models/failure.dart';
+import 'package:flutter_instagram_clone/core/models/post.dart';
 import 'package:flutter_instagram_clone/features/chat/domain/models/conversation.dart';
 import 'package:flutter_instagram_clone/features/chat/domain/repositories/chat_repository.dart';
 import 'package:flutter_instagram_clone/features/chat/presentation/bloc/new_chat_cubit.dart';
@@ -19,6 +20,13 @@ class MockIExploreRepository extends Mock implements IExploreRepository {}
 
 final AppUser user = AppUser(uid: 'u1', email: 'a@b.c', username: 'alice');
 final Conversation convo = Conversation(id: 'c1', otherUser: user);
+final Post sharedPost = Post(
+  id: 'p_6',
+  authorId: 'u2',
+  authorUsername: 'bob',
+  imageUrls: <String>['http://cover'],
+  createdAt: DateTime(2026, 1, 1),
+);
 
 void main() {
   late MockIChatRepository chatRepo;
@@ -135,5 +143,54 @@ void main() {
       return NewChatCubit(exploreRepo, chatRepo, myUid: 'me');
     },
     expect: () => const <NewChatState>[NewChatState(suggestionsLoading: false)],
+  );
+
+  blocTest<NewChatCubit, NewChatState>(
+    'share mode: shareTo sends the pending post and emits shared',
+    build: () {
+      when(
+        () => chatRepo.sendPostMessage(
+          conversationId: 'c1',
+          myUid: 'me',
+          otherUid: 'u1',
+          postId: 'p_6',
+          imageUrl: 'http://cover',
+        ),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
+      return NewChatCubit(
+        exploreRepo,
+        chatRepo,
+        myUid: 'me',
+        sharedPost: sharedPost,
+      );
+    },
+    act: (NewChatCubit cubit) => cubit.shareTo(convo),
+    expect: () => const <NewChatState>[NewChatState(shared: true)],
+  );
+
+  blocTest<NewChatCubit, NewChatState>(
+    'share mode: failure sets error, no shared flag',
+    build: () {
+      when(
+        () => chatRepo.sendPostMessage(
+          conversationId: any(named: 'conversationId'),
+          myUid: any(named: 'myUid'),
+          otherUid: any(named: 'otherUid'),
+          postId: any(named: 'postId'),
+          imageUrl: any(named: 'imageUrl'),
+        ),
+      ).thenAnswer(
+        (_) async =>
+            const Left<Failure, void>(Failure.serverError(message: 'boom')),
+      );
+      return NewChatCubit(
+        exploreRepo,
+        chatRepo,
+        myUid: 'me',
+        sharedPost: sharedPost,
+      );
+    },
+    act: (NewChatCubit cubit) => cubit.shareTo(convo),
+    expect: () => const <NewChatState>[NewChatState(error: 'boom')],
   );
 }

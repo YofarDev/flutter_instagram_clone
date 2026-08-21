@@ -62,6 +62,7 @@ void main() {
     when(
       () => repo.markMessagesRead(
         conversationId: any(named: 'conversationId'),
+        myUid: any(named: 'myUid'),
         messageIds: any(named: 'messageIds'),
       ),
     ).thenAnswer((_) async => const Right<Failure, void>(null));
@@ -92,6 +93,7 @@ void main() {
       verify(
         () => repo.markMessagesRead(
           conversationId: 'c1',
+          myUid: 'me',
           messageIds: <String>['m2'],
         ),
       ).called(1);
@@ -111,6 +113,7 @@ void main() {
       verifyNever(
         () => repo.markMessagesRead(
           conversationId: any(named: 'conversationId'),
+          myUid: any(named: 'myUid'),
           messageIds: any(named: 'messageIds'),
         ),
       );

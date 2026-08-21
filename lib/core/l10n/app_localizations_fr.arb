@@ -85,5 +85,11 @@
   "postAddMore": "Ajouter des photos",
   "chatSendPhoto": "Envoyer une photo",
   "chatPhotoPreview": "Photo",
-  "chatSeen": "Vu"
+  "chatSeen": "Vu",
+  "shareToTitle": "Envoyer à",
+  "chatPostSent": "Envoyé",
+  "chatPostPreview": "Publication",
+  "chatStoryPreview": "Story",
+  "storyReplyHint": "Répondre à {username}…",
+  "storyReplySent": "Réponse envoyée"
 }

@@ -39,6 +39,26 @@ abstract interface class IChatDataSource {
     required String filePath,
   });
 
+  /// Shares a feed post into the conversation (type 'post').
+  Future<void> sendPostMessage({
+    required String conversationId,
+    required String myUid,
+    required String otherUid,
+    required String postId,
+    required String imageUrl,
+  });
+
+  /// Story reply: sends [text] quoting the story (type 'story'; the story
+  /// id rides the postId field).
+  Future<void> sendStoryReply({
+    required String conversationId,
+    required String myUid,
+    required String otherUid,
+    required String text,
+    required String storyId,
+    required String imageUrl,
+  });
+
   /// Live `typingUid` field on the conversation doc (null = nobody typing).
   Stream<String?> watchTyping({required String conversationId});
 
@@ -46,6 +66,7 @@ abstract interface class IChatDataSource {
   /// expected to pass only incoming (not sent-by-me) unread ids.
   Future<void> markMessagesRead({
     required String conversationId,
+    required String myUid,
     required List<String> messageIds,
   });
 
@@ -155,9 +176,62 @@ class ChatFirebaseDataSource implements IChatDataSource {
     required String otherUid,
     required String text,
     String? imageUrl,
+  }) => _writeMessage(
+    conversationId: conversationId,
+    myUid: myUid,
+    otherUid: otherUid,
+    text: imageUrl == null ? text : '',
+    type: imageUrl == null ? 'text' : 'image',
+    imageUrl: imageUrl,
+  );
+
+  @override
+  Future<void> sendPostMessage({
+    required String conversationId,
+    required String myUid,
+    required String otherUid,
+    required String postId,
+    required String imageUrl,
+  }) => _writeMessage(
+    conversationId: conversationId,
+    myUid: myUid,
+    otherUid: otherUid,
+    text: '',
+    type: 'post',
+    imageUrl: imageUrl,
+    postId: postId,
+  );
+
+  @override
+  Future<void> sendStoryReply({
+    required String conversationId,
+    required String myUid,
+    required String otherUid,
+    required String text,
+    required String storyId,
+    required String imageUrl,
+  }) => _writeMessage(
+    conversationId: conversationId,
+    myUid: myUid,
+    otherUid: otherUid,
+    text: text,
+    type: 'story',
+    imageUrl: imageUrl,
+    postId: storyId,
+  );
+
+  /// One batch: the message doc, the conversation's lastMessage preview,
+  /// and the receiver's unread badge bump.
+  Future<void> _writeMessage({
+    required String conversationId,
+    required String myUid,
+    required String otherUid,
+    required String text,
+    required String type,
+    String? imageUrl,
+    String? postId,
   }) async {
     final int millis = DateTime.now().millisecondsSinceEpoch;
-    final bool isImage = imageUrl != null;
     final WriteBatch batch = _db.batch();
     batch.set(
       _db
@@ -167,24 +241,27 @@ class ChatFirebaseDataSource implements IChatDataSource {
           .doc(),
       ChatMessageDto(
         senderId: myUid,
-        text: isImage ? '' : text,
+        text: text,
         createdAtMillis: millis,
-        type: isImage ? 'image' : 'text',
+        type: type,
         imageUrl: imageUrl,
+        postId: postId,
       ).toMap(),
     );
     batch.update(
       _db.collection('conversations').doc(conversationId),
       <String, dynamic>{
         'lastMessage': <String, dynamic>{
-          // preview text is empty for images; readers render a localized
-          // "Photo" off the type field
-          'text': isImage ? '' : text,
-          'type': isImage ? 'image' : 'text',
+          // preview text is empty for media; readers render a localized
+          // "Photo"/"Post" off the type field
+          'text': text,
+          'type': type,
           'senderId': myUid,
           'createdAt': millis,
         },
         'updatedAt': millis,
+        // receiver's denormalized unread counter for list badges
+        'unread.$otherUid': FieldValue.increment(1),
       },
     );
     await batch.commit();
@@ -221,6 +298,7 @@ class ChatFirebaseDataSource implements IChatDataSource {
   @override
   Future<void> markMessagesRead({
     required String conversationId,
+    required String myUid,
     required List<String> messageIds,
   }) async {
     if (messageIds.isEmpty) return;
@@ -233,6 +311,11 @@ class ChatFirebaseDataSource implements IChatDataSource {
     for (final String id in messageIds) {
       batch.update(messages.doc(id), <String, dynamic>{'readAt': now});
     }
+    // my unread counter resets alongside the receipts
+    batch.update(
+      _db.collection('conversations').doc(conversationId),
+      <String, dynamic>{'unread.$myUid': 0},
+    );
     await batch.commit();
   }
 

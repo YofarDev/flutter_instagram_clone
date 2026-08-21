@@ -18,6 +18,8 @@ class PostCard extends StatefulWidget {
     this.onSaveTap,
     this.onCommentTap,
     this.onUsernameTap,
+    this.onShareTap,
+    this.heroTag,
     super.key,
   });
 
@@ -28,6 +30,10 @@ class PostCard extends StatefulWidget {
   final VoidCallback? onSaveTap;
   final VoidCallback? onCommentTap;
   final VoidCallback? onUsernameTap;
+  final VoidCallback? onShareTap;
+
+  /// When set, the media block flies in/out via Hero from the source grid.
+  final String? heroTag;
 
   @override
   State<PostCard> createState() => _PostCardState();
@@ -75,15 +81,21 @@ class _PostCardState extends State<PostCard> {
           ),
           title: Text(post.authorUsername),
           trailing: Text(
-            timeAgo(post.createdAt),
+            timeAgo(
+              post.createdAt,
+              locale: Localizations.localeOf(context).languageCode,
+            ),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ),
         GestureDetector(
           onDoubleTap: _onDoubleTap,
-          child: AspectRatio(
-            aspectRatio: 1,
-            child: Stack(
+          child: Hero(
+            // unique tag = never pairs, plain AspectRatio when no heroTag
+            tag: widget.heroTag ?? Object(),
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: Stack(
               alignment: Alignment.center,
               children: <Widget>[
                 PageView.builder(
@@ -137,6 +149,7 @@ class _PostCardState extends State<PostCard> {
                 HeartBurst(controller: _burstController),
               ],
             ),
+            ),
           ),
         ),
         Row(
@@ -157,6 +170,12 @@ class _PostCardState extends State<PostCard> {
               icon: IgIcon(IgIcons.comment, color: onSurface),
               onPressed: widget.onCommentTap,
             ),
+            if (widget.onShareTap != null)
+              IconButton(
+                tooltip: l10n.shareToTitle,
+                icon: IgIcon(IgIcons.share, color: onSurface),
+                onPressed: widget.onShareTap,
+              ),
             const Spacer(),
             if (widget.onSaveTap != null)
               IconButton(
