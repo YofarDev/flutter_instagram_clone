@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CreatePostState {
 
- String? get pickedPath; String get caption; bool get submitting; bool get success; String? get error;
+ List<String> get pickedPaths; String get caption; bool get submitting; bool get success; String? get error;
 /// Create a copy of CreatePostState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $CreatePostStateCopyWith<CreatePostState> get copyWith => _$CreatePostStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreatePostState&&(identical(other.pickedPath, pickedPath) || other.pickedPath == pickedPath)&&(identical(other.caption, caption) || other.caption == caption)&&(identical(other.submitting, submitting) || other.submitting == submitting)&&(identical(other.success, success) || other.success == success)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreatePostState&&const DeepCollectionEquality().equals(other.pickedPaths, pickedPaths)&&(identical(other.caption, caption) || other.caption == caption)&&(identical(other.submitting, submitting) || other.submitting == submitting)&&(identical(other.success, success) || other.success == success)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,pickedPath,caption,submitting,success,error);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(pickedPaths),caption,submitting,success,error);
 
 @override
 String toString() {
-  return 'CreatePostState(pickedPath: $pickedPath, caption: $caption, submitting: $submitting, success: $success, error: $error)';
+  return 'CreatePostState(pickedPaths: $pickedPaths, caption: $caption, submitting: $submitting, success: $success, error: $error)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $CreatePostStateCopyWith<$Res>  {
   factory $CreatePostStateCopyWith(CreatePostState value, $Res Function(CreatePostState) _then) = _$CreatePostStateCopyWithImpl;
 @useResult
 $Res call({
- String? pickedPath, String caption, bool submitting, bool success, String? error
+ List<String> pickedPaths, String caption, bool submitting, bool success, String? error
 });
 
 
@@ -62,10 +62,10 @@ class _$CreatePostStateCopyWithImpl<$Res>
 
 /// Create a copy of CreatePostState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? pickedPath = freezed,Object? caption = null,Object? submitting = null,Object? success = null,Object? error = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? pickedPaths = null,Object? caption = null,Object? submitting = null,Object? success = null,Object? error = freezed,}) {
   return _then(_self.copyWith(
-pickedPath: freezed == pickedPath ? _self.pickedPath : pickedPath // ignore: cast_nullable_to_non_nullable
-as String?,caption: null == caption ? _self.caption : caption // ignore: cast_nullable_to_non_nullable
+pickedPaths: null == pickedPaths ? _self.pickedPaths : pickedPaths // ignore: cast_nullable_to_non_nullable
+as List<String>,caption: null == caption ? _self.caption : caption // ignore: cast_nullable_to_non_nullable
 as String,submitting: null == submitting ? _self.submitting : submitting // ignore: cast_nullable_to_non_nullable
 as bool,success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
@@ -151,10 +151,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? pickedPath,  String caption,  bool submitting,  bool success,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<String> pickedPaths,  String caption,  bool submitting,  bool success,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CreatePostState() when $default != null:
-return $default(_that.pickedPath,_that.caption,_that.submitting,_that.success,_that.error);case _:
+return $default(_that.pickedPaths,_that.caption,_that.submitting,_that.success,_that.error);case _:
   return orElse();
 
 }
@@ -172,10 +172,10 @@ return $default(_that.pickedPath,_that.caption,_that.submitting,_that.success,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? pickedPath,  String caption,  bool submitting,  bool success,  String? error)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<String> pickedPaths,  String caption,  bool submitting,  bool success,  String? error)  $default,) {final _that = this;
 switch (_that) {
 case _CreatePostState():
-return $default(_that.pickedPath,_that.caption,_that.submitting,_that.success,_that.error);}
+return $default(_that.pickedPaths,_that.caption,_that.submitting,_that.success,_that.error);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -189,10 +189,10 @@ return $default(_that.pickedPath,_that.caption,_that.submitting,_that.success,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? pickedPath,  String caption,  bool submitting,  bool success,  String? error)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<String> pickedPaths,  String caption,  bool submitting,  bool success,  String? error)?  $default,) {final _that = this;
 switch (_that) {
 case _CreatePostState() when $default != null:
-return $default(_that.pickedPath,_that.caption,_that.submitting,_that.success,_that.error);case _:
+return $default(_that.pickedPaths,_that.caption,_that.submitting,_that.success,_that.error);case _:
   return null;
 
 }
@@ -204,10 +204,16 @@ return $default(_that.pickedPath,_that.caption,_that.submitting,_that.success,_t
 
 
 class _CreatePostState implements CreatePostState {
-  const _CreatePostState({this.pickedPath, this.caption = '', this.submitting = false, this.success = false, this.error});
+  const _CreatePostState({final  List<String> pickedPaths = const <String>[], this.caption = '', this.submitting = false, this.success = false, this.error}): _pickedPaths = pickedPaths;
   
 
-@override final  String? pickedPath;
+ final  List<String> _pickedPaths;
+@override@JsonKey() List<String> get pickedPaths {
+  if (_pickedPaths is EqualUnmodifiableListView) return _pickedPaths;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_pickedPaths);
+}
+
 @override@JsonKey() final  String caption;
 @override@JsonKey() final  bool submitting;
 @override@JsonKey() final  bool success;
@@ -223,16 +229,16 @@ _$CreatePostStateCopyWith<_CreatePostState> get copyWith => __$CreatePostStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreatePostState&&(identical(other.pickedPath, pickedPath) || other.pickedPath == pickedPath)&&(identical(other.caption, caption) || other.caption == caption)&&(identical(other.submitting, submitting) || other.submitting == submitting)&&(identical(other.success, success) || other.success == success)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreatePostState&&const DeepCollectionEquality().equals(other._pickedPaths, _pickedPaths)&&(identical(other.caption, caption) || other.caption == caption)&&(identical(other.submitting, submitting) || other.submitting == submitting)&&(identical(other.success, success) || other.success == success)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,pickedPath,caption,submitting,success,error);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_pickedPaths),caption,submitting,success,error);
 
 @override
 String toString() {
-  return 'CreatePostState(pickedPath: $pickedPath, caption: $caption, submitting: $submitting, success: $success, error: $error)';
+  return 'CreatePostState(pickedPaths: $pickedPaths, caption: $caption, submitting: $submitting, success: $success, error: $error)';
 }
 
 
@@ -243,7 +249,7 @@ abstract mixin class _$CreatePostStateCopyWith<$Res> implements $CreatePostState
   factory _$CreatePostStateCopyWith(_CreatePostState value, $Res Function(_CreatePostState) _then) = __$CreatePostStateCopyWithImpl;
 @override @useResult
 $Res call({
- String? pickedPath, String caption, bool submitting, bool success, String? error
+ List<String> pickedPaths, String caption, bool submitting, bool success, String? error
 });
 
 
@@ -260,10 +266,10 @@ class __$CreatePostStateCopyWithImpl<$Res>
 
 /// Create a copy of CreatePostState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? pickedPath = freezed,Object? caption = null,Object? submitting = null,Object? success = null,Object? error = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? pickedPaths = null,Object? caption = null,Object? submitting = null,Object? success = null,Object? error = freezed,}) {
   return _then(_CreatePostState(
-pickedPath: freezed == pickedPath ? _self.pickedPath : pickedPath // ignore: cast_nullable_to_non_nullable
-as String?,caption: null == caption ? _self.caption : caption // ignore: cast_nullable_to_non_nullable
+pickedPaths: null == pickedPaths ? _self._pickedPaths : pickedPaths // ignore: cast_nullable_to_non_nullable
+as List<String>,caption: null == caption ? _self.caption : caption // ignore: cast_nullable_to_non_nullable
 as String,submitting: null == submitting ? _self.submitting : submitting // ignore: cast_nullable_to_non_nullable
 as bool,success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable

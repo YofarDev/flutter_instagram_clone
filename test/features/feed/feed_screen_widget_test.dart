@@ -42,7 +42,7 @@ Post _post() => Post(
   id: 'p1',
   authorId: 'u1',
   authorUsername: 'alice',
-  imageUrl: 'http://x',
+  imageUrls: <String>['http://x'],
   caption: 'hello world',
   createdAt: DateTime(2026, 1, 1),
   likeCount: 3,

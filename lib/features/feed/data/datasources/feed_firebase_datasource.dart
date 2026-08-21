@@ -35,7 +35,10 @@ List<String> extractTags(String caption) {
 
 abstract interface class IFeedDataSource {
   Stream<List<Post>> watchFeed({required int limit});
-  Future<void> createPost({required String caption, required String filePath});
+  Future<void> createPost({
+    required String caption,
+    required List<String> filePaths,
+  });
   Future<Set<String>> fetchLikedPostIds({required List<String> postIds});
   Future<Set<String>> fetchSavedPostIds({required List<String> postIds});
   Future<Post> getPostById({required String postId});
@@ -100,14 +103,20 @@ class FeedFirebaseDataSource implements IFeedDataSource {
   @override
   Future<void> createPost({
     required String caption,
-    required String filePath,
+    required List<String> filePaths,
   }) async {
+    assert(filePaths.isNotEmpty, 'a post needs at least one image');
     final ({String username, String? avatarUrl}) profile =
         await _currentUserProfile();
     final int millis = DateTime.now().millisecondsSinceEpoch;
-    final Reference ref = _storage.ref('posts/$_uid/$millis.jpg');
-    await ref.putFile(File(filePath));
-    final String imageUrl = await ref.getDownloadURL();
+    final List<Reference> refs = <Reference>[];
+    final List<String> imageUrls = <String>[];
+    for (int i = 0; i < filePaths.length; i++) {
+      final Reference ref = _storage.ref('posts/$_uid/$millis-$i.jpg');
+      refs.add(ref);
+      await ref.putFile(File(filePaths[i]));
+      imageUrls.add(await ref.getDownloadURL());
+    }
     // ponytail: client timestamp + denormalized author fields
     try {
       await _db
@@ -117,7 +126,7 @@ class FeedFirebaseDataSource implements IFeedDataSource {
               authorId: _uid,
               authorUsername: profile.username,
               authorAvatarUrl: profile.avatarUrl,
-              imageUrl: imageUrl,
+              imageUrls: imageUrls,
               caption: caption,
               createdAtMillis: millis,
               tags: extractTags(caption),
@@ -125,7 +134,9 @@ class FeedFirebaseDataSource implements IFeedDataSource {
           );
     } catch (e) {
       // ponytail: best-effort cleanup, orphan possible if delete fails too
-      unawaited(ref.delete().catchError((_) => ref));
+      for (final Reference ref in refs) {
+        unawaited(ref.delete().catchError((_) => ref));
+      }
       rethrow;
     }
     try {

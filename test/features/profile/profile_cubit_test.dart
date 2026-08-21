@@ -25,14 +25,14 @@ final Post p1 = Post(
   id: 'p1',
   authorId: 'u2',
   authorUsername: 'target',
-  imageUrl: 'http://img/p1',
+  imageUrls: <String>['http://img/p1'],
   createdAt: DateTime(2026, 1, 1),
 );
 final Post p2 = Post(
   id: 'p2',
   authorId: 'u2',
   authorUsername: 'target',
-  imageUrl: 'http://img/p2',
+  imageUrls: <String>['http://img/p2'],
   createdAt: DateTime(2026, 1, 1),
 );
 final List<Post> posts = <Post>[p1, p2];
@@ -42,7 +42,7 @@ final List<Post> manyPosts = List<Post>.generate(
     id: 'p$i',
     authorId: 'u2',
     authorUsername: 'target',
-    imageUrl: 'http://img/p$i',
+    imageUrls: <String>['http://img/p$i'],
     createdAt: DateTime(2026, 1, 1),
   ),
 );

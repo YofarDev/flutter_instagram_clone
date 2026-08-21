@@ -9,34 +9,60 @@ import 'create_post_state.dart';
 class CreatePostCubit extends Cubit<CreatePostState> {
   CreatePostCubit(this._repository) : super(const CreatePostState());
 
+  static const int maxImages = 10;
+
   final IFeedRepository _repository;
 
-  Future<void> pickImage(ImageSource source) async {
-    XFile? picked;
+  /// Gallery opens multi-select and appends; camera appends a single shot.
+  /// Both respect the 10-image IG-style cap.
+  Future<void> pickImages(ImageSource source) async {
+    if (state.pickedPaths.length >= maxImages) return;
+    final List<String> paths = <String>[];
     try {
-      picked = await ImagePicker().pickImage(
-        source: source,
-        maxWidth: 1080,
-        imageQuality: 70,
-      );
+      if (source == ImageSource.gallery) {
+        final List<XFile> picked = await ImagePicker().pickMultiImage(
+          maxWidth: 1080,
+          imageQuality: 70,
+        );
+        paths.addAll(picked.map((XFile f) => f.path));
+      } else {
+        final XFile? picked = await ImagePicker().pickImage(
+          source: source,
+          maxWidth: 1080,
+          imageQuality: 70,
+        );
+        if (picked != null) paths.add(picked.path);
+      }
     } catch (_) {
       // ponytail: plugin cancel/permission errors — nothing sensible to show
       return;
     }
-    if (isClosed) return;
-    if (picked != null) {
-      emit(state.copyWith(pickedPath: picked.path));
-    }
+    if (isClosed || paths.isEmpty) return;
+    emit(
+      state.copyWith(
+        pickedPaths: <String>[
+          ...state.pickedPaths,
+          ...paths.take(maxImages - state.pickedPaths.length),
+        ],
+      ),
+    );
+  }
+
+  void removeImageAt(int index) {
+    if (index < 0 || index >= state.pickedPaths.length) return;
+    final List<String> updated = <String>[...state.pickedPaths]
+      ..removeAt(index);
+    emit(state.copyWith(pickedPaths: updated));
   }
 
   void captionChanged(String value) => emit(state.copyWith(caption: value));
 
   Future<void> submit() async {
-    if (state.pickedPath == null || state.submitting) return;
+    if (state.pickedPaths.isEmpty || state.submitting) return;
     emit(state.copyWith(submitting: true, error: null));
     final Either<Failure, void> either = await _repository.createPost(
       caption: state.caption.trim(),
-      filePath: state.pickedPath!,
+      filePaths: state.pickedPaths,
     );
     if (isClosed) return;
     either.fold(

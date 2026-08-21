@@ -23,11 +23,11 @@ class MockFeedRepository extends Mock implements IFeedRepository {}
 
 class MockProfileRepository extends Mock implements IProfileRepository {}
 
-Post _post() => Post(
+Post _post({List<String> urls = const <String>['http://x']}) => Post(
   id: 'p1',
   authorId: 'u1',
   authorUsername: 'alice',
-  imageUrl: 'http://x',
+  imageUrls: urls,
   caption: 'hello world',
   createdAt: DateTime(2026, 1, 1),
   likeCount: 3,
@@ -79,7 +79,7 @@ void main() {
     ).thenAnswer((_) async => const Right<Failure, void>(null));
   });
 
-  Widget subject() {
+  Widget subject({Post? post}) {
     return MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -90,7 +90,7 @@ void main() {
             children: <Widget>[
               BlocBuilder<FeedCubit, FeedState>(
                 builder: (BuildContext context, FeedState state) => PostCard(
-                  post: _post(),
+                  post: post ?? _post(),
                   isLiked: state.likedIds.contains('p1'),
                   onLikeTap: () =>
                       context.read<FeedCubit>().toggleLike(_post()),
@@ -106,11 +106,11 @@ void main() {
     );
   }
 
-  Future<void> pumpSubject(WidgetTester tester) async {
+  Future<void> pumpSubject(WidgetTester tester, {Post? post}) async {
     // narrow surface keeps the like row on-screen under the square image
     await tester.binding.setSurfaceSize(const Size(400, 1200));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.pumpWidget(subject());
+    await tester.pumpWidget(subject(post: post));
     await tester.pump();
   }
 
@@ -204,5 +204,42 @@ void main() {
     expect(find.textContaining('hello world'), findsOneWidget);
     expect(find.text('3 likes'), findsOneWidget);
     expect(find.text('2 comments'), findsOneWidget);
+  });
+
+  testWidgets('single-image post hides carousel chrome', (
+    WidgetTester tester,
+  ) async {
+    await pumpSubject(tester);
+
+    expect(find.byType(PageView), findsOneWidget);
+    expect(find.textContaining('/'), findsNothing);
+  });
+
+  testWidgets('carousel shows counter and dots, swipe advances page', (
+    WidgetTester tester,
+  ) async {
+    await pumpSubject(
+      tester,
+      post: _post(urls: const <String>['http://a', 'http://b', 'http://c']),
+    );
+
+    expect(find.text('1/3'), findsOneWidget);
+    // 3 dot containers: active + 2 inactive
+    expect(
+      find.byWidgetPredicate(
+        (Widget w) =>
+            w is Container &&
+            w.constraints == const BoxConstraints.tightFor(
+              width: 6,
+              height: 6,
+            ),
+      ),
+      findsNWidgets(3),
+    );
+
+    await tester.drag(find.byType(PageView), const Offset(-350, 0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('2/3'), findsOneWidget);
   });
 }

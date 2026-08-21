@@ -18,21 +18,21 @@ final Post mine = Post(
   id: 'pm',
   authorId: 'me',
   authorUsername: 'me',
-  imageUrl: 'http://img/pm',
+  imageUrls: <String>['http://img/pm'],
   createdAt: DateTime(2026, 1, 1),
 );
 final Post followedPost = Post(
   id: 'pf',
   authorId: 'u2',
   authorUsername: 'followed',
-  imageUrl: 'http://img/pf',
+  imageUrls: <String>['http://img/pf'],
   createdAt: DateTime(2026, 1, 1),
 );
 final Post stranger = Post(
   id: 'ps',
   authorId: 'u9',
   authorUsername: 'stranger',
-  imageUrl: 'http://img/ps',
+  imageUrls: <String>['http://img/ps'],
   createdAt: DateTime(2026, 1, 1),
 );
 final List<Post> manyPosts = List<Post>.generate(
@@ -41,7 +41,7 @@ final List<Post> manyPosts = List<Post>.generate(
     id: 'p$i',
     authorId: 'u9',
     authorUsername: 'stranger',
-    imageUrl: 'http://img/p$i',
+    imageUrls: <String>['http://img/p$i'],
     createdAt: DateTime(2026, 1, 1),
   ),
 );

@@ -16,7 +16,7 @@ final Post p1 = Post(
   id: 'p1',
   authorId: 'u1',
   authorUsername: 'yo',
-  imageUrl: 'http://img/p1',
+  imageUrls: <String>['http://img/p1'],
   createdAt: DateTime(2026, 1, 1),
   likeCount: 5,
   commentCount: 2,

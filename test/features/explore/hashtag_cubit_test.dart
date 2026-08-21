@@ -15,7 +15,7 @@ final Post post = Post(
   id: 'p1',
   authorId: 'u1',
   authorUsername: 'yo',
-  imageUrl: 'http://img',
+  imageUrls: <String>['http://img'],
   createdAt: DateTime(2026, 1, 1),
 );
 

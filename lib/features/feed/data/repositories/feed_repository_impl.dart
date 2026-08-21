@@ -18,11 +18,11 @@ class FeedRepositoryImpl implements IFeedRepository {
   @override
   Future<Either<Failure, void>> createPost({
     required String caption,
-    required String filePath,
+    required List<String> filePaths,
   }) async {
     try {
       return Right<Failure, void>(
-        await _ds.createPost(caption: caption, filePath: filePath),
+        await _ds.createPost(caption: caption, filePaths: filePaths),
       );
     } catch (e) {
       return Left<Failure, void>(_mapError(e));

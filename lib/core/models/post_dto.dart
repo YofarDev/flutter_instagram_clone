@@ -5,7 +5,7 @@ class PostDto {
     required this.authorId,
     required this.authorUsername,
     this.authorAvatarUrl,
-    required this.imageUrl,
+    required this.imageUrls,
     this.caption = '',
     required this.createdAtMillis,
     this.likeCount = 0,
@@ -17,7 +17,11 @@ class PostDto {
     authorId: map['authorId'] as String,
     authorUsername: map['authorUsername'] as String,
     authorAvatarUrl: map['authorAvatarUrl'] as String?,
-    imageUrl: map['imageUrl'] as String,
+    // pre-carousel docs only carry imageUrl; keep reading them
+    imageUrls:
+        ((map['imageUrls'] as List<dynamic>?) ?? <dynamic>[map['imageUrl']])
+            .map((dynamic e) => e as String)
+            .toList(),
     caption: map['caption'] as String? ?? '',
     createdAtMillis: map['createdAt'] as int,
     likeCount: map['likeCount'] as int? ?? 0,
@@ -30,7 +34,7 @@ class PostDto {
   final String authorId;
   final String authorUsername;
   final String? authorAvatarUrl;
-  final String imageUrl;
+  final List<String> imageUrls;
   final String caption;
   final int createdAtMillis;
   final int likeCount;
@@ -41,7 +45,9 @@ class PostDto {
     'authorId': authorId,
     'authorUsername': authorUsername,
     'authorAvatarUrl': authorAvatarUrl,
-    'imageUrl': imageUrl,
+    // cover kept as a scalar for old readers; imageUrls is the source of truth
+    'imageUrl': imageUrls.first,
+    'imageUrls': imageUrls,
     'caption': caption,
     'createdAt': createdAtMillis,
     'likeCount': likeCount,
@@ -54,7 +60,7 @@ class PostDto {
     authorId: authorId,
     authorUsername: authorUsername,
     authorAvatarUrl: authorAvatarUrl,
-    imageUrl: imageUrl,
+    imageUrls: imageUrls,
     caption: caption,
     createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMillis),
     likeCount: likeCount,

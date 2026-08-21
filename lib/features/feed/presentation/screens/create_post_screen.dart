@@ -19,10 +19,12 @@ class CreatePostScreen extends StatefulWidget {
 
 class _CreatePostScreenState extends State<CreatePostScreen> {
   final TextEditingController _caption = TextEditingController();
+  final PageController _pageController = PageController();
 
   @override
   void dispose() {
     _caption.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -48,7 +50,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         },
         child: BlocBuilder<CreatePostCubit, CreatePostState>(
           builder: (BuildContext context, CreatePostState state) {
-            if (state.pickedPath == null) {
+            if (state.pickedPaths.isEmpty) {
               return Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -56,7 +58,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     OutlinedButton.icon(
                       onPressed: () => context
                           .read<CreatePostCubit>()
-                          .pickImage(ImageSource.gallery),
+                          .pickImages(ImageSource.gallery),
                       icon: const Icon(Icons.photo_library_outlined),
                       label: Text(l10n.postAddPhoto),
                     ),
@@ -64,7 +66,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     OutlinedButton.icon(
                       onPressed: () => context
                           .read<CreatePostCubit>()
-                          .pickImage(ImageSource.camera),
+                          .pickImages(ImageSource.camera),
                       icon: const Icon(Icons.camera_alt_outlined),
                       label: Text(l10n.postTakePhoto),
                     ),
@@ -75,18 +77,52 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             return ListView(
               padding: const EdgeInsets.all(16),
               children: <Widget>[
-                GestureDetector(
-                  onTap: () => context.read<CreatePostCubit>().pickImage(
-                    ImageSource.gallery,
-                  ),
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Image.file(
-                      File(state.pickedPath!),
-                      fit: BoxFit.cover,
-                    ),
+                AspectRatio(
+                  aspectRatio: 1,
+                  child: Stack(
+                    children: <Widget>[
+                      PageView.builder(
+                        controller: _pageController,
+                        itemCount: state.pickedPaths.length,
+                        itemBuilder: (BuildContext context, int index) =>
+                            Image.file(
+                              File(state.pickedPaths[index]),
+                              fit: BoxFit.cover,
+                            ),
+                      ),
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: _RemoveButton(
+                          onPressed: () {
+                            final int page = _pageController.hasClients
+                                ? _pageController.page?.round() ?? 0
+                                : 0;
+                            context.read<CreatePostCubit>().removeImageAt(page);
+                            if (page > 0) {
+                              _pageController.jumpToPage(page - 1);
+                            }
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+                const SizedBox(height: 8),
+                if (state.pickedPaths.length > 1)
+                  _PageDots(
+                    count: state.pickedPaths.length,
+                    controller: _pageController,
+                  ),
+                const SizedBox(height: 8),
+                if (state.pickedPaths.length < CreatePostCubit.maxImages)
+                  OutlinedButton.icon(
+                    onPressed: () => context.read<CreatePostCubit>().pickImages(
+                      ImageSource.gallery,
+                    ),
+                    icon: const Icon(Icons.add_photo_alternate_outlined),
+                    label: Text(l10n.postAddMore),
+                  ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _caption,
@@ -113,6 +149,62 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           },
         ),
       ),
+    );
+  }
+}
+
+class _RemoveButton extends StatelessWidget {
+  const _RemoveButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.5),
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
+        icon: const Icon(Icons.close, color: Colors.white),
+        onPressed: onPressed,
+      ),
+    );
+  }
+}
+
+class _PageDots extends StatelessWidget {
+  const _PageDots({required this.count, required this.controller});
+
+  final int count;
+  final PageController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color active = Theme.of(context).colorScheme.onSurface;
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (BuildContext context, _) {
+        final int page = controller.hasClients
+            ? controller.page?.round() ?? 0
+            : 0;
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            for (int i = 0; i < count; i++)
+              Container(
+                width: 6,
+                height: 6,
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: i == page ? active : active.withValues(alpha: 0.25),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }

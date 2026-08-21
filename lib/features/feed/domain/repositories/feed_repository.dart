@@ -10,7 +10,7 @@ abstract interface class IFeedRepository {
 
   Future<Either<Failure, void>> createPost({
     required String caption,
-    required String filePath,
+    required List<String> filePaths,
   });
 
   Future<Either<Failure, Set<String>>> fetchLikedPostIds({
