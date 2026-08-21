@@ -30,6 +30,7 @@ class ChatCubit extends Cubit<ChatState> {
           (List<ChatMessage> messages) {
             if (isClosed) return;
             emit(state.copyWith(messages: messages));
+            _markIncomingRead(messages);
           },
           onError: (Object e) {
             if (isClosed) return;
@@ -150,6 +151,19 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   void clearError() => emit(state.copyWith(error: null));
+
+  /// Read receipts: stamp every incoming unread message as read while this
+  /// screen is open. Failure is silent — the next emission retries.
+  void _markIncomingRead(List<ChatMessage> messages) {
+    final List<String> unread = messages
+        .where((ChatMessage m) => m.senderId != _myUid && m.readAt == null)
+        .map((ChatMessage m) => m.id)
+        .toList();
+    if (unread.isEmpty) return;
+    _repository
+        .markMessagesRead(conversationId: _conversation.id, messageIds: unread)
+        .then((_) {}, onError: (Object _) {});
+  }
 
   @override
   Future<void> close() {

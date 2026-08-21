@@ -114,5 +114,6 @@
   "newDmSuggestions": "Suggested",
   "postAddMore": "Add more",
   "chatSendPhoto": "Send a photo",
-  "chatPhotoPreview": "Photo"
+  "chatPhotoPreview": "Photo",
+  "chatSeen": "Seen"
 }

@@ -59,6 +59,12 @@ void main() {
         typing: any(named: 'typing'),
       ),
     ).thenAnswer((_) async => const Right<Failure, void>(null));
+    when(
+      () => repo.markMessagesRead(
+        conversationId: any(named: 'conversationId'),
+        messageIds: any(named: 'messageIds'),
+      ),
+    ).thenAnswer((_) async => const Right<Failure, void>(null));
   });
 
   blocTest<ChatCubit, ChatState>(
@@ -72,6 +78,43 @@ void main() {
     expect: () => <ChatState>[
       ChatState(conversation: convo, messages: <ChatMessage>[m1, m2]),
     ],
+  );
+
+  blocTest<ChatCubit, ChatState>(
+    'read receipts: incoming unread messages get marked read',
+    build: () {
+      when(() => repo.watchMessages(conversationId: 'c1')).thenAnswer(
+        (_) => Stream<List<ChatMessage>>.value(<ChatMessage>[m1, m2]),
+      );
+      return ChatCubit(repo, conversation: convo, myUid: 'me');
+    },
+    verify: (ChatCubit cubit) {
+      verify(
+        () => repo.markMessagesRead(
+          conversationId: 'c1',
+          messageIds: <String>['m2'],
+        ),
+      ).called(1);
+    },
+  );
+
+  blocTest<ChatCubit, ChatState>(
+    'read receipts: already-read and own messages are not re-marked',
+    build: () {
+      final ChatMessage read = m2.copyWith(readAt: DateTime(2026, 1, 1, 12));
+      when(() => repo.watchMessages(conversationId: 'c1')).thenAnswer(
+        (_) => Stream<List<ChatMessage>>.value(<ChatMessage>[m1, read]),
+      );
+      return ChatCubit(repo, conversation: convo, myUid: 'me');
+    },
+    verify: (ChatCubit cubit) {
+      verifyNever(
+        () => repo.markMessagesRead(
+          conversationId: any(named: 'conversationId'),
+          messageIds: any(named: 'messageIds'),
+        ),
+      );
+    },
   );
 
   blocTest<ChatCubit, ChatState>(

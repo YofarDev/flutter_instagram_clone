@@ -7,6 +7,7 @@ class ChatMessageDto {
     required this.createdAtMillis,
     this.type = 'text',
     this.imageUrl,
+    this.readAtMillis,
   });
 
   factory ChatMessageDto.fromMap(Map<String, dynamic> map) => ChatMessageDto(
@@ -15,6 +16,7 @@ class ChatMessageDto {
     createdAtMillis: map['createdAt'] as int,
     type: map['type'] as String? ?? 'text',
     imageUrl: map['imageUrl'] as String?,
+    readAtMillis: map['readAt'] as int?,
   );
 
   final String senderId;
@@ -22,6 +24,7 @@ class ChatMessageDto {
   final int createdAtMillis;
   final String type;
   final String? imageUrl;
+  final int? readAtMillis;
 
   Map<String, dynamic> toMap() => <String, dynamic>{
     'senderId': senderId,
@@ -39,5 +42,8 @@ class ChatMessageDto {
     createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMillis),
     type: type,
     imageUrl: imageUrl,
+    readAt: readAtMillis == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(readAtMillis!),
   );
 }

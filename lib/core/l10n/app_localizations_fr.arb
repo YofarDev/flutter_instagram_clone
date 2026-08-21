@@ -84,5 +84,6 @@
   "newDmSuggestions": "Suggestions",
   "postAddMore": "Ajouter des photos",
   "chatSendPhoto": "Envoyer une photo",
-  "chatPhotoPreview": "Photo"
+  "chatPhotoPreview": "Photo",
+  "chatSeen": "Vu"
 }

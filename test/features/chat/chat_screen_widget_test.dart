@@ -60,6 +60,12 @@ void main() {
         typing: any(named: 'typing'),
       ),
     ).thenAnswer((_) async => const Right<Failure, void>(null));
+    when(
+      () => repo.markMessagesRead(
+        conversationId: any(named: 'conversationId'),
+        messageIds: any(named: 'messageIds'),
+      ),
+    ).thenAnswer((_) async => const Right<Failure, void>(null));
     when(() => repo.watchMessages(conversationId: 'c1')).thenAnswer(
       (_) => Stream<List<ChatMessage>>.value(<ChatMessage>[
         _message(id: 'm1', senderId: 'u1', text: 'hi'),
@@ -199,5 +205,23 @@ void main() {
 
     expect(find.byIcon(Icons.photo_library_outlined), findsOneWidget);
     expect(find.byIcon(Icons.camera_alt_outlined), findsOneWidget);
+  });
+
+  testWidgets('Seen receipt shows under the last own message once read', (
+    WidgetTester tester,
+  ) async {
+    when(() => repo.watchMessages(conversationId: 'c1')).thenAnswer(
+      (_) => Stream<List<ChatMessage>>.value(<ChatMessage>[
+        _message(id: 'm1', senderId: 'u1', text: 'hi'),
+        _message(
+          id: 'm2',
+          senderId: 'me',
+          text: 'yo there',
+        ).copyWith(readAt: DateTime(2026, 1, 1, 12)),
+      ]),
+    );
+    await pumpSubject(tester);
+
+    expect(find.text('Seen'), findsOneWidget);
   });
 }

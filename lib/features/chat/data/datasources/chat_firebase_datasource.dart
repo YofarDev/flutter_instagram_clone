@@ -42,6 +42,13 @@ abstract interface class IChatDataSource {
   /// Live `typingUid` field on the conversation doc (null = nobody typing).
   Stream<String?> watchTyping({required String conversationId});
 
+  /// Read receipts: stamps readAt on the given messages. The caller is
+  /// expected to pass only incoming (not sent-by-me) unread ids.
+  Future<void> markMessagesRead({
+    required String conversationId,
+    required List<String> messageIds,
+  });
+
   Future<void> setTyping({
     required String conversationId,
     required String? typingUid,
@@ -209,6 +216,24 @@ class ChatFirebaseDataSource implements IChatDataSource {
       unawaited(ref.delete().catchError((_) => ref));
       rethrow;
     }
+  }
+
+  @override
+  Future<void> markMessagesRead({
+    required String conversationId,
+    required List<String> messageIds,
+  }) async {
+    if (messageIds.isEmpty) return;
+    final int now = DateTime.now().millisecondsSinceEpoch;
+    final WriteBatch batch = _db.batch();
+    final CollectionReference<Object?> messages = _db
+        .collection('conversations')
+        .doc(conversationId)
+        .collection('messages');
+    for (final String id in messageIds) {
+      batch.update(messages.doc(id), <String, dynamic>{'readAt': now});
+    }
+    await batch.commit();
   }
 
   @override

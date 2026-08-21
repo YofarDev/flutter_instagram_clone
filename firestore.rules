@@ -125,7 +125,16 @@ service cloud.firestore {
             request.resource.data.senderId == request.auth.uid &&
             request.auth.uid in
                 get(/databases/$(database)/documents/conversations/$(convId)).data.participants;
-        allow update, delete: if false;
+        // read receipts: a participant may stamp readAt on messages sent TO
+        // them, and may touch nothing else
+        allow update: if signedIn() &&
+            request.auth.uid in
+                get(/databases/$(database)/documents/conversations/$(convId)).data.participants &&
+            request.resource.data.senderId == resource.data.senderId &&
+            request.resource.data.senderId != request.auth.uid &&
+            request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['readAt']);
+        allow delete: if false;
       }
     }
   }

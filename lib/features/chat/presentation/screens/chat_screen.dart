@@ -205,13 +205,29 @@ class _ChatScreenState extends State<ChatScreen> {
                             final ChatMessage message = state
                                 .messages[state.messages.length - 1 - index];
                             final bool mine = message.senderId == myUid;
+                            // "Seen" rides under the newest own message only
+                            ChatMessage? lastOwn;
+                            for (final ChatMessage m in state.messages) {
+                              if (m.senderId == myUid) lastOwn = m;
+                            }
+                            final bool showSeen =
+                                lastOwn != null &&
+                                message.id == lastOwn.id &&
+                                message.readAt != null;
                             return Align(
                               alignment: mine
                                   ? Alignment.centerRight
                                   : Alignment.centerLeft,
-                              child: message.isImage
-                                  ? _ImageBubble(message: message, mine: mine)
-                                  : Container(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: mine
+                                    ? CrossAxisAlignment.end
+                                    : CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  if (message.isImage)
+                                    _ImageBubble(message: message, mine: mine)
+                                  else
+                                    Container(
                                       margin: const EdgeInsets.symmetric(
                                         vertical: 4,
                                       ),
@@ -236,6 +252,27 @@ class _ChatScreenState extends State<ChatScreen> {
                                       ),
                                       child: Text(message.text),
                                     ),
+                                  if (showSeen)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        right: 4,
+                                        bottom: 2,
+                                      ),
+                                      child: Text(
+                                        l10n.chatSeen,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface
+                                                  .withValues(alpha: 0.5),
+                                            ),
+                                      ),
+                                    ),
+                                ],
+                              ),
                             );
                           },
                         ),

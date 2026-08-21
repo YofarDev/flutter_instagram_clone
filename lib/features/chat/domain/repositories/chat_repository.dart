@@ -29,6 +29,12 @@ abstract interface class IChatRepository {
   /// Live uid of whoever is typing in this conversation (null = nobody).
   Stream<String?> watchTyping({required String conversationId});
 
+  /// Stamps readAt on incoming messages (read receipts).
+  Future<Either<Failure, void>> markMessagesRead({
+    required String conversationId,
+    required List<String> messageIds,
+  });
+
   /// Flags/clears [myUid] as typing.
   Future<Either<Failure, void>> setTyping({
     required String conversationId,
