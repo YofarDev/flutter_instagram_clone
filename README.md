@@ -3,28 +3,32 @@
 [![CI](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml/badge.svg)](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Dart](https://img.shields.io/badge/dart-%5E3.12-0175C2?logo=dart&logoColor=white)](https://dart.dev)
+[![Tests](https://img.shields.io/badge/tests-258-brightgreen)](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml)
+[![Stars](https://img.shields.io/github/stars/YofarDev/flutter_instagram_clone?style=social)](https://github.com/YofarDev/flutter_instagram_clone/stargazers)
 
-A working clone of Instagram, built to find out how far "vibe coding" gets you: every line was written by an AI agent (opencode / Claude Code on GLM 5.3), one feature at a time, with tests and reviews along the way. No hand-written Dart.
+**A working Instagram clone where zero lines of Dart were written by a human.** Every feature, test, rule and commit came out of an AI agent session (opencode / Claude Code on GLM 5.3) — one feature slice at a time, with plans, tests and review passes along the way. It runs against a real Firebase backend: no mocks, no fake latency, actual Firestore snapshots driving actual UI.
 
-**8 features · 258 tests · 2 locales · 0 hand-written lines.** Auth (email + Google), a home feed with images and video reels, stories that expire after 24h, likes, comments, follow graph, search over users and hashtags, notifications, and real-time direct messages. It runs against a real Firebase backend — no mocks, no fake latency.
+Why? To find out how far "vibe coding" really gets you — and to leave behind receipts you can check, not claims you have to trust. See [The receipts](#the-receipts).
+
+**8 features · 258 tests · 2 locales · 0 hand-written lines.**
 
 ## Demo
 
-A 40-second walkthrough on the Android emulator (seeded demo data): feed scroll and double-tap like, story viewer with tap-through, reels with double-tap like, profile with the saved-posts tab.
+~35 seconds on the Android emulator over seeded demo data: carousel swipe, double-tap like, story viewer, reels, image DMs with Seen receipts, Saved tab.
 
 ![Demo walkthrough](assets/screenshots/demo.gif)
 
 ## Screenshots
 
-From the Android emulator, running on seeded demo data (dark theme; the app follows the system theme and has a matching light one):
+Android emulator, seeded demo data. Dark theme first — the app follows the system theme, light shots at the end.
 
-| | |
-|---|---|
-| ![Login](assets/screenshots/01-login.png) | ![Feed](assets/screenshots/02-feed.png) |
-| ![Story viewer](assets/screenshots/03-stories-viewer.png) | ![Search](assets/screenshots/04-search.png) |
-| ![Explore results](assets/screenshots/05-explore.png) | ![Reels](assets/screenshots/06-reels.png) |
-| ![Activity](assets/screenshots/07-activity.png) | ![Profile](assets/screenshots/08-profile.png) |
-| ![Post detail](assets/screenshots/09-post-detail.png) | ![Chat](assets/screenshots/10-chat.png) |
+| | | |
+|---|---|---|
+| ![Feed with carousel](assets/screenshots/02-feed-carousel.png) | ![Carousel page 2](assets/screenshots/03-carousel-page2.png) | ![Story viewer](assets/screenshots/04-stories.png) |
+| ![Reels](assets/screenshots/07-reels.png) | ![Explore](assets/screenshots/06-explore.png) | ![Search](assets/screenshots/05-search.png) |
+| ![Activity](assets/screenshots/08-activity.png) | ![Chat list](assets/screenshots/12-chat-list.png) | ![Image DMs + Seen](assets/screenshots/13-chat-images.png) |
+| ![Profile](assets/screenshots/09-profile.png) | ![Saved tab](assets/screenshots/10-saved.png) | ![Post detail](assets/screenshots/11-post-detail.png) |
+| ![Login](assets/screenshots/01-login.png) | ![Light feed](assets/screenshots/14-light-feed.png) | ![Light profile](assets/screenshots/15-light-profile.png) |
 
 ## What works
 
@@ -58,11 +62,11 @@ cp scripts/firebase_options_stub.dart lib/firebase_options.dart
 flutter test
 ```
 
-The security rules are in `firestore.rules` and `firebase.storage.rules` at the repo root — deploy them with `firebase deploy --only firestore:rules,storage` rather than running in test mode forever. They're field-level strict: strangers can only touch count fields, media writes are owner-scoped per folder, and notification creates must name the caller as actor.
+The security rules are in `firestore.rules` and `firebase.storage.rules` at the repo root — deploy them with `firebase deploy --only firestore:rules,storage` rather than running in test mode forever. They're field-level strict: strangers can only touch count fields, media writes are owner-scoped per folder, read-receipt updates may only stamp `readAt` on messages sent to you, and notification creates must name the caller as actor.
 
 ## Demo data
 
-The seeder fills the project with 12 users, 60 posts with real photos (picsum/pravatar, downloaded and cached in `scripts/seed/assets/`), stories, reels, comments, notifications and chat threads, all wired to your own account so your feed isn't empty:
+The seeder fills the project with 12 users, 60 posts — including 3-image carousels — with real photos (picsum/pravatar, downloaded and cached in `scripts/seed/assets/`), stories, reels, comments, notifications and chat threads with image messages and read receipts, all wired to your own account so your feed isn't empty:
 
 ```bash
 cd scripts/seed && npm install
@@ -78,7 +82,7 @@ Your uid is in the Firebase console under Authentication. Re-runs are idempotent
 Feature-first clean architecture: each feature (`feed`, `stories`, `reels`, `chat`, …) owns its `data` / `domain` / `presentation` layers, and only `core/` is shared. Dependencies point inward — screens talk to cubits (`flutter_bloc`), cubits to repository interfaces, implementations live in data and are wired in a single `service_locator.dart`. Failures travel as `Either<Failure, T>` from `fpdart`, so error handling is a type, not a promise.
 
 ```mermaid
-flowchart TD
+flowchart td
   subgraph feature["each feature — feed · stories · reels · chat · explore · notifications · profile · auth"]
     presentation["presentation — screens · widgets · cubits"]
     domain["domain — freezed models · repository interfaces"]
@@ -106,7 +110,7 @@ grep -rn "ponytail:" lib | wc -l
 The "written entirely by AI agents" claim is checkable, not vibes:
 
 - **[docs/plans/](docs/plans)** — nine dated phase implementation plans (~3,000 lines), one per feature slice, each ending in a `chore: complete phase N` commit.
-- **The commit history** — 50+ conventional commits in a repeating rhythm: plan → per-layer feature slices → `fix: final review` pass → phase complete.
+- **The commit history** — 60+ conventional commits in a repeating rhythm: plan → per-layer feature slices → `fix: final review` pass → phase complete.
 - **[AGENTS.md](AGENTS.md) and [.claude/skills/](.claude/skills)** — the rules the agents operated under (freezed v3 gotchas, controller lifecycle bans, auto dart-fix hooks) and the five custom enforcement skills that kept the architecture honest.
 - **CI** — `flutter analyze` + all 258 tests on every push: [![CI](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml/badge.svg)](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml)
 
@@ -132,7 +136,11 @@ flutter test                                               # 258 tests, ~10s
 
 ## Roadmap
 
-Everything above works end-to-end, including saved posts + the Saved profile tab, password reset, typing indicators, reel comments (with like/comment notifications) and suggested users. Next up, in wow-per-effort order: carousel posts, unread badges + read receipts, image messages / share-post-to-DM, story replies, FCM push.
+Everything above works end-to-end, including carousels, image DMs and read receipts. Next up, in wow-per-effort order: unread badges on the DM list, story replies, share-post-to-DM, FCM push, group chats.
+
+## Star history
+
+[![Star History Chart](https://api.star-history.com/svg?repos=YofarDev/flutter_instagram_clone&type=Date)](https://star-history.com/#YofarDev/flutter_instagram_clone&Date)
 
 ## License
 
