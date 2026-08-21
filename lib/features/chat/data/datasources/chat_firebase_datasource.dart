@@ -1,4 +1,8 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import '../../domain/models/chat_message.dart';
 import '../../domain/models/conversation.dart';
@@ -23,6 +27,16 @@ abstract interface class IChatDataSource {
     required String myUid,
     required String otherUid,
     required String text,
+    String? imageUrl,
+  });
+
+  /// Uploads the image to Storage, then sends it as an image message.
+  /// Cleans the orphan upload up if the Firestore write fails.
+  Future<void> sendImageMessage({
+    required String conversationId,
+    required String myUid,
+    required String otherUid,
+    required String filePath,
   });
 
   /// Live `typingUid` field on the conversation doc (null = nobody typing).
@@ -133,8 +147,10 @@ class ChatFirebaseDataSource implements IChatDataSource {
     required String myUid,
     required String otherUid,
     required String text,
+    String? imageUrl,
   }) async {
     final int millis = DateTime.now().millisecondsSinceEpoch;
+    final bool isImage = imageUrl != null;
     final WriteBatch batch = _db.batch();
     batch.set(
       _db
@@ -144,15 +160,20 @@ class ChatFirebaseDataSource implements IChatDataSource {
           .doc(),
       ChatMessageDto(
         senderId: myUid,
-        text: text,
+        text: isImage ? '' : text,
         createdAtMillis: millis,
+        type: isImage ? 'image' : 'text',
+        imageUrl: imageUrl,
       ).toMap(),
     );
     batch.update(
       _db.collection('conversations').doc(conversationId),
       <String, dynamic>{
         'lastMessage': <String, dynamic>{
-          'text': text,
+          // preview text is empty for images; readers render a localized
+          // "Photo" off the type field
+          'text': isImage ? '' : text,
+          'type': isImage ? 'image' : 'text',
           'senderId': myUid,
           'createdAt': millis,
         },
@@ -160,6 +181,34 @@ class ChatFirebaseDataSource implements IChatDataSource {
       },
     );
     await batch.commit();
+  }
+
+  @override
+  Future<void> sendImageMessage({
+    required String conversationId,
+    required String myUid,
+    required String otherUid,
+    required String filePath,
+  }) async {
+    final int millis = DateTime.now().millisecondsSinceEpoch;
+    final Reference ref = FirebaseStorage.instance.ref(
+      'chats/$myUid/$millis.jpg',
+    );
+    await ref.putFile(File(filePath));
+    final String url = await ref.getDownloadURL();
+    try {
+      await sendMessage(
+        conversationId: conversationId,
+        myUid: myUid,
+        otherUid: otherUid,
+        text: '',
+        imageUrl: url,
+      );
+    } catch (e) {
+      // ponytail: best-effort cleanup, orphan possible if delete fails too
+      unawaited(ref.delete().catchError((_) => ref));
+      rethrow;
+    }
   }
 
   @override

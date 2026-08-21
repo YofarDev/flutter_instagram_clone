@@ -112,5 +112,7 @@
   "chatTyping": "typing…",
   "commentsEmpty": "No comments yet",
   "newDmSuggestions": "Suggested",
-  "postAddMore": "Add more"
+  "postAddMore": "Add more",
+  "chatSendPhoto": "Send a photo",
+  "chatPhotoPreview": "Photo"
 }

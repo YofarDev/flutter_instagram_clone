@@ -31,12 +31,16 @@ ChatMessage _message({
   required String id,
   required String senderId,
   required String text,
+  String type = 'text',
+  String? imageUrl,
 }) => ChatMessage(
   id: id,
   conversationId: 'c1',
   senderId: senderId,
   text: text,
   createdAt: DateTime(2026, 1, 1),
+  type: type,
+  imageUrl: imageUrl,
 );
 
 void main() {
@@ -155,5 +159,45 @@ void main() {
       ),
     ).called(1);
     expect(find.text('new msg'), findsNothing);
+  });
+
+  testWidgets('image message renders an image bubble, not a text bubble', (
+    WidgetTester tester,
+  ) async {
+    when(() => repo.watchMessages(conversationId: 'c1')).thenAnswer(
+      (_) => Stream<List<ChatMessage>>.value(<ChatMessage>[
+        _message(id: 'm1', senderId: 'u1', text: 'hi'),
+        _message(
+          id: 'm2',
+          senderId: 'me',
+          text: '',
+          type: 'image',
+          imageUrl: 'http://img/dm',
+        ),
+      ]),
+    );
+    await pumpSubject(tester);
+
+    expect(find.text('hi'), findsOneWidget);
+    expect(find.text('yo there'), findsNothing);
+    // the image bubble's network Image, with the avatar excluded
+    expect(
+      find.byWidgetPredicate(
+        (Widget w) => w is Image && w.image is NetworkImage,
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('camera button opens the photo source sheet', (
+    WidgetTester tester,
+  ) async {
+    await pumpSubject(tester);
+
+    await tester.tap(find.byIcon(Icons.photo_camera_outlined));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.photo_library_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.camera_alt_outlined), findsOneWidget);
   });
 }

@@ -18,6 +18,14 @@ abstract interface class IChatRepository {
     required String text,
   });
 
+  /// Picks nothing — uploads [filePath] and sends it as an image message.
+  Future<Either<Failure, void>> sendImageMessage({
+    required String conversationId,
+    required String myUid,
+    required String otherUid,
+    required String filePath,
+  });
+
   /// Live uid of whoever is typing in this conversation (null = nobody).
   Stream<String?> watchTyping({required String conversationId});
 

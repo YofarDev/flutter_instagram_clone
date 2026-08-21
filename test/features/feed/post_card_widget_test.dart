@@ -229,10 +229,7 @@ void main() {
       find.byWidgetPredicate(
         (Widget w) =>
             w is Container &&
-            w.constraints == const BoxConstraints.tightFor(
-              width: 6,
-              height: 6,
-            ),
+            w.constraints == const BoxConstraints.tightFor(width: 6, height: 6),
       ),
       findsNWidgets(3),
     );
