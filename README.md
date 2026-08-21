@@ -25,8 +25,7 @@ Android emulator, seeded demo data. Dark theme; the app follows the system theme
 | | | |
 |---|---|---|
 | ![Feed with carousel](assets/screenshots/02-feed-carousel.png) | ![Story viewer](assets/screenshots/04-stories.png) | ![Reels](assets/screenshots/07-reels.png) |
-| ![Explore](assets/screenshots/06-explore.png) | ![Image DMs + Seen](assets/screenshots/13-chat-images.png) | ![Profile](assets/screenshots/09-profile.png) |
-| ![Saved tab](assets/screenshots/10-saved.png) | ![Post detail](assets/screenshots/11-post-detail.png) | ![Light theme](assets/screenshots/14-light-feed.png) |
+| ![Explore](assets/screenshots/06-explore.png) | ![Image DMs + Seen](assets/screenshots/13-chat-images.png) | ![Light theme](assets/screenshots/14-light-feed.png) |
 
 ## What works
 
