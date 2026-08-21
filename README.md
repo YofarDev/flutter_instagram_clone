@@ -111,6 +111,10 @@ The "written entirely by AI agents" claim is checkable, not vibes:
 - **[AGENTS.md](AGENTS.md) and [.claude/skills/](.claude/skills)** — the rules the agents operated under (freezed v3 gotchas, controller lifecycle bans, auto dart-fix hooks) and the five custom enforcement skills that kept the architecture honest.
 - **CI** — `flutter analyze` + all 270 tests on every push: [![CI](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml/badge.svg)](https://github.com/YofarDev/flutter_instagram_clone/actions/workflows/ci.yml)
 
+## What the human did
+
+The agents wrote every line of Dart — but none of the judgment. Per phase I wrote the spec and the acceptance criteria, set the architectural constraints (feature-first clean architecture, cubits over blocs, `Either` failures, DI rules), reviewed each slice against them, and sent it back when it drifted. The tooling is mine too: the enforcement skills, the edit hooks, the scripts below, and the `ponytail:` convention that forces every shortcut to name its own revisit condition. Orchestrating, reviewing and constraining agents turned out to be most of the work — which is exactly what the experiment was testing.
+
 ## Scripts
 
 The agent tooling is part of the exhibit — this is the machinery that kept AI code honest:
